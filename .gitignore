@@ -18,3 +18,4 @@ target/
 # Env / secrets
 .env
 application-local.yml
+*.zip
