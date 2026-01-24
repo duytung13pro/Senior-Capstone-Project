@@ -10,20 +10,21 @@ export const metadata: Metadata = {
   generator: "Project Rewood team",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+        >
           {children}
         </ThemeProvider>
       </body>
     </html>
   );
 }
+
 
 import "./globals.css";

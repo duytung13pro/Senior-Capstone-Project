@@ -9,14 +9,24 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Event handler for clicking the "Dang Ky" button
+  // Will send a POST request to localhost:8080/api/register
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log({
-      name,
-      email,
-      password,
+  
+    await fetch("http://localhost:8080/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
     });
+  
+    alert("Đăng ký thành công!");
   };
 
   return (
