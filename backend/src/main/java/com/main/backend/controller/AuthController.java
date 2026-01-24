@@ -20,4 +20,13 @@ public class AuthController {
     public User register(@RequestBody User user) {
         return userRepository.save(user);
     }
+    // Where request for logging in is received
+    @PostMapping("/login")
+    public User login(@RequestBody User loginRequest) {
+        return userRepository
+                .findByEmail(loginRequest.getEmail())
+                .filter(user -> user.getPassword().equals(loginRequest.getPassword()))
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+    }
+        
 }
