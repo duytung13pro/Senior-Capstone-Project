@@ -23,7 +23,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <Link href="/login">
           <Button variant="outline" className="border-green-600 text-green-700">
-            Đăng aaaa
+            Đăng nhập
           </Button>
           </Link>
           {/* "Dang Ky" button redirect to /register */}
