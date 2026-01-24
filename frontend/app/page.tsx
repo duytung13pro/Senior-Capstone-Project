@@ -26,7 +26,11 @@ export default function Home() {
             Đăng aaaa
           </Button>
           </Link>
-          <Button className="bg-green-600 hover:bg-green-700 ">Đăng ký</Button>
+          {/* "Dang Ky" button redirect to /register */}
+          <Link href="/register">
+            <Button className="bg-green-600 hover:bg-green-700 ">Đăng ký</Button>
+          </Link>
+
         </div>
       </header>
 
