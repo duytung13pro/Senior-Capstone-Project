@@ -46,7 +46,7 @@ export default function LoginPage() {
       console.log("Login success:", data);
   
       // Redirect after successful login
-      router.push("/dashboard");
+      router.push("/tutor-fe");
     } catch (error) {
       console.error("Login failed:", error);
   
