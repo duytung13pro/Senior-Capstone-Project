@@ -16,26 +16,47 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Handle User request when trying to login.
+  // Request will be sent to localhosts:8080/api/login at localhosts:8080
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate login process
+  
     try {
-      // In a real app, you would make an API call here
-      console.log("Login attempt with:", { email, password, rememberMe });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirect to dashboard or home page after successful login
+      const res = await fetch("http://localhost:8080/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          rememberMe,
+        }),
+      });
+  
+      // Handle non-2xx responses
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+  
+      // If backend returns user / token info
+      const data = await res.json();
+      console.log("Login success:", data);
+  
+      // Redirect after successful login
       router.push("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
+  
+      // show error to user
+      alert(error instanceof Error ? error.message : "Login failed");
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-[#FFF8E9] flex flex-col">
