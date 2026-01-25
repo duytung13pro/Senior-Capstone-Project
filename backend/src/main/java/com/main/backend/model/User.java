@@ -13,7 +13,6 @@ public class User {
     private String email;
     private String password;
 
-        // --- getters & setters ---
         // We need getters so that MongoDB can access these fields and write them to the database
         public String getId() {
             return id;
@@ -28,7 +27,7 @@ public class User {
         }
     
         public String getEmail() {
-            return email;
+            return email.toLowerCase().trim();
         }
     
         public void setEmail(String email) {

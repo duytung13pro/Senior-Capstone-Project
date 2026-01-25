@@ -14,20 +14,37 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    await fetch("http://localhost:8080/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
-    });
+    // Sending the request
+    try {
+      const res = await fetch("http://localhost:8080/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
   
-    alert("Đăng ký thành công!");
+      const contentType = res.headers.get("content-type");
+      
+      // Check if the response is 2xx
+      if (!res.ok) {
+        if (contentType?.includes("application/json")) {
+          const err = await res.json();
+          throw new Error(err.message || "Registration failed");
+        }
+        throw new Error("Unexpected server response");
+      }
+      // Successful registration
+      alert("Đăng ký thành công!");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Registration failed");
+    }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center">
