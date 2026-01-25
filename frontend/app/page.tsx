@@ -21,13 +21,13 @@ export default function Home() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/login">
+          <Link href="/auth/login">
           <Button variant="outline" className="border-green-600 text-green-700">
             Đăng nhập
           </Button>
           </Link>
           {/* "Dang Ky" button redirect to /register */}
-          <Link href="/register">
+          <Link href="auth/register">
             <Button className="bg-green-600 hover:bg-green-700 ">Đăng ký</Button>
           </Link>
 
