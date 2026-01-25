@@ -27,17 +27,17 @@ export function Sidebar() {
   const [pinned, setPinned] = useState(false);
 
   const navigation = [
-    { name: "Dashboard", href: "/", icon: Home },
-    { name: "My Classes", href: "/classes", icon: BookOpen },
-    { name: "Lesson Plans", href: "/lesson-plans", icon: BookMarked },
-    { name: "Assignments", href: "/assignments", icon: FileText },
-    { name: "Student Progress", href: "/student-progress", icon: BarChart },
-    { name: "Attendance", href: "/attendance", icon: Calendar },
-    { name: "Messages", href: "/messages", icon: MessageSquare },
-    { name: "Announcements", href: "/announcements", icon: Megaphone },
-    { name: "Resources", href: "/resources", icon: FolderOpen },
-    { name: "Productivity Tools", href: "/productivity", icon: Tool },
-    { name: "Profile & Settings", href: "/profile", icon: Settings },
+    { name: "Dashboard", href: "/tutor-fe", icon: Home },
+    { name: "My Classes", href: "/tutor-fe/classes", icon: BookOpen },
+    { name: "Lesson Plans", href: "/tutor-fe/lesson-plans", icon: BookMarked },
+    { name: "Assignments", href: "/tutor-fe/assignments", icon: FileText },
+    { name: "Student Progress", href: "/tutor-fe/student-progress", icon: BarChart },
+    { name: "Attendance", href: "/tutor-fe/attendance", icon: Calendar },
+    { name: "Messages", href: "/tutor-fe/messages", icon: MessageSquare },
+    { name: "Announcements", href: "/tutor-fe/announcements", icon: Megaphone },
+    { name: "Resources", href: "/tutor-fe/resources", icon: FolderOpen },
+    { name: "Productivity Tools", href: "/tutor-fe/productivity", icon: Tool },
+    { name: "Profile & Settings", href: "/tutor-fe/profile", icon: Settings },
   ];
 
   return (
