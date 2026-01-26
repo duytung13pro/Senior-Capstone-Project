@@ -34,19 +34,28 @@ export default function LoginPage() {
           rememberMe,
         }),
       });
-  
+      const data = await res.json();
+
       // Handle non-2xx responses
       if (!res.ok) {
-        const errorData = await res.json();
         throw new Error(errorData.message || "Login failed");
       }
   
       // If backend returns user / token info
-      const data = await res.json();
       console.log("Login success:", data);
-  
+      
+      // save role so layouts can read it
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("userId", data.id);
+      
       // Redirect after successful login
-      router.push("/tutor-fe");
+      if (data.role === "TEACHER") {
+        router.push("/tutor-fe");
+      } else if (data.role === "STUDENT") {
+        router.push("/student-fe");
+      } else {
+        throw new Error("Unknown role");
+      }
     } catch (error) {
       console.error("Login failed:", error);
   
