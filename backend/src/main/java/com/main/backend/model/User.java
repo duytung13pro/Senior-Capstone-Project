@@ -12,6 +12,8 @@ public class User {
     private String name;
     private String email;
     private String password;
+    private Role role;
+
 
         // We need getters so that MongoDB can access these fields and write them to the database
         public String getId() {
@@ -40,5 +42,13 @@ public class User {
     
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public Role getRole(){
+            return role;
+        } 
+
+        public void setRole(Role role){
+            this.role = role;
         }
 }

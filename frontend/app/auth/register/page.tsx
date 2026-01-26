@@ -8,6 +8,8 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"STUDENT" | "TEACHER">("STUDENT");
+
 
   // Event handler for clicking the "Dang Ky" button
   // Will send a POST request to localhost:8080/api/register
@@ -25,6 +27,7 @@ export default function RegisterPage() {
           name,
           email,
           password,
+          role,
         }),
       });
   
@@ -72,6 +75,34 @@ export default function RegisterPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        {/* ROLE SELECTION */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Đăng ký với vai trò</label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="role"
+                value="STUDENT"
+                checked={role === "STUDENT"}
+                onChange={() => setRole("STUDENT")}
+              />
+              Sinh viên
+            </label>
+
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="role"
+                value="TEACHER"
+                checked={role === "TEACHER"}
+                onChange={() => setRole("TEACHER")}
+              />
+              Giáo viên
+            </label>
+          </div>
+        </div>
+
 
         <Button className="w-full bg-green-600 hover:bg-green-700">
           Đăng ký

@@ -5,6 +5,10 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.main.backend.dto.LoginRequest;
+import com.main.backend.dto.LoginResponse;
+import com.main.backend.dto.RegisterRequest;
 import com.main.backend.model.User;
 import com.main.backend.repository.UserRepository;
 
@@ -21,32 +25,48 @@ public class AuthController {
 
     // Where request for registering an account is received
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User loginRequest) {
-    
-        // Check for duplicated username
-        if (userRepository.existsByEmail(loginRequest.getEmail())) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+        System.out.println("ROLE RECEIVED: " + req.getRole());
+
+        String email = req.getEmail();
+
+        if (userRepository.existsByEmail(email)) {
             return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(Map.of("message", "Email already registered"));
         }
-    
+
         User user = new User();
-        user.setEmail(loginRequest.getEmail());
-        user.setPassword(loginRequest.getPassword());
-    
+        user.setName(req.getName());
+        user.setEmail(email);
+        user.setPassword(req.getPassword()); // hashing later
+        user.setRole(req.getRole());
+
         userRepository.save(user);
-    
-        return ResponseEntity.ok(user);
+
+        return ResponseEntity.ok(Map.of("success", true));
     }
-    
+
     // Where request for logging in is received
     @PostMapping("/login")
-    public User login(@RequestBody User loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
 
-        return userRepository
-                .findByEmail(loginRequest.getEmail())
-                .filter(user -> user.getPassword().equals(loginRequest.getPassword()))
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        String email = req.getEmail();
+
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null || !user.getPassword().equals(req.getPassword())) {
+            return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Invalid credentials"));
+        }
+
+        LoginResponse response = new LoginResponse(
+            user.getId(),
+            user.getEmail(),
+            user.getRole()
+        );
+
+        return ResponseEntity.ok(response);
     }
-        
 }
