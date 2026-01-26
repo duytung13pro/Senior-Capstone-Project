@@ -49,10 +49,13 @@ export function ClassesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   // Holds classes fetched from database
   const [classes, setClasses] = useState<any[]>([]);
-
   // Loading indicator
   const [loading, setLoading] = useState(true);
-
+  const [name, setName] = useState("");
+  const [level, setLevel] = useState("");
+  const [time, setTime] = useState("");
+  const [days, setDays] = useState("");
+  const [description, setDescription] = useState("");
   // We'll run everytime the page is loaded.
   // Look at the database and fetch the Class data
   // based on teacherID
@@ -78,12 +81,42 @@ export function ClassesPage() {
       });
   }, []);
 
-  // Filter by search
+
+  const handleCreateClass = async () => {
+    const teacherId = localStorage.getItem("userId");
+    if (!teacherId) return;
+
+    const res = await fetch("http://localhost:8080/api/classes/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        level,
+        time,
+        days,
+        description,
+        teacherId,
+      }),
+    });
+
+    const newClass = await res.json();
+
+    // Immediately update UI without refresh
+    setClasses((prev) => [newClass, ...prev]);
+
+    // Reset form
+    setName("");
+    setLevel("");
+    setTime("");
+    setDays("");
+    setDescription("");
+  };
+
   const filteredClasses = classes.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // 🔹oading UI. Load this while waiting for data
+  // Loading UI. Load this while waiting for data
   if (loading) {
     return <div className="p-6">Loading classes...</div>;
   }
@@ -94,10 +127,75 @@ export function ClassesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">My Classes</h1>
 
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          New Class
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              New Class
+            </Button>
+          </DialogTrigger>
+
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Class</DialogTitle>
+              <DialogDescription>
+                Fill in the details to create a class.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div>
+                <Label>Class Name</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} />
+              </div>
+
+              <div>
+                <Label>Level</Label>
+                <Select onValueChange={setLevel}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BEGINNER">Beginner</SelectItem>
+                    <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
+                    <SelectItem value="ADVANCED">Advanced</SelectItem>
+                    <SelectItem value="ALL">All Levels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Time</Label>
+                <Input
+                  placeholder="9:00AM - 10:10AM"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>Days</Label>
+                <Input
+                  placeholder="Mon / Wed / Fri"
+                  value={days}
+                  onChange={(e) => setDays(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>Description</Label>
+                <Input
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button onClick={handleCreateClass}>Create Class</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search */}

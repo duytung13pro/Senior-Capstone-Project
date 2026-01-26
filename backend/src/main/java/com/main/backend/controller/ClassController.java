@@ -27,7 +27,7 @@ public class ClassController {
         this.userRepository = userRepository;
         this.classRepository = classRepository;
     }    
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> createClass(@RequestBody CreateClassRequest req) {
 
         Class c = new Class();
