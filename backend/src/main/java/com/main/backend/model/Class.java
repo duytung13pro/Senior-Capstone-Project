@@ -1,6 +1,8 @@
 package com.main.backend.model;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -27,6 +29,10 @@ public class Class {
     private String teacherId;
 
     private Instant createdAt = Instant.now();
+
+    // List of student user IDs enrolled in this class
+    
+    private List<String> studentIds = new ArrayList<>();
 
     public Class() {}
 
@@ -85,4 +91,12 @@ public class Class {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public List<String> getStudentIds() {
+        return studentIds;
+    }
+
+    public void setStudentIds(List<String> studentIds) {
+        this.studentIds = studentIds;
+}
 }
