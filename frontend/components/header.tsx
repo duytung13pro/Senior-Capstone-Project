@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -28,7 +29,15 @@ import { NotificationsPanel } from "@/components/notifications-panel";
 export function Header() {
   const { setTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const router = useRouter();
 
+  // When user click logout, clear localStorage and redirect to homepage
+  const handleLogout = () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("role");
+    router.push("/");
+  };
+  
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background px-4 md:px-6">
       <div className="flex w-full max-w-7xl mx-auto items-center">
@@ -122,7 +131,8 @@ export function Header() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center">
+              <DropdownMenuItem className="flex items-center cursor-pointer"
+                                onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
