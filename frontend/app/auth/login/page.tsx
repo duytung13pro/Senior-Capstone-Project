@@ -15,7 +15,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  
   // Handle User request when trying to login.
   // Request will be sent to localhosts:8080/api/login at localhosts:8080
   const handleSubmit = async (e: React.FormEvent) => {

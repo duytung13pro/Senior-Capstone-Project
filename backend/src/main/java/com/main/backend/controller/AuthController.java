@@ -37,9 +37,11 @@ public class AuthController {
         }
 
         User user = new User();
-        user.setName(req.getName());
-        user.setEmail(email);
-        user.setPassword(req.getPassword()); // hashing later
+        user.setFirstName(req.getFirstName());
+        user.setLastName(req.getLastName());
+        user.setPhone(req.getPhone());
+        user.setEmail(req.getEmail());
+        user.setPassword(req.getPassword());
         user.setRole(req.getRole());
 
         userRepository.save(user);
