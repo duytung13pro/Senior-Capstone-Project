@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {useEffect, useState} from "react";
 import {
   Table,
   TableBody,
@@ -11,55 +12,46 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const recentClasses = [
-  {
-    id: "1",
-    name: "Beginner Mandarin",
-    level: "Beginner",
-    time: "9:00 AM - 10:30 AM",
-    days: "Mon, Wed, Fri",
-    students: 12,
-    status: "Active",
-  },
-  {
-    id: "2",
-    name: "Intermediate Conversation",
-    level: "Intermediate",
-    time: "11:00 AM - 12:30 PM",
-    days: "Tue, Thu",
-    students: 8,
-    status: "Active",
-  },
-  {
-    id: "3",
-    name: "Advanced Writing",
-    level: "Advanced",
-    time: "2:00 PM - 3:30 PM",
-    days: "Mon, Wed",
-    students: 6,
-    status: "Active",
-  },
-  {
-    id: "4",
-    name: "Business Mandarin",
-    level: "Intermediate",
-    time: "4:00 PM - 5:30 PM",
-    days: "Tue, Thu",
-    students: 10,
-    status: "Upcoming",
-  },
-  {
-    id: "5",
-    name: "HSK 4 Preparation",
-    level: "Intermediate",
-    time: "6:00 PM - 7:30 PM",
-    days: "Mon, Wed, Fri",
-    students: 15,
-    status: "Completed",
-  },
-];
 
 export function RecentClasses() {
+  const [recentClasses, setRecentClasses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real data
+  useEffect(() => {
+    const teacherId = localStorage.getItem("userId");
+    if (!teacherId) return;
+
+    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch classes");
+        return res.json();
+      })
+      .then((data) => {
+        setRecentClasses(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load classes", err);
+        setLoading(false);
+      });
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return <div className="text-muted-foreground">Loading classes...</div>;
+  }
+
+  // Empty state
+  if (recentClasses.length === 0) {
+    return (
+      <div className="text-muted-foreground text-sm">
+        No classes created yet.
+      </div>
+    );
+  }
+
+
   return (
     <div className="w-full">
       <div className="rounded-md border">
@@ -71,7 +63,6 @@ export function RecentClasses() {
               <TableHead>Time</TableHead>
               <TableHead>Days</TableHead>
               <TableHead>Students</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -82,20 +73,7 @@ export function RecentClasses() {
                 <TableCell>{classItem.level}</TableCell>
                 <TableCell>{classItem.time}</TableCell>
                 <TableCell>{classItem.days}</TableCell>
-                <TableCell>{classItem.students}</TableCell>
-                <TableCell className="whitespace-nowrap">
-                  <Badge
-                    variant={
-                      classItem.status === "Active"
-                        ? "default"
-                        : classItem.status === "Upcoming"
-                        ? "outline"
-                        : "secondary"
-                    }
-                  >
-                    {classItem.status}
-                  </Badge>
-                </TableCell>
+                <TableCell>{classItem.getStudentCount ?? 0}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm">
                     View

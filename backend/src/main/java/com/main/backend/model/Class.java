@@ -39,7 +39,9 @@ public class Class {
     public String getId() {
         return id;
     }
-
+    public int getStudentCount(){
+        return studentIds.size();
+    }
     public String getName() {
         return name;
     }
