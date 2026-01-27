@@ -111,36 +111,27 @@ export function ProfilePage() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="first-name">First Name</Label>
-                      <Input
-  id="first-name"
-  value={form.firstName}
-  onChange={(e) =>
-    setForm({ ...form, firstName: e.target.value })
-  }
-/>
+                      <Input id="first-name" value={form.firstName} 
+                              onChange={(e) => 
+                              setForm({ ...form, firstName: e.target.value })
+                      }/>
 
 
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="last-name">Last Name</Label>
-                      <Input
-  id="last-name"
-  value={form.lastName}
-  onChange={(e) =>
-    setForm({ ...form, lastName: e.target.value })
-  }
-/>
-
+                      <Input id="last-name" value={form.lastName}
+                              onChange={(e) =>
+                              setForm({ ...form, lastName: e.target.value })
+                            }/>
                     </div>
                   </div>
                   <div className="grid gap-2">
-                  <Input
-  id="email"
-  value={form.email}
-  onChange={(e) =>
-    setForm({ ...form, email: e.target.value })
-  }
-/>
+                  <Input id="email"
+                          value={form.email}
+                          onChange={(e) =>
+                            setForm({ ...form, email: e.target.value })
+                          }/>
 
                   </div>
                   <div className="grid gap-2">
