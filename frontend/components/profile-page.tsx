@@ -18,6 +18,13 @@ export function ProfilePage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  })
+  
   // Fetch data from backend to load personal info
   useEffect(() => {
     const userId = localStorage.getItem("userId")
@@ -30,6 +37,12 @@ export function ProfilePage() {
       })
       .then(data => {
         setProfile(data)
+        setForm({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+        })
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -37,12 +50,38 @@ export function ProfilePage() {
       if (!profile) {
         return <div>Loading profile...</div>
       }
+
+  const handleSave = async () => {
+    const userId = localStorage.getItem("userId")
+    if (!userId) return
+
+    const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    })
+
+    if (!res.ok) {
+      alert("Failed to save changes")
+      return
+    }
+
+    const updated = await res.json()
+    setProfile(updated)
+    alert("Profile updated successfully")
+}
+
   
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Profile & Settings</h1>
-        <Button>Save Changes</Button>
+        <Button onClick={handleSave}>
+          Save Changes
+        </Button>
+
       </div>
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList>
@@ -72,19 +111,47 @@ export function ProfilePage() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="first-name">First Name</Label>
-                      <Input id="first-name" value={profile.firstName || ""} readOnly/>
+                      <Input
+  id="first-name"
+  value={form.firstName}
+  onChange={(e) =>
+    setForm({ ...form, firstName: e.target.value })
+  }
+/>
+
 
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="last-name">Last Name</Label>
-                      <Input id="last-name" value={profile.lastName || ""} readOnly />
+                      <Input
+  id="last-name"
+  value={form.lastName}
+  onChange={(e) =>
+    setForm({ ...form, lastName: e.target.value })
+  }
+/>
+
                     </div>
                   </div>
                   <div className="grid gap-2">
-                      <Input id="email" value={profile.email || ""} readOnly />
+                  <Input
+  id="email"
+  value={form.email}
+  onChange={(e) =>
+    setForm({ ...form, email: e.target.value })
+  }
+/>
+
                   </div>
                   <div className="grid gap-2">
-                    <Input id="phone" value={profile.phone || ""} readOnly/>
+                  <Input
+  id="phone"
+  value={form.phone}
+  onChange={(e) =>
+    setForm({ ...form, phone: e.target.value })
+  }
+/>
+
                   </div>
                 </div>
               </div>

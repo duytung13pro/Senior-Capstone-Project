@@ -1,5 +1,6 @@
 package com.main.backend.controller;
 
+import com.main.backend.dto.UpdateProfileRequest;
 import com.main.backend.dto.UserProfileResponse;
 import com.main.backend.model.User;
 import com.main.backend.repository.UserRepository;
@@ -24,4 +25,21 @@ public class UserController {
 
         return new UserProfileResponse(user);
     }
+    @PatchMapping("/{id}")
+    public UserProfileResponse updateUserProfile(@PathVariable String id,@RequestBody UpdateProfileRequest req) 
+    {
+        User user = userRepository
+            .findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setFirstName(req.getFirstName());
+        user.setLastName(req.getLastName());
+        user.setEmail(req.getEmail());
+        user.setPhone(req.getPhone());
+
+        userRepository.save(user);
+
+        return new UserProfileResponse(user);
+}
+
 }
