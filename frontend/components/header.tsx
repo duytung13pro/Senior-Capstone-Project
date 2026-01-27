@@ -1,7 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
 
-import { useState } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -25,12 +24,36 @@ import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NotificationsPanel } from "@/components/notifications-panel";
+import {useEffect, useState} from "react";
 
 export function Header() {
   const { setTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+  // Fetch data from backend to load personal info
+  useEffect(() => {
+    const userId = localStorage.getItem("userId")
+    if (!userId) return
+  
+    fetch(`http://localhost:8080/api/users/${userId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load profile")
+        return res.json()
+      })
+      .then(data => {
+        setProfile(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+    // Loading state
+    if (loading) {
+      return <div className="text-muted-foreground">Loading info...</div>;
+    }
+  
   // When user click logout, clear localStorage and redirect to homepage
   const handleLogout = () => {
     localStorage.removeItem("userId");
@@ -100,20 +123,19 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src="/placeholder.svg?height=32&width=32"
-                    alt="Teacher"
-                  />
-                  <AvatarFallback>LW</AvatarFallback>
+                <AvatarImage src={profile.avatarUrl
+                                  ? `http://localhost:8080${profile.avatarUrl}`
+                                  : "/placeholder.svg"
+                                  }alt="User Avatar"/>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Li Wei</p>
+                  <p className="text-sm font-medium leading-none">{profile.firstName} {profile.lastName}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    liwei@mandarinlearning.com
+                    {profile.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
