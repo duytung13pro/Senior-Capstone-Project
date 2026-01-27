@@ -13,6 +13,7 @@ public class User {
     private String phone;
     private String email;
     private String password;
+    private String avatarUrl;
     private Role role;
 
 
@@ -20,7 +21,6 @@ public class User {
         public String getId() {
             return id;
         }
-    
     
         public String getEmail() {
             return email.toLowerCase().trim();
@@ -70,5 +70,13 @@ public class User {
 
         public void setPhone(String phone) {
             this.phone = phone;
+        }
+
+        public void setAvatarUrl(String avatarUrl ){
+            this.avatarUrl = avatarUrl;
+        }
+        
+        public String getAvatarUrl(){
+            return avatarUrl;
         }
     }

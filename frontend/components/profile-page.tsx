@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +18,8 @@ export function ProfilePage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -47,9 +49,6 @@ export function ProfilePage() {
       })
       .catch(() => setLoading(false))
   }, [])
-      if (!profile) {
-        return <div>Loading profile...</div>
-      }
 
   const handleSave = async () => {
     const userId = localStorage.getItem("userId")
@@ -71,9 +70,43 @@ export function ProfilePage() {
     const updated = await res.json()
     setProfile(updated)
     alert("Profile updated successfully")
-}
+  }
 
+  const handleAvatarChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
   
+    const userId = localStorage.getItem("userId")
+    if (!userId) return
+  
+    const formData = new FormData()
+    formData.append("file", file)
+  
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/users/${userId}/avatar`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
+  
+      if (!res.ok) {
+        throw new Error("Upload failed")
+      }
+  
+      const updated = await res.json()
+      setProfile(updated) 
+    } catch (err) {
+      alert("Avatar upload failed")
+    }
+  }
+  
+  if (!profile) {
+    return <div>Loading profile...</div>
+  }
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -100,12 +133,23 @@ export function ProfilePage() {
               <div className="flex flex-col gap-6 md:flex-row">
                 <div className="flex flex-col items-center gap-4">
                   <Avatar className="h-32 w-32">
-                    <AvatarImage src="/placeholder.svg?height=128&width=128" alt="Teacher" />
+                    <AvatarImage src=
+                      {profile.avatarUrl? `http://localhost:8080${profile.avatarUrl}`: "/placeholder.svg"}
+                    />
                     <AvatarFallback className="text-4xl">LW</AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
                     Change Avatar
                   </Button>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    hidden
+                    onChange={handleAvatarChange}
+                  />
+
                 </div>
                 <div className="flex-1 space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
@@ -135,38 +179,16 @@ export function ProfilePage() {
 
                   </div>
                   <div className="grid gap-2">
-                  <Input
-  id="phone"
-  value={form.phone}
-  onChange={(e) =>
-    setForm({ ...form, phone: e.target.value })
-  }
-/>
+                  <Input id="phone"
+                        value={form.phone}
+                        onChange={(e) =>
+                          setForm({ ...form, phone: e.target.value })
+                        }/>
 
                   </div>
                 </div>
               </div>
-              <Separator />
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    rows={4}
-                    defaultValue="Experienced Mandarin teacher with over 10 years of teaching experience. Specialized in teaching Chinese as a second language with a focus on conversation and practical applications."
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="qualifications">Qualifications</Label>
-                  <Textarea
-                    id="qualifications"
-                    rows={4}
-                    defaultValue="- Master's in Teaching Chinese as a Foreign Language, Beijing Normal University
-- HSK Examiner Certification
-- International Chinese Language Teaching Certificate"
-                  />
-                </div>
-              </div>
+
             </CardContent>
           </Card>
         </TabsContent>

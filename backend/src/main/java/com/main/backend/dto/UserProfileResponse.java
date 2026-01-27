@@ -12,6 +12,8 @@ public class UserProfileResponse {
     private String email;
     private String phone;
     private Role role;
+    private String avatarUrl;
+
 
     public UserProfileResponse(User user) {
         this.id = user.getId();
@@ -20,6 +22,7 @@ public class UserProfileResponse {
         this.email = user.getEmail();
         this.phone = user.getPhone();
         this.role = user.getRole();
+        this.avatarUrl = user.getAvatarUrl();
     }
 
     
@@ -29,4 +32,5 @@ public class UserProfileResponse {
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
     public Role getRole() { return role; }
+    public String getAvatarUrl(){return avatarUrl;}
 }
