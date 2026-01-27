@@ -12,10 +12,32 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { useEffect } from "react"
 
 export function ProfilePage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
-
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  // Fetch data from backend to load personal info
+  useEffect(() => {
+    const userId = localStorage.getItem("userId")
+    if (!userId) return
+  
+    fetch(`http://localhost:8080/api/users/${userId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load profile")
+        return res.json()
+      })
+      .then(data => {
+        setProfile(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+      if (!profile) {
+        return <div>Loading profile...</div>
+      }
+  
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -50,20 +72,19 @@ export function ProfilePage() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="first-name">First Name</Label>
-                      <Input id="first-name" defaultValue="Li" />
+                      <Input id="first-name" value={profile.firstName || ""} readOnly/>
+
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="last-name">Last Name</Label>
-                      <Input id="last-name" defaultValue="Wei" />
+                      <Input id="last-name" value={profile.lastName || ""} readOnly />
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" defaultValue="liwei@mandarinlearning.com" />
+                      <Input id="email" value={profile.email || ""} readOnly />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" defaultValue="+1 (555) 123-4567" />
+                    <Input id="phone" value={profile.phone || ""} readOnly/>
                   </div>
                 </div>
               </div>
