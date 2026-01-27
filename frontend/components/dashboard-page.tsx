@@ -13,8 +13,26 @@ import { UpcomingAssignments } from "@/components/upcoming-assignments";
 import { StudentAttendance } from "@/components/student-attendance";
 import { RecentMessages } from "@/components/recent-messages";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
-
+import {useEffect, useState} from "react";
 export function DashboardPage() {
+  const [activeClassCount, setActiveClassCount] = useState<number>(0);
+  useEffect(() => {
+    const teacherId = localStorage.getItem("userId");
+    if (!teacherId) return;
+  
+    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch classes");
+        return res.json();
+      })
+      .then(data => {
+        // data is an array of classes
+        setActiveClassCount(data.length);
+      })
+      .catch(err => {
+        console.error("Failed to load active classes", err);
+      });
+  }, []);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -52,9 +70,6 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">42</div>
-                <p className="text-xs text-muted-foreground">
-                  +2 from last month
-                </p>
               </CardContent>
             </Card>
             <Card>
@@ -79,10 +94,7 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">5</div>
-                <p className="text-xs text-muted-foreground">
-                  +1 from last month
-                </p>
+                <div className="text-2xl font-bold">{activeClassCount}</div>
               </CardContent>
             </Card>
             <Card>
