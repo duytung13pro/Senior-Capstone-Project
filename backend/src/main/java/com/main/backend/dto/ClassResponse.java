@@ -4,6 +4,7 @@ import com.main.backend.model.Class;
 import com.main.backend.model.ClassLevel;
 
 import java.time.Instant;
+import java.util.List;
 
 // Control what data is sent to the client
 // When a class object is returned from backend
@@ -16,6 +17,7 @@ public class ClassResponse {
     private String days;
     private String description;
     private Instant createdAt;
+    private List<String> studentIds;
 
     public ClassResponse(Class c) {
         this.id = c.getId();
@@ -25,8 +27,12 @@ public class ClassResponse {
         this.days = c.getDays();
         this.description = c.getDescription();
         this.createdAt = c.getCreatedAt();
+        this.studentIds = c.getStudentIds();
     }
 
+    public List<String> getStudentIds(){
+        return studentIds;
+    }
     public String getId() {
         return id;
     }

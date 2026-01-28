@@ -83,5 +83,15 @@ public class ClassController {
 
         return ResponseEntity.ok().build();
     }
+    // API endpod to receive info about a specific class based on classId
+    @GetMapping("/{classId}")
+    public ClassResponse getClass(@PathVariable String classId) {
+    Class c = classRepository
+        .findById(classId)
+        .orElseThrow(() -> new RuntimeException("Class not found"));
+
+    return new ClassResponse(c);
+}
+
 
 }

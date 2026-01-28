@@ -2,6 +2,7 @@
 
 import { Textarea } from "@/components/ui/textarea";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function ClassesPage() {
+  const router = useRouter();
+
 
   const [searchQuery, setSearchQuery] = useState("");
   // Holds classes fetched from database
@@ -240,13 +243,11 @@ export function ClassesPage() {
                   <TableCell>{c.days}</TableCell>
                   <TableCell className="text-right">
                     {/* View button – routing comes later */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => console.log("View class", c.id)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${c.id}`)}>
                       View
-                    </Button>
+                </Button>
+
+                    
                   </TableCell>
                 </TableRow>
               ))

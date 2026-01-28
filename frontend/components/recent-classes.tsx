@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 export function RecentClasses() {
   const [recentClasses, setRecentClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   // Fetch real data
   useEffect(() => {
@@ -75,9 +77,9 @@ export function RecentClasses() {
                 <TableCell>{classItem.days}</TableCell>
                 <TableCell>{classItem.getStudentCount ?? 0}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    View
-                  </Button>
+                <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${classItem.id}`)}>
+                  View
+                </Button>
                 </TableCell>
               </TableRow>
             ))}
