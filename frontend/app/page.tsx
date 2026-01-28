@@ -1,12 +1,15 @@
+'use client'
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";  
 import LearningCarousel from "@/components/learning-carousel";
+import { useLanguage } from "@/i18n/useLanguage"
 
 export default function Home() {
-  console.log("Home page loaded");
+  const { t, changeLanguage } = useLanguage()
+
   return (
     <div className="min-h-screen bg-[#FFF8E9]">
       {/* Header */}
@@ -21,41 +24,47 @@ export default function Home() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/auth/login">
-          <Button variant="outline" className="border-green-600 text-green-700">
-            Đăng nhập
+          <Button size="sm" variant="ghost" onClick={() => changeLanguage("vi")}>   🇻
           </Button>
+          <Button size="sm" variant="ghost" onClick={() => changeLanguage("en")}>          🇺
+          </Button>
+          <Link href="/auth/login">
+            <Button variant="outline" className="border-green-600 text-green-700">
+              {t.nav.login}
+            </Button>
           </Link>
-          {/* "Dang Ky" button redirect to /register */}
-          <Link href="auth/register">
-            <Button className="bg-green-600 hover:bg-green-700 ">Đăng ký</Button>
+          <Link href="/auth/register">
+            <Button className="bg-green-600 hover:bg-green-700">
+              {t.nav.register}
+            </Button>
           </Link>
+</div>
 
-        </div>
       </header>
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 md:py-12 flex flex-col md:flex-row items-center">
         <div className="md:w-1/2 space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-green-800 leading-tight">
-            Học tiếng Trung hiệu quả <br />
-            mọi lúc, mọi nơi
-          </h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-green-800 leading-tight">
+          {t.hero.title} <br />
+          {t.hero.subtitle}
+        </h1>
+
           <div className="flex flex-col space-y-4">
             <Button className="w-full md:w-64 h-12 text-base font-medium bg-green-600 hover:bg-green-700 shadow-md">
-              Dùng thử miễn phí
+              {t.hero.freeTrial}
             </Button>
             <Button
               variant="outline"
               className="w-full md:w-64 h-12 text-base font-medium border-2 border-amber-500 text-amber-600 bg-amber-50 hover:bg-amber-100 shadow-sm"
             >
-              Xem các khóa học
+              {t.hero.viewCourses}
             </Button>
             <Button
               variant="outline"
               className="w-full md:w-64 h-12 text-base font-medium border-2 border-orange-500 text-orange-600 bg-orange-50 hover:bg-orange-100 shadow-sm"
             >
-              Đăng ký thành viên
+              {t.hero.signUp}
             </Button>
           </div>
         </div>
@@ -73,14 +82,13 @@ export default function Home() {
       {/* Why Choose Section */}
       <section className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-orange-800 mb-6">
-          Tại sao nên chọn Rewood Project <br />
-          để học tiếng Trung?
+          {t.whyChoose.title}
         </h2>
+
         <p className="text-gray-700 mb-8 max-w-3xl">
-          Rewood Project mang đến trải nghiệm học tập toàn diện, từ giao ngôn
-          ngữ, tương tác cao, hỗ trợ cá nhân và cộng đồng học viên năng động.
-          Bạn có thể học mọi lúc, trên mọi thiết bị.
+          {t.whyChoose.description}
         </p>
+
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-orange-500 rounded-lg p-6 text-white">
@@ -93,10 +101,8 @@ export default function Home() {
                 className="w-12 h-12"
               />
             </div>
-            <h3 className="font-semibold mb-2">
-              Giáo trình học tập trực tuyến, đa dạng
-            </h3>
-            <p className="text-sm">Học mọi lúc, mọi nơi</p>
+            <h3>{t.features.onlineMaterials.title}</h3>
+             <p>{t.features.onlineMaterials.desc}</p>
           </div>
 
           <div className="bg-green-600 rounded-lg p-6 text-white">
@@ -109,10 +115,8 @@ export default function Home() {
                 className="w-12 h-12"
               />
             </div>
-            <h3 className="font-semibold mb-2">
-              Lộ trình rõ ràng từ HSK 1 đến HSK 6
-            </h3>
-            <p className="text-sm">Học có hệ thống</p>
+            <h3>{t.features.clearPath.title}</h3>
+              <p>{t.features.clearPath.desc}</p>
           </div>
 
           <div className="bg-amber-500 rounded-lg p-6 text-white">
@@ -125,10 +129,8 @@ export default function Home() {
                 className="w-12 h-12"
               />
             </div>
-            <h3 className="font-semibold mb-2">
-              Học tập trên mọi thiết bị, mọi nền tảng
-            </h3>
-            <p className="text-sm">Học mọi lúc, mọi nơi</p>
+            <h3>{t.features.multiPlatform.title}</h3>
+              <p>{t.features.multiPlatform.desc}</p>
           </div>
         </div>
       </section>
@@ -141,24 +143,24 @@ export default function Home() {
       {/* Pricing Section */}
       <section className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-gray-800 mb-8">
-          Lựa chọn gói học lý tưởng
+          {t.pricing.title}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="border rounded-lg overflow-hidden">
             <div className="bg-amber-500 text-white p-4 text-center font-bold">
-              Miễn phí
+              {t.pricing.free.name}
             </div>
             <div className="p-6 space-y-4">
               <div className="text-center">
-                <p className="text-xl font-bold">0đ/tháng</p>
+                <p className="text-xl font-bold">{t.pricing.free.price}</p>
               </div>
               <p className="text-sm text-center text-gray-600">
-                Truy cập các khóa học cơ bản, không giới hạn thời gian
+                {t.pricing.free.description}
               </p>
               <div className="pt-4">
                 <Button variant="outline" className="w-full border-gray-300">
-                  Chọn gói phù hợp
+                  {t.pricing.action}
                 </Button>
               </div>
             </div>
@@ -166,18 +168,18 @@ export default function Home() {
 
           <div className="border rounded-lg overflow-hidden">
             <div className="bg-amber-600 text-white p-4 text-center font-bold">
-              Gói Tháng Premium
+              {t.pricing.monthly.name}
             </div>
             <div className="p-6 space-y-4">
               <div className="text-center">
-                <p className="text-xl font-bold">199.000đ/tháng</p>
+                <p className="text-xl font-bold">{t.pricing.monthly.price}</p>
               </div>
               <p className="text-sm text-center text-gray-600">
-                Mở khóa toàn bộ bài học, tương tác, hỗ trợ riêng cao
+                {t.pricing.monthly.description}
               </p>
               <div className="pt-4">
                 <Button className="w-full bg-green-600 hover:bg-green-700">
-                  Đăng ký ngay
+                  {t.pricing.action}
                 </Button>
               </div>
             </div>
@@ -185,18 +187,18 @@ export default function Home() {
 
           <div className="border rounded-lg overflow-hidden">
             <div className="bg-amber-700 text-white p-4 text-center font-bold">
-              Gói Năm Premium
+              {t.pricing.yearly.name}
             </div>
             <div className="p-6 space-y-4">
               <div className="text-center">
-                <p className="text-xl font-bold">1.490.000đ/năm</p>
+                <p className="text-xl font-bold">{t.pricing.yearly.price}</p>
               </div>
               <p className="text-sm text-center text-gray-600">
-                Tiết kiệm hơn 40% so với gói tháng, giảm vĩnh viễn hàng năm
+                {t.pricing.yearly.description}
               </p>
               <div className="pt-4">
                 <Button variant="outline" className="w-full border-gray-300">
-                  So sánh gói học
+                  {t.pricing.action}
                 </Button>
               </div>
             </div>
@@ -217,28 +219,26 @@ export default function Home() {
             />
           </div>
           <div className="md:w-2/3 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Bạn cần tư vấn? <br />
-              Đừng ngần ngại nhé!
+            <h2>
+              {t.contact.title} <br />
+              {t.contact.subtitle}
             </h2>
-            <p className="text-gray-700">
-              Hãy để lại thông tin, đội ngũ Rewood sẽ liên hệ với bạn sớm nhất
-              có thể để tư vấn chi tiết về lộ trình học tập phù hợp nhất.
-            </p>
+            <p>{t.contact.description}</p>
+
 
             <form className="space-y-4">
-              <Input placeholder="Họ và tên" className="bg-white" />
-              <Input placeholder="Email" className="bg-white" />
+              <Input placeholder={t.contact.form.name} className="bg-white" />
+              <Input placeholder={t.contact.form.email} className="bg-white" />
               <Input
-                placeholder="Số điện thoại (nếu có)"
+                placeholder={t.contact.form.phone}
                 className="bg-white"
               />
               <Textarea
-                placeholder="Nội dung cần hỗ trợ / câu hỏi"
+                placeholder={t.contact.form.mesage}
                 className="bg-white"
               />
               <Button className="w-full md:w-auto bg-orange-500 hover:bg-orange-600">
-                Gửi yêu cầu tư vấn
+                {t.contact.form.submit}
               </Button>
             </form>
           </div>
@@ -258,7 +258,7 @@ export default function Home() {
             />
             <div>
               <p className="text-xs text-gray-500">
-                Copyright © 2025 Project Rewood
+                {t.footer.copyright}
               </p>
             </div>
           </div>
