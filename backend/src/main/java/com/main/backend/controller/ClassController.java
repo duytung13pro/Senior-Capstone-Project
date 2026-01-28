@@ -43,7 +43,7 @@ public class ClassController {
         return ResponseEntity.ok(new ClassResponse(c));
     }
 
-    // API endpoint to see all of a teacher's class
+    // API endpoint to see all of a teacher's classes
     @GetMapping("/my")
     public List<ClassResponse> getMyClasses(@RequestParam String teacherId) {
 
