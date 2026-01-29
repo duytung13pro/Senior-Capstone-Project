@@ -1,5 +1,6 @@
 package com.main.backend.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,4 +12,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     // Check if a User object with the same email already exists
     // Prevent 2 users with the same username
     boolean existsByEmail(String email);
+    // Find all Ids
+    List<User> findAll();
+
 }

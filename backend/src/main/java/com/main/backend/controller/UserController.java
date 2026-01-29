@@ -1,7 +1,9 @@
 package com.main.backend.controller;
 
+import com.main.backend.dto.AllStudentResponse;
 import com.main.backend.dto.UpdateProfileRequest;
 import com.main.backend.dto.UserProfileResponse;
+import com.main.backend.model.Role;
 import com.main.backend.model.User;
 import com.main.backend.repository.UserRepository;
 
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -95,7 +98,20 @@ public class UserController {
                 .status(400)
                 .body(e.getMessage());
     }
-}
+}    
+    @GetMapping("/students")
+    public List<AllStudentResponse> getAllStudents() {
+        return userRepository.findAll().stream()
+            .filter(user -> user.getRole() == Role.STUDENT)
+            .map(user -> new AllStudentResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
+            ))
+            .toList();
+    }
+
 
 
 }

@@ -58,6 +58,7 @@ public class ClassController {
     @PostMapping("/add-student")
     public ResponseEntity<?> addStudentToClass(@RequestBody AddStudentRequest req) {
         // Get the class
+        
         Class c = classRepository
             .findById(req.getClassId())
             .orElseThrow(() -> new RuntimeException("Class not found"));
