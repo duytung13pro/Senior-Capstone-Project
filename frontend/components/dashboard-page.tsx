@@ -1,38 +1,14 @@
-"use client";
+"use client"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RecentClasses } from "@/components/recent-classes";
-import { UpcomingAssignments } from "@/components/upcoming-assignments";
-import { StudentAttendance } from "@/components/student-attendance";
-import { RecentMessages } from "@/components/recent-messages";
-import { AnalyticsDashboard } from "@/components/analytics-dashboard";
-import {useEffect, useState} from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { RecentClasses } from "@/components/recent-classes"
+import { UpcomingAssignments } from "@/components/upcoming-assignments"
+import { StudentAttendance } from "@/components/student-attendance"
+import { RecentMessages } from "@/components/recent-messages"
+import { AnalyticsDashboard } from "@/components/analytics-dashboard"
+
 export function DashboardPage() {
-  const [activeClassCount, setActiveClassCount] = useState<number>(0);
-  useEffect(() => {
-    const teacherId = localStorage.getItem("userId");
-    if (!teacherId) return;
-  
-    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch classes");
-        return res.json();
-      })
-      .then(data => {
-        // data is an array of classes
-        setActiveClassCount(data.length);
-      })
-      .catch(err => {
-        console.error("Failed to load active classes", err);
-      });
-  }, []);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -49,9 +25,7 @@ export function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Students
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Total Students</CardTitle>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -70,13 +44,12 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">42</div>
+                <p className="text-xs text-muted-foreground">+2 from last month</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Active Classes
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Active Classes</CardTitle>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -94,14 +67,13 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{activeClassCount}</div>
+                <div className="text-2xl font-bold">5</div>
+                <p className="text-xs text-muted-foreground">+1 from last month</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Pending Assignments
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Pending Assignments</CardTitle>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -118,16 +90,12 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">
-                  +3 since yesterday
-                </p>
+                <p className="text-xs text-muted-foreground">+3 since yesterday</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Unread Messages
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Unread Messages</CardTitle>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -143,9 +111,7 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">7</div>
-                <p className="text-xs text-muted-foreground">
-                  +2 since yesterday
-                </p>
+                <p className="text-xs text-muted-foreground">+2 since yesterday</p>
               </CardContent>
             </Card>
           </div>
@@ -198,18 +164,14 @@ export function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Reports</CardTitle>
-              <CardDescription>
-                Generate and view reports about student performance.
-              </CardDescription>
+              <CardDescription>Generate and view reports about student performance.</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px] flex items-center justify-center">
-              <p className="text-muted-foreground">
-                Reports content coming soon
-              </p>
+              <p className="text-muted-foreground">Reports content coming soon</p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

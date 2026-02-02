@@ -1,6 +1,6 @@
 "use client"
 
-import { useState,useRef } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,109 +12,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { useEffect } from "react"
 
 export function ProfilePage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
-  const [profile, setProfile] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-  })
-  
-  // Fetch data from backend to load personal info
-  useEffect(() => {
-    const userId = localStorage.getItem("userId")
-    if (!userId) return
-  
-    fetch(`http://localhost:8080/api/users/${userId}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to load profile")
-        return res.json()
-      })
-      .then(data => {
-        setProfile(data)
-        setForm({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          phone: data.phone || "",
-        })
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [])
-
-  const handleSave = async () => {
-    const userId = localStorage.getItem("userId")
-    if (!userId) return
-
-    const res = await fetch(`http://localhost:8080/api/users/${userId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    })
-
-    if (!res.ok) {
-      alert("Failed to save changes")
-      return
-    }
-
-    const updated = await res.json()
-    setProfile(updated)
-    alert("Profile updated successfully")
-  }
-
-  const handleAvatarChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-  
-    const userId = localStorage.getItem("userId")
-    if (!userId) return
-  
-    const formData = new FormData()
-    formData.append("file", file)
-  
-    try {
-      const res = await fetch(
-        `http://localhost:8080/api/users/${userId}/avatar`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
-  
-      if (!res.ok) {
-        throw new Error("Upload failed")
-      }
-  
-      const updated = await res.json()
-      setProfile(updated) 
-    } catch (err) {
-      alert("Avatar upload failed")
-    }
-  }
-  
-  if (!profile) {
-    return <div>Loading profile...</div>
-  }
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Profile & Settings</h1>
-        <Button onClick={handleSave}>
-          Save Changes
-        </Button>
-
+        <Button>Save Changes</Button>
       </div>
       <Tabs defaultValue="profile" className="space-y-4">
         <TabsList>
@@ -133,62 +39,55 @@ export function ProfilePage() {
               <div className="flex flex-col gap-6 md:flex-row">
                 <div className="flex flex-col items-center gap-4">
                   <Avatar className="h-32 w-32">
-                    <AvatarImage src=
-                      {profile.avatarUrl? `http://localhost:8080${profile.avatarUrl}`: "/placeholder.svg"}
-                    />
+                    <AvatarImage src="/placeholder.svg" alt="Teacher" />
                     <AvatarFallback className="text-4xl">LW</AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <Button variant="outline" size="sm">
                     Change Avatar
                   </Button>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    hidden
-                    onChange={handleAvatarChange}
-                  />
-
                 </div>
                 <div className="flex-1 space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="first-name">First Name</Label>
-                      <Input id="first-name" value={form.firstName} 
-                              onChange={(e) => 
-                              setForm({ ...form, firstName: e.target.value })
-                      }/>
-
-
+                      <Input id="first-name" defaultValue="Li" />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="last-name">Last Name</Label>
-                      <Input id="last-name" value={form.lastName}
-                              onChange={(e) =>
-                              setForm({ ...form, lastName: e.target.value })
-                            }/>
+                      <Input id="last-name" defaultValue="Wei" />
                     </div>
                   </div>
                   <div className="grid gap-2">
-                  <Input id="email"
-                          value={form.email}
-                          onChange={(e) =>
-                            setForm({ ...form, email: e.target.value })
-                          }/>
-
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" defaultValue="liwei@mandarinlearning.com" />
                   </div>
                   <div className="grid gap-2">
-                  <Input id="phone"
-                        value={form.phone}
-                        onChange={(e) =>
-                          setForm({ ...form, phone: e.target.value })
-                        }/>
-
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input id="phone" defaultValue="+1 (555) 123-4567" />
                   </div>
                 </div>
               </div>
-
+              <Separator />
+              <div className="space-y-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    rows={4}
+                    defaultValue="Experienced Mandarin teacher with over 10 years of teaching experience. Specialized in teaching Chinese as a second language with a focus on conversation and practical applications."
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="qualifications">Qualifications</Label>
+                  <Textarea
+                    id="qualifications"
+                    rows={4}
+                    defaultValue="- Master's in Teaching Chinese as a Foreign Language, Beijing Normal University
+- HSK Examiner Certification
+- International Chinese Language Teaching Certificate"
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

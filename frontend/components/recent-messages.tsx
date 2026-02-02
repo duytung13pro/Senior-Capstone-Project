@@ -48,7 +48,7 @@ export function RecentMessages() {
       {recentMessages.map((message) => (
         <div key={message.id} className="flex items-start gap-4 rounded-lg border p-3 hover:bg-muted/50">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={`/placeholder.svg?height=40&width=40`} alt={message.sender} />
+            <AvatarImage src="/placeholder.svg" alt={message.sender} />
             <AvatarFallback>{message.avatar}</AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-1">
