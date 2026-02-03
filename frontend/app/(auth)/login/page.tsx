@@ -53,9 +53,9 @@ export default function LoginPage() {
       
       // Redirect after successful login
       if (data.role === "TEACHER") {
-        router.push("/tutor-fe");
+        router.push("/dashboard");
       } else if (data.role === "STUDENT") {
-        router.push("/student-fe");
+        router.push("/dashboard/student");
       } else {
         throw new Error("Unknown role");
       }
