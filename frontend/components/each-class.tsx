@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {AddStudentButton} from "@/components/add-student-button";
 import {
   Table,
   TableBody,
@@ -54,7 +55,7 @@ export function ClassDetailPage() {
           value={studentEmail}
           onChange={(e) => setStudentEmail(e.target.value)}
         />
-        <Button>Add Student</Button>
+        <AddStudentButton>Add Student</AddStudentButton>
       </div>
 
       {/* Student List */}

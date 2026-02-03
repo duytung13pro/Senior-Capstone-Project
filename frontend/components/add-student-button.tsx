@@ -29,7 +29,7 @@ interface Student {
 }
 
 // Fetch when the dialog is opened
-export function Test() {
+export function AddStudentButton() {
 
   const [open, setOpen] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
@@ -85,7 +85,6 @@ export function Test() {
   };
 
   return (
-    <DashboardLayout>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button>
@@ -126,7 +125,6 @@ export function Test() {
           </Button>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
   );
 }
 
