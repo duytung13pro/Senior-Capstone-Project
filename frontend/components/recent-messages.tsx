@@ -1,7 +1,7 @@
-"use client"
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+"use client";
+import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 const recentMessages = [
   {
@@ -40,13 +40,22 @@ const recentMessages = [
     status: "Read",
     avatar: "LY",
   },
-]
+];
 
 export function RecentMessages() {
+  const router = useRouter(); // Initialize router
+
+  const handleMessageClick = (messageId: string) => {
+    router.push(`/messages?id=${messageId}`);
+  };
+
   return (
     <div className="space-y-4">
       {recentMessages.map((message) => (
-        <div key={message.id} className="flex items-start gap-4 rounded-lg border p-3 hover:bg-muted/50">
+        <div
+          key={message.id}
+          className="flex items-start gap-4 rounded-lg border p-3 hover:bg-muted/50"
+        >
           <Avatar className="h-10 w-10">
             <AvatarImage src="/placeholder.svg" alt={message.sender} />
             <AvatarFallback>{message.avatar}</AvatarFallback>
@@ -54,11 +63,15 @@ export function RecentMessages() {
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between">
               <div className="font-medium">{message.sender}</div>
-              <div className="text-xs text-muted-foreground">{message.time}</div>
+              <div className="text-xs text-muted-foreground">
+                {message.time}
+              </div>
             </div>
             <div className="text-sm">{message.subject}</div>
             <div className="flex items-center gap-2">
-              <div className="text-xs text-muted-foreground">{message.class}</div>
+              <div className="text-xs text-muted-foreground">
+                {message.class}
+              </div>
               {message.status === "Unread" && (
                 <Badge variant="secondary" className="text-xs">
                   New
@@ -69,5 +82,5 @@ export function RecentMessages() {
         </div>
       ))}
     </div>
-  )
+  );
 }

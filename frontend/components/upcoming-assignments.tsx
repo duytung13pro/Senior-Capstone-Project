@@ -1,8 +1,15 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useRouter } from "next/navigation"; // Added import
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const upcomingAssignments = [
   {
@@ -37,14 +44,15 @@ const upcomingAssignments = [
     submissions: "0/15",
     status: "Past Due",
   },
-]
+];
 
 export function UpcomingAssignments() {
-  const router = useRouter()
+  const router = useRouter(); // Initialize the router
 
-  const handleAssignmentClick = (assignmentId: string) => {
-    router.push(`/assignments?id=${assignmentId}`)
-  }
+  const handleAssignmentClick = (id: string) => {
+    // Navigate to the main assignments page with the specific ID as a query param
+    router.push(`/assignments?id=${id}`);
+  };
 
   return (
     <div className="w-full">
@@ -63,10 +71,13 @@ export function UpcomingAssignments() {
             {upcomingAssignments.map((assignment) => (
               <TableRow
                 key={assignment.id}
+                // Added cursor-pointer for better UX and the click handler
                 className="cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => handleAssignmentClick(assignment.id)}
               >
-                <TableCell className="font-medium">{assignment.title}</TableCell>
+                <TableCell className="font-medium">
+                  {assignment.title}
+                </TableCell>
                 <TableCell>{assignment.class}</TableCell>
                 <TableCell>{assignment.deadline}</TableCell>
                 <TableCell>{assignment.submissions}</TableCell>
@@ -89,5 +100,5 @@ export function UpcomingAssignments() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

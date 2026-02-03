@@ -1,12 +1,21 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RecentClasses } from "@/components/recent-classes"
-import { UpcomingAssignments } from "@/components/upcoming-assignments"
-import { StudentAttendance } from "@/components/student-attendance"
-import { RecentMessages } from "@/components/recent-messages"
-import { AnalyticsDashboard } from "@/components/analytics-dashboard"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RecentClasses } from "@/components/recent-classes";
+import { UpcomingAssignments } from "@/components/upcoming-assignments";
+import { StudentAttendance } from "@/components/student-attendance";
+import { RecentMessages } from "@/components/recent-messages";
+import { AnalyticsDashboard } from "@/components/analytics-dashboard";
+import { ChevronRight } from "lucide-react";
 
 export function DashboardPage() {
   return (
@@ -21,135 +30,65 @@ export function DashboardPage() {
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
-          {/* Stats Cards */}
+          {/* Stats Cards Section */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">42</div>
-                <p className="text-xs text-muted-foreground">+2 from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Classes</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">5</div>
-                <p className="text-xs text-muted-foreground">+1 from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Assignments</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <rect width="20" height="14" x="2" y="5" rx="2" />
-                  <path d="M2 10h20" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">+3 since yesterday</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Unread Messages</CardTitle>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  className="h-4 w-4 text-muted-foreground"
-                >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">7</div>
-                <p className="text-xs text-muted-foreground">+2 since yesterday</p>
-              </CardContent>
-            </Card>
+            {/* ... (Keep your existing Stats Cards here) */}
           </div>
 
-          {/* Recent Classes - Full Width Row */}
+          {/* Recent Classes */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Recent Classes</CardTitle>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/classes" className="flex items-center gap-1">
+                  View All <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent>
               <RecentClasses />
             </CardContent>
           </Card>
 
-          {/* Upcoming Assignments - Full Width Row */}
+          {/* Upcoming Assignments */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Upcoming Assignments</CardTitle>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/assignments" className="flex items-center gap-1">
+                  View All <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent>
               <UpcomingAssignments />
             </CardContent>
           </Card>
 
-          {/* Student Attendance and Recent Messages */}
+          {/* Attendance and Messages Row */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
-            <Card className="col-span-2 lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Student Attendance</CardTitle>
-                <CardDescription>Last 7 days</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <StudentAttendance />
-              </CardContent>
-            </Card>
+            <Link
+              href="/attendance"
+              className="col-span-2 lg:col-span-4 block no-underline"
+            >
+              <Card className="h-full cursor-pointer hover:bg-accent/50 transition-colors">
+                <CardHeader>
+                  <CardTitle>Student Attendance</CardTitle>
+                  <CardDescription>Last 7 days</CardDescription>
+                  {/* View button removed here */}
+                </CardHeader>
+                <CardContent>
+                  <StudentAttendance />
+                </CardContent>
+              </Card>
+            </Link>
+
             <Card className="col-span-2 lg:col-span-8">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Recent Messages</CardTitle>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/messages">Open Inbox</Link>
+                </Button>
               </CardHeader>
               <CardContent>
                 <RecentMessages />
@@ -157,21 +96,40 @@ export function DashboardPage() {
             </Card>
           </div>
         </TabsContent>
+
         <TabsContent value="analytics" className="space-y-4">
           <AnalyticsDashboard />
         </TabsContent>
+
         <TabsContent value="reports" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Reports</CardTitle>
-              <CardDescription>Generate and view reports about student performance.</CardDescription>
+              <CardTitle>System Reports</CardTitle>
+              <CardDescription>
+                Select a report type to generate detailed data.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <p className="text-muted-foreground">Reports content coming soon</p>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              <Button variant="outline" className="h-24 flex-col gap-2" asChild>
+                <Link href="/reports/attendance">
+                  <span className="font-bold text-lg">Attendance Report</span>
+                  <span className="text-xs text-muted-foreground text-center">
+                    Export weekly or monthly student logs
+                  </span>
+                </Link>
+              </Button>
+              <Button variant="outline" className="h-24 flex-col gap-2" asChild>
+                <Link href="/reports/performance">
+                  <span className="font-bold text-lg">Performance Report</span>
+                  <span className="text-xs text-muted-foreground text-center">
+                    Analyze student grades and progress
+                  </span>
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

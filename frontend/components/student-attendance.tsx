@@ -1,6 +1,6 @@
-"use client"
-
-import { Progress } from "@/components/ui/progress"
+"use client";
+import { useRouter } from "next/navigation";
+import { Progress } from "@/components/ui/progress";
 
 const attendanceData = [
   { day: "Monday", present: 90 },
@@ -8,9 +8,15 @@ const attendanceData = [
   { day: "Wednesday", present: 95 },
   { day: "Thursday", present: 80 },
   { day: "Friday", present: 88 },
-]
+];
 
 export function StudentAttendance() {
+  const router = useRouter();
+
+  const handleAttendanceClick = (day: string) => {
+    router.push(`/reports/attendance?day=${day.toLowerCase()}`);
+  };
+
   return (
     <div className="space-y-4">
       {attendanceData.map((item) => (
@@ -23,5 +29,5 @@ export function StudentAttendance() {
         </div>
       ))}
     </div>
-  )
+  );
 }
