@@ -1,0 +1,20 @@
+{
+  "name": "senior-capstone-project",
+  "version": "1.0.0",
+  "description": "Consolidated LMS Platform for Senior Capstone",
+  "main": "index.js",
+  "scripts": {
+    "ops:init": "bash ops.sh init",
+    "docker:up": "bash ops.sh up code fe",
+    "docker:down": "bash ops.sh down"
+  },
+  "keywords": [
+    "nextjs",
+    "spring-boot",
+    "docker",
+    "ai-lms"
+  ],
+  "author": "Jay Dao",
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.1"
+}

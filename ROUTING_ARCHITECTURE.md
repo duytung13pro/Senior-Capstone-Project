@@ -1,6 +1,6 @@
 # Routing Architecture Explanation
 
-## Why Separate `/app/(dashboard)/(teacher)` and `/app/(dashboard)/(student)`?
+## Why Separate `/app/dashboard/teacher` and `/app/dashboard/student`?
 
 ### Short Answer
 They are **grouped by role**, not duplicated. Route groups (parentheses in Next.js) are invisible in URLs but create logical organization and enable:
@@ -15,18 +15,18 @@ They are **grouped by role**, not duplicated. Route groups (parentheses in Next.
 
 ### Route Groups (Next.js Feature)
 Route groups use parentheses `()` and do NOT appear in URLs:
-- `/app/(dashboard)/(teacher)/page.tsx` → URL is `/` (teacher sees this)
-- `/app/(dashboard)/(student)/page.tsx` → URL is `/` (student sees this)
+- `/app/dashboard/teacher/page.tsx` → URL is `/` (teacher sees this)
+- `/app/dashboard/student/page.tsx` → URL is `/` (student sees this)
 - Middleware decides which one based on user role
 
 ### URL Structure
 ```
 User Role    → Redirected To          → Sees URL
 ─────────────────────────────────────────────────
-Teacher      → /(dashboard)/(teacher) → /
-Student      → /(dashboard)/(student) → /
-Admin        → /(dashboard)/(admin)   → /admin
-Center       → /(dashboard)/(center)  → /center
+Teacher      → /dashboard/teacher → /
+Student      → /dashboard/student → /
+Admin        → /dashboard/admin   → /admin
+Center       → /dashboard/center  → /center
 ```
 
 ### Middleware Flow
@@ -50,22 +50,22 @@ Each role **MUST** have:
 
 ### 1. Different Layouts
 ```
-/(teacher)/layout.tsx
+/teacher/layout.tsx
 - Teacher sidebar (Classes, Assignments, Students, Analytics)
 - Teacher header
 - Teacher-specific UI
 
-/(student)/layout.tsx
+/student/layout.tsx
 - Student sidebar (My Classes, Assignments, Grades, Schedule)
 - Student header  
 - Student-specific UI
 
-/(admin)/layout.tsx
+/admin/layout.tsx
 - Admin sidebar (Users, Centers, Settings)
 - Admin header
 - Admin dashboard components
 
-/(center)/layout.tsx
+/center/layout.tsx
 - Center sidebar (Analytics, Reports, Staff Management)
 - Center header
 - Franchise-level UI
@@ -80,13 +80,13 @@ Each portal has **completely different** navigation menus:
 
 ### 3. Different Permissions & RBAC
 ```
-/(teacher)/page.tsx
+/teacher/page.tsx
 - Only teachers can access
 - Can create/edit courses
 - Can view student progress
 - Middleware blocks students from accessing
 
-/(student)/page.tsx
+/student/page.tsx
 - Only students can access
 - Can view enrolled courses
 - Can submit assignments
@@ -104,11 +104,11 @@ Each portal has **completely different** navigation menus:
 ## File Structure Clarity
 
 ```
-/app/(dashboard)
+/app/dashboard
 ├── /layout.tsx                 ← Shared wrapper (auth, theme, header)
 ├── /page.tsx                   ← Root redirect logic
 │
-├── /(teacher)
+├── /teacher
 │   ├── /layout.tsx            ← Teacher-specific layout with sidebar
 │   ├── /page.tsx              ← Teacher dashboard
 │   ├── /classes
@@ -116,7 +116,7 @@ Each portal has **completely different** navigation menus:
 │   ├── /student-progress
 │   └── ... teacher routes
 │
-├── /(student)
+├── /student
 │   ├── /layout.tsx            ← Student-specific layout with sidebar
 │   ├── /page.tsx              ← Student dashboard
 │   ├── /my-classes
@@ -124,12 +124,12 @@ Each portal has **completely different** navigation menus:
 │   ├── /grades
 │   └── ... student routes
 │
-├── /(admin)                    ← Empty, ready for implementation
+├── /admin                    ← Empty, ready for implementation
 │   ├── /layout.tsx            ← Admin-specific layout
 │   ├── /page.tsx              ← Admin dashboard
 │   └── /centers
 │
-└── /(center)                   ← Empty, ready for implementation
+└── /center                   ← Empty, ready for implementation
     ├── /layout.tsx            ← Center-specific layout
     ├── /page.tsx              ← Center dashboard
     └── /analytics

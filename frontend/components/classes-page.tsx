@@ -225,7 +225,7 @@ export function ClassesPage() {
   }
 
   const handleStudentReview = (student: any) => {
-    setSelectedStudent(student)
+    setSelectedStudentstudent
     setShowReviewDialog(true)
   }
 
@@ -400,11 +400,11 @@ export function ClassesPage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {students.map((student) => (
+                          {students.map(student => (
                             <TableRow
                               key={student.id}
                               className="cursor-pointer hover:bg-muted/50 transition-colors"
-                              onClick={() => handleStudentReview(student)}
+                              onClick={() => handleStudentReviewstudent}
                             >
                               <TableCell>
                                 <div className="flex items-center gap-3">
@@ -424,7 +424,7 @@ export function ClassesPage() {
                                   size="sm"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    handleStudentReview(student)
+                                    handleStudentReviewstudent
                                   }}
                                 >
                                   Review

@@ -4,7 +4,7 @@
 
 ```
 /app
-├── (auth)                          # Authentication pages
+├── auth                          # Authentication pages
 │   ├── layout.tsx                  # Auth layout wrapper
 │   ├── login/
 │   │   └── page.tsx                # Login page
@@ -13,21 +13,21 @@
 │   └── forgot-password/
 │       └── page.tsx                # Password reset page
 │
-├── (dashboard)                     # Shared dashboard wrapper
+├── dashboard                     # Shared dashboard wrapper
 │   ├── layout.tsx                  # Dashboard wrapper layout
 │   ├── page.tsx                    # Redirects to teacher portal (default)
 │   │
-│   ├── (admin)                     # Admin Portal (Full System Control)
+│   ├── admin                     # Admin Portal (Full System Control)
 │   │   ├── layout.tsx              # Admin layout
 │   │   ├── page.tsx                # Admin dashboard
 │   │   └── centers/                # Manage franchises [TODO]
 │   │
-│   ├── (center)                    # Center/Franchise Portal (Business-level)
+│   ├── center                    # Center/Franchise Portal (Business-level)
 │   │   ├── layout.tsx              # Center layout
 │   │   ├── page.tsx                # Center dashboard
 │   │   └── analytics/              # Business reports [TODO]
 │   │
-│   ├── (teacher)                   # Teacher Portal (Course Management)
+│   ├── teacher                   # Teacher Portal (Course Management)
 │   │   ├── layout.tsx              # Teacher layout with sidebar
 │   │   ├── page.tsx                # Teacher dashboard
 │   │   ├── classes/
@@ -51,7 +51,7 @@
 │   │   └── profile/
 │   │       └── page.tsx            # Teacher settings
 │   │
-│   └── (student)                   # Student Portal (Learning)
+│   └── student                   # Student Portal (Learning)
 │       ├── layout.tsx              # Student layout with sidebar
 │       ├── loading.tsx             # Loading state
 │       ├── page.tsx                # Student dashboard

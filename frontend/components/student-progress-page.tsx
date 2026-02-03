@@ -385,7 +385,7 @@ export function StudentProgressPage() {
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [activeTab, setActiveTab] = useState("overview")
 
-  const filteredStudents = students.filter((student) => {
+  const filteredStudents = students.filter(student => {
     const classMatch = filter.class === "all" || student.class === filter.class
     const levelMatch = filter.level === "all" || student.level === filter.level
     const progressMatch =
@@ -472,12 +472,12 @@ export function StudentProgressPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredStudents.map((student) => (
+              filteredStudents.map(student => (
                 <TableRow
                   key={student.id}
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => {
-                    setSelectedStudent(student)
+                    setSelectedStudentstudent
                     setActiveTab("overview")
                   }}
                 >

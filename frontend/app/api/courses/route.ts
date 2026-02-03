@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import dbConnect from "@/lib/mongodb"
 import Course from "@/lib/models/Course"
 
+export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     await dbConnect()

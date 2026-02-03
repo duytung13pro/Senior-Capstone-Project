@@ -1,0 +1,59 @@
+{
+  "name": "backend",
+  "initializeCommand": "bash ops.sh init",
+  "postCreateCommand": "bash .devcontainer/backend/post-create.sh",
+  "postAttachCommand": "bash .devcontainer/backend/post-attach.sh",
+  "dockerComposeFile": "../../docker-compose.yml",
+  "service": "backend-dev",
+  "runServices": ["backend-dev"],
+  "shutdownAction": "none",
+  "workspaceFolder": "/workspaces/little-startup",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Hermit.zip
+        "editor.fontFamily": "Hurmit Nerd Font",
+        "editor.fontSize": 12,
+        "terminal.integrated.fontFamily": "Hurmit Nerd Font",
+        "terminal.integrated.fontSize": 12,
+        "workbench.colorTheme": "Default Dark Modern",
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.compile.nullAnalysis.mode": "automatic",
+        "java.format.settings.profile": "GoogleStyle",
+        "editor.formatOnSave": true,
+        "editor.insertSpaces": true,
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2
+        },
+        "[yaml]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2
+        },
+        "files.exclude": {
+          ".db-mongodb": true
+        },
+        "terminal.integrated.cwd": "${workspaceFolder}/backend",
+        "github.codespaces.devcontainerChangedNotificationStyle": "none",
+        "editor.renderWhitespace": "all",
+        "code-eol.newlineCharacter": "¬",
+        "code-eol.returnCharacter": "¤",
+        "code-eol.crlfCharacter": "¤¬"
+      },
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "chekweitan.compare-view",
+        "cweijan.vscode-mysql-client2",
+        "eriklynd.json-tools",
+        "esbenp.prettier-vscode",
+        "github.copilot",
+        "github.vscode-pull-request-github",
+        "mechatroner.rainbow-csv",
+        "medo64.render-crlf",
+        "ms-azuretools.vscode-containers",
+        "usernamehw.errorlens",
+        "vadimcn.vscode-lldb"
+      ]
+    }
+  }
+}

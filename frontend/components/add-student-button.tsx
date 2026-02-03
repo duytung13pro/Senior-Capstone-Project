@@ -108,7 +108,7 @@ export function Test() {
               </SelectTrigger>
 
               <SelectContent>
-                {students.map((student) => (
+                {students.map(student => (
                   <SelectItem key={student.id} value={student.email}>
                     {student.firstName} {student.lastName} — {student.email}
                   </SelectItem>
