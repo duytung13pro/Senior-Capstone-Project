@@ -84,6 +84,40 @@ public class ClassController {
 
         return ResponseEntity.ok().build();
     }
+
+    // API endpoint to remove a student from a class
+    @PostMapping("/remove-student")
+    public ResponseEntity<?> removeStudentFromClass(@RequestBody AddStudentRequest req) {
+
+        // Get the class
+        Class c = classRepository
+            .findById(req.getClassId())
+            .orElseThrow(() -> new RuntimeException("Class not found"));
+
+        // Get the student
+        User student = userRepository
+            .findByEmail(req.getStudentEmail())
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        // Only students can be removed
+        if (student.getRole() != Role.STUDENT) {
+            return ResponseEntity.badRequest()
+                .body("User is not a student");
+        }
+
+        // Remove student if enrolled
+        boolean removed = c.getStudentIds().remove(student.getId());
+
+        if (!removed) {
+            return ResponseEntity.badRequest()
+                .body("Student is not enrolled in this class");
+        }
+
+        classRepository.save(c);
+
+        return ResponseEntity.ok().build();
+    }
+
     // API endpod to receive info about a specific class based on classId
     @GetMapping("/{classId}")
     public ClassResponse getClass(@PathVariable String classId) {
