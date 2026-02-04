@@ -242,7 +242,7 @@ export function ClassesPage() {
                   <TableCell>{c.time}</TableCell>
                   <TableCell>{c.days}</TableCell>
                   <TableCell className="text-right">
-                    {/* View button – routing comes later */}
+                    {/* View button – */}
                     <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${c.id}`)}>
                       View
                 </Button>

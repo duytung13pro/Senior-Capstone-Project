@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
-import { DashboardLayout } from "@/components/dashboard-layout";
 
 interface Student {
   id: string;
@@ -29,7 +28,8 @@ interface Student {
 }
 
 // Fetch when the dialog is opened
-export function RemoveStudentButton() {
+export function RemoveStudentButton({classId,onSuccess,}: {classId: string; onSuccess: () => void;}) 
+{
 
   const [open, setOpen] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
@@ -50,7 +50,7 @@ export function RemoveStudentButton() {
       return;
     }
     // Send the request to get all students
-    fetch(`http://localhost:8080/api/users/students`)
+    fetch(`http://localhost:8080/api/classes/${classId}/in-class-students`)
       .then((res) => res.json())
       .then((data) => {
         setStudents(data); 
@@ -63,14 +63,13 @@ export function RemoveStudentButton() {
   }, [open]);
 
   const handleRemoveStudent = async () => {
-    const classId = "697832b48818c014a3756bcc";
     if (!selectedStudent) return;
 
     const res = await fetch("http://localhost:8080/api/classes/remove-student", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        classId,
+        classId, // Comes from parent who call it
         studentEmail: selectedStudent
       }),
     });
@@ -79,12 +78,13 @@ export function RemoveStudentButton() {
       return;
     }
   
-    console.log("Remove student successfully");
-  
+    if (res.ok) {
+      onSuccess();     // notify parent
+      setOpen(false);  // close dialog
+    }  
   };
 
   return (
-    <DashboardLayout>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button>
@@ -125,7 +125,6 @@ export function RemoveStudentButton() {
           </Button>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
   );
 }
 

@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.main.backend.dto.AddStudentRequest;
+import com.main.backend.dto.AllStudentResponse;
 import com.main.backend.dto.ClassResponse;
 import com.main.backend.dto.CreateClassRequest;
 import com.main.backend.model.Class;
@@ -127,6 +128,52 @@ public class ClassController {
 
     return new ClassResponse(c);
 }
+
+// Find students who have not enrolled in classs {classId} yet
+@GetMapping("/{classId}/not-in-class-students")
+    public List<AllStudentResponse> getStudentNotInClass(@PathVariable String classId) 
+        {
+            // Find class
+            Class c = classRepository.findById(classId)
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+            
+            // Find students
+            List<String> enrolledStudentIds = c.getStudentIds();
+
+            return userRepository.findAll().stream()
+                .filter(user -> user.getRole() == Role.STUDENT)
+                .filter(user -> !enrolledStudentIds.contains(user.getId()))
+                .map(user -> new AllStudentResponse(
+                    user.getId(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail()
+                ))
+                .toList();
+        }
+    @GetMapping("/{classId}/in-class-students")
+    public List<AllStudentResponse> getStudentsInClass(@PathVariable String classId) 
+    {
+        // Get the class
+        Class c = classRepository.findById(classId)
+            .orElseThrow(() -> new RuntimeException("Class not found"));
+
+        // 2. Get enrolled student IDs
+        List<String> studentIds = c.getStudentIds();
+
+        // 3. Fetch users by IDs and map to response
+        return userRepository.findAllById(studentIds).stream()
+            .filter(user -> user.getRole() == Role.STUDENT)
+            .map(user -> new AllStudentResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
+            ))
+            .toList();
+    }
+
+
 
 
 }

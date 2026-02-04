@@ -19,8 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
-import { DashboardLayout } from "@/components/dashboard-layout";
-
 interface Student {
   id: string;
   firstName: string;
@@ -29,7 +27,8 @@ interface Student {
 }
 
 // Fetch when the dialog is opened
-export function AddStudentButton() {
+export function AddStudentButton({classId,onSuccess,}: {classId: string; onSuccess: () => void;}) 
+{
 
   const [open, setOpen] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
@@ -50,7 +49,7 @@ export function AddStudentButton() {
       return;
     }
     // Send the request to get all students
-    fetch(`http://localhost:8080/api/users/students`)
+    fetch(`http://localhost:8080/api/classes/${classId}/not-in-class-students`)
       .then((res) => res.json())
       .then((data) => {
         setStudents(data); 
@@ -63,15 +62,13 @@ export function AddStudentButton() {
   }, [open]);
 
   const handleAddStudent = async () => {
-    console.log("Student added successfully");
-    const classId = "697832b48818c014a3756bcc";
     if (!selectedStudent) return;
 
     const res = await fetch("http://localhost:8080/api/classes/add-student", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        classId,
+        classId, // This value comes from the parent
         studentEmail: selectedStudent
       }),
     });
@@ -80,7 +77,11 @@ export function AddStudentButton() {
       return;
     }
   
-    console.log("Student added successfully");
+    if (res.ok) {
+      onSuccess();     // notify parent
+      setOpen(false);  // close dialog
+    }
+    
   
   };
 
