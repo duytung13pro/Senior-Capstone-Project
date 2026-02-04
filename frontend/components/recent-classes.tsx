@@ -75,7 +75,7 @@ export function RecentClasses() {
                 <TableCell>{classItem.level}</TableCell>
                 <TableCell>{classItem.time}</TableCell>
                 <TableCell>{classItem.days}</TableCell>
-                <TableCell>{classItem.getStudentCount ?? 0}</TableCell>
+                <TableCell>{classItem.studentIds.length ?? 0}</TableCell>
                 <TableCell className="text-right">
                 <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${classItem.id}`)}>
                   View
