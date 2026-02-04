@@ -129,6 +129,21 @@ public class ClassController {
     return new ClassResponse(c);
 }
 
+    private List<Class> getTeacherClasses(String teacherId) 
+    {
+        return classRepository.findByTeacherId(teacherId);
+    }
+    @GetMapping("/student-count")
+    public int getStudentCount(@RequestParam String teacherId) 
+    {
+
+    return getTeacherClasses(teacherId)
+        .stream()
+        .flatMap(c -> c.getStudentIds().stream())
+        .collect(Collectors.toSet()) // remove duplicates
+        .size();
+    }
+
 // Find students who have not enrolled in classs {classId} yet
 @GetMapping("/{classId}/not-in-class-students")
     public List<AllStudentResponse> getStudentNotInClass(@PathVariable String classId) 

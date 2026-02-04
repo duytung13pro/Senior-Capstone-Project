@@ -16,10 +16,21 @@ import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import {useEffect, useState} from "react";
 export function DashboardPage() {
   const [activeClassCount, setActiveClassCount] = useState<number>(0);
-  useEffect(() => {
-    const teacherId = localStorage.getItem("userId");
-    if (!teacherId) return;
-  
+  const [classCountLoading, setActiveClassCountLoading] = useState(true);
+  const [activeStudentCount, setActiveStudentCount] = useState<number>(0);
+  const [studentCountLoading, setStudentCountLoading] = useState(true);
+  const teacherId = localStorage.getItem("userId");
+
+  if (!teacherId) return;
+  const fetchStudentCount = async () => {
+    setStudentCountLoading(true);
+    const res = await fetch(`http://localhost:8080/api/classes/student-count?teacherId=${teacherId}`);
+    const data = await res.json();
+    setActiveStudentCount(data);
+    setStudentCountLoading(false);
+  };
+
+  const fetchClassCount = async () => {
     fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch classes");
@@ -28,10 +39,17 @@ export function DashboardPage() {
       .then(data => {
         // data is an array of classes
         setActiveClassCount(data.length);
+        setActiveClassCountLoading(false);
       })
       .catch(err => {
         console.error("Failed to load active classes", err);
+        setActiveClassCountLoading(false);
       });
+  };  
+  useEffect(() => {
+
+    fetchClassCount();
+    fetchStudentCount();
   }, []);
   return (
     <div className="flex flex-col gap-4">
@@ -69,7 +87,7 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">42</div>
+                <div className="text-2xl font-bold">{classCountLoading ? "—" : activeClassCount}</div>
               </CardContent>
             </Card>
             <Card>
