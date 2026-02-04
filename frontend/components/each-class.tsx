@@ -41,20 +41,16 @@ interface ClassDetail {
   studentIds: string[];
 }
 
-const fetchClass = async () => {
-  setLoading(true);
-  const res = await fetch(`http://localhost:8080/api/classes/${classId}`);
-  const data = await res.json();
-  setClassData(data);
-  setLoading(false);
-};
 export function EachClass() {
   const { classId } = useParams();
   const router = useRouter();
 
   const [classData, setClassData] = useState<ClassDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [studentLoading, setStudentLoading] = useState(true);
 
+  const [students, setStudents] = useState<Student[]>([]);
+  // Update class
   const fetchClass = async () => {
     setLoading(true);
     const res = await fetch(`http://localhost:8080/api/classes/${classId}`);
@@ -63,11 +59,24 @@ export function EachClass() {
     setLoading(false);
   };
 
+  // Update StudentInfo
+  const fetchStudents = async () => {
+    setStudentLoading(true);
+    const res = await fetch(`http://localhost:8080/api/classes/${classId}/in-class-students`);
+    const data = await res.json();
+    console.log("students response:", data);
+    console.log("isArray:", Array.isArray(data));
+    setStudents(data);
+    setStudentLoading(false);
+
+  };
+  
   useEffect(() => {
     fetchClass();
+    fetchStudents()
   }, [classId]);
 
-  if (loading) {
+  if (loading || studentLoading) {
     return (
       <DashboardLayout>
         <div className="p-6">Loading class...</div>
@@ -103,9 +112,8 @@ export function EachClass() {
 
           {/* Right side actions */}
           <div className="flex gap-2">
-          <AddStudentButton classId={classData.id} onSuccess={fetchClass}/>
-          <RemoveStudentButton classId={classData.id} onSuccess={fetchClass}/>
-
+          <AddStudentButton classId={classData.id} onSuccess={() => {fetchClass();fetchStudents();}}/>
+          <RemoveStudentButton classId={classData.id} onSuccess={() => {fetchClass();fetchStudents();}}/>
           </div>
         </div>
 
@@ -127,7 +135,7 @@ export function EachClass() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Students</span>
-                <span>{classData.studentIds.length}</span>
+                <span>{students.length}</span>
               </div>
             </CardContent>
           </Card>
@@ -170,14 +178,14 @@ export function EachClass() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {classData.studentIds.length === 0 ? (
+                      {students.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={2} className="text-center">
                             No students enrolled.
                           </TableCell>
                         </TableRow>
                       ) : (
-                        classData.studentIds.map((student) => (
+                        students.map((student) => (
                           <TableRow key={student.id}>
                             <TableCell>
                               {student.firstName} {student.lastName}
