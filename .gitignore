@@ -19,3 +19,6 @@ target/
 .env
 application-local.yml
 *.zip
+
+#database
+.db-mongodb/
