@@ -8,7 +8,8 @@ COPY backend/ ./backend/
 COPY backend/.m2 ./backend/.m2 
 
 # Run Maven from the root using the specific path
-RUN mvn -s backend/.m2/settings.xml clean package -DskipTests -f backend/pom.xml
+# RUN mvn -s backend/.m2/settings.xml clean package -DskipTests -f backend/pom.xml
+RUN mvn clean package -DskipTests -f backend/pom.xml
 # Stage 2: Run
 FROM eclipse-temurin:17-jre-alpine AS backend
 

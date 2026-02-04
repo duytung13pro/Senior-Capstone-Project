@@ -7,7 +7,7 @@
   "service": "backend-dev",
   "runServices": ["backend-dev"],
   "shutdownAction": "none",
-  "workspaceFolder": "/workspaces/little-startup",
+  "workspaceFolder": "/workspaces/senior-project",
   "customizations": {
     "vscode": {
       "settings": {
