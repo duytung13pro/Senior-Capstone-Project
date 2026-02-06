@@ -135,8 +135,7 @@ public class ClassController {
     }
     @GetMapping("/student-count")
     public int getStudentCount(@RequestParam String teacherId) 
-    {
-
+    {        
     return getTeacherClasses(teacherId)
         .stream()
         .flatMap(c -> c.getStudentIds().stream())

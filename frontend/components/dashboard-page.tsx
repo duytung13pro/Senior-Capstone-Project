@@ -19,10 +19,11 @@ export function DashboardPage() {
   const [classCountLoading, setActiveClassCountLoading] = useState(true);
   const [activeStudentCount, setActiveStudentCount] = useState<number>(0);
   const [studentCountLoading, setStudentCountLoading] = useState(true);
-  const teacherId = localStorage.getItem("userId");
 
-  if (!teacherId) return;
   const fetchStudentCount = async () => {
+    const teacherId = localStorage.getItem("userId");
+
+    if (!teacherId) return;
     setStudentCountLoading(true);
     const res = await fetch(`http://localhost:8080/api/classes/student-count?teacherId=${teacherId}`);
     const data = await res.json();
@@ -31,6 +32,9 @@ export function DashboardPage() {
   };
 
   const fetchClassCount = async () => {
+    const teacherId = localStorage.getItem("userId");
+
+    if (!teacherId) return;
     fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch classes");
@@ -87,7 +91,7 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{classCountLoading ? "—" : activeClassCount}</div>
+                <div className="text-2xl font-bold">{studentCountLoading ? "—" : activeStudentCount}</div>
               </CardContent>
             </Card>
             <Card>
