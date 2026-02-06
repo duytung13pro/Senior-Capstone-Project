@@ -114,6 +114,9 @@ export function EachClass() {
           <div className="flex gap-2">
           <AddStudentButton classId={classData.id} onSuccess={() => {fetchClass();fetchStudents();}}/>
           <RemoveStudentButton classId={classData.id} onSuccess={() => {fetchClass();fetchStudents();}}/>
+          <Button variant="outline" onClick={() => router.push(`/tutor-fe/classes/${classData.id}/assignments`)}>
+            Assignments
+          </Button>
           </div>
         </div>
 
