@@ -140,9 +140,6 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">
-                  +3 since yesterday
-                </p>
               </CardContent>
             </Card>
             <Card>
