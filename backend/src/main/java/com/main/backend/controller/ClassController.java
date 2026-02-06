@@ -1,5 +1,7 @@
 package com.main.backend.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,10 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import com.main.backend.dto.AddStudentRequest;
 import com.main.backend.dto.AllStudentResponse;
 import com.main.backend.dto.ClassResponse;
+import com.main.backend.dto.CreateAssignmentRequest;
+import com.main.backend.dto.CreateAssignmentRespond;
 import com.main.backend.dto.CreateClassRequest;
+import com.main.backend.model.Assignment;
 import com.main.backend.model.Class;
 import com.main.backend.model.Role;
 import com.main.backend.model.User;
+import com.main.backend.repository.AssignmentRepository;
 import com.main.backend.repository.ClassRepository;
 import com.main.backend.repository.UserRepository;
 
@@ -23,10 +29,12 @@ public class ClassController {
 
     private final ClassRepository classRepository;
     private final UserRepository userRepository;
+    private final AssignmentRepository assignmentRepository;
 
-    public ClassController(ClassRepository classRepository, UserRepository userRepository) {
+    public ClassController(ClassRepository classRepository, UserRepository userRepository, AssignmentRepository assignmentRepository) {
         this.userRepository = userRepository;
         this.classRepository = classRepository;
+        this.assignmentRepository = assignmentRepository;
     }    
     @PostMapping("/create")
     public ResponseEntity<?> createClass(@RequestBody CreateClassRequest req) {
@@ -187,7 +195,32 @@ public class ClassController {
             .toList();
     }
 
+    // Create an assignment for class {classId}
+    @PostMapping("/{classId}/create-assignment")
+    public ResponseEntity<CreateAssignmentRespond> createAssignment(@PathVariable String classId,  @RequestBody CreateAssignmentRequest req) 
+    {
+        Assignment assignment = new Assignment();
+        assignment.setClassId(classId);
+        assignment.setTitle(req.getTitle());
+        assignment.setDescription(req.getDescription());
+        assignment.setDeadline(LocalDateTime.parse(req.getDeadline()).atZone(ZoneId.systemDefault())
+        .toInstant()
+);
+
+        assignment.setMaxScore(req.getMaxScore());
+
+        assignmentRepository.save(assignment);
+
+        // Get the class
+        // 2. Get enrolled student IDs
+        return ResponseEntity.ok(new CreateAssignmentRespond(assignment));
 
 
+    }    // Create an assignment for class {classId}
+    @GetMapping("/{classId}/assignments")
+    public List<Assignment> getAssignments(@PathVariable String classId) 
+    {
+        return assignmentRepository.findByClassId(classId);
 
+    }
 }
