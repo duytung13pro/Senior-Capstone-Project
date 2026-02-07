@@ -223,4 +223,16 @@ public class ClassController {
         return assignmentRepository.findByClassId(classId);
 
     }
+
+    // Get all classes (student course catalog)
+    @GetMapping("/all")
+    public List<ClassResponse> getAllClasses() 
+    {
+        return classRepository
+            .findAll()
+            .stream()
+            .map(ClassResponse::new)
+            .collect(Collectors.toList());
+    }
+
 }
