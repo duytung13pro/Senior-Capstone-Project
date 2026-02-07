@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
+
 interface Student {
   id: string;
   firstName: string;
@@ -27,7 +28,7 @@ interface Student {
 }
 
 // Fetch when the dialog is opened
-export function AddStudentButton({classId,onSuccess,}: {classId: string; onSuccess: () => void;}) 
+export function RemoveStudentButton({classId,onSuccess,}: {classId: string; onSuccess: () => void;}) 
 {
 
   const [open, setOpen] = useState(false);
@@ -49,7 +50,7 @@ export function AddStudentButton({classId,onSuccess,}: {classId: string; onSucce
       return;
     }
     // Send the request to get all students
-    fetch(`http://localhost:8080/api/classes/${classId}/not-in-class-students`)
+    fetch(`http://localhost:8080/api/classes/${classId}/in-class-students`)
       .then((res) => res.json())
       .then((data) => {
         setStudents(data); 
@@ -61,28 +62,26 @@ export function AddStudentButton({classId,onSuccess,}: {classId: string; onSucce
       });
   }, [open]);
 
-  const handleAddStudent = async () => {
+  const handleRemoveStudent = async () => {
     if (!selectedStudent) return;
 
-    const res = await fetch("http://localhost:8080/api/classes/add-student", {
+    const res = await fetch("http://localhost:8080/api/classes/remove-student", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        classId, // This value comes from the parent
+        classId, // Comes from parent who call it
         studentEmail: selectedStudent
       }),
     });
     if (!res.ok) {
-      console.error("Failed to add student");
+      console.error("Failed to remove student");
       return;
     }
   
     if (res.ok) {
       onSuccess();     // notify parent
       setOpen(false);  // close dialog
-    }
-    
-  
+    }  
   };
 
   return (
@@ -90,17 +89,17 @@ export function AddStudentButton({classId,onSuccess,}: {classId: string; onSucce
         <DialogTrigger asChild>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Student
+            Remove Student
           </Button>
         </DialogTrigger>
 
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Student to Class</DialogTitle>
+            <DialogTitle>Remove a student from a class</DialogTitle>
           </DialogHeader>
 
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading students...</p>
+            <p className="text-sm text-muted-foreground">Removing students...</p>
           ) : (
             <Select onValueChange={setSelectedStudent}>
               <SelectTrigger>
@@ -108,7 +107,7 @@ export function AddStudentButton({classId,onSuccess,}: {classId: string; onSucce
               </SelectTrigger>
 
               <SelectContent>
-                {students.map((student) => (
+                {students.map(student => (
                   <SelectItem key={student.id} value={student.email}>
                     {student.firstName} {student.lastName} — {student.email}
                   </SelectItem>
@@ -120,7 +119,7 @@ export function AddStudentButton({classId,onSuccess,}: {classId: string; onSucce
           <Button
             className="mt-4"
             disabled={!selectedStudent}
-            onClick= {handleAddStudent}
+            onClick= {handleRemoveStudent}
           >
             Confirm
           </Button>

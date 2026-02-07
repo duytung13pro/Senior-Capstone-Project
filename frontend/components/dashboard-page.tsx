@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,9 +13,48 @@ import { UpcomingAssignments } from "@/components/upcoming-assignments";
 import { StudentAttendance } from "@/components/student-attendance";
 import { RecentMessages } from "@/components/recent-messages";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
-import { ChevronRight } from "lucide-react";
-
+import {useEffect, useState} from "react";
 export function DashboardPage() {
+  const [activeClassCount, setActiveClassCount] = useState<number>(0);
+  const [classCountLoading, setActiveClassCountLoading] = useState(true);
+  const [activeStudentCount, setActiveStudentCount] = useState<number>(0);
+  const [studentCountLoading, setStudentCountLoading] = useState(true);
+
+  const fetchStudentCount = async () => {
+    const teacherId = localStorage.getItem("userId");
+
+    if (!teacherId) return;
+    setStudentCountLoading(true);
+    const res = await fetch(`http://localhost:8080/api/classes/student-count?teacherId=${teacherId}`);
+    const data = await res.json();
+    setActiveStudentCount(data);
+    setStudentCountLoading(false);
+  };
+
+  const fetchClassCount = async () => {
+    const teacherId = localStorage.getItem("userId");
+
+    if (!teacherId) return;
+    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch classes");
+        return res.json();
+      })
+      .then(data => {
+        // data is an array of classes
+        setActiveClassCount(data.length);
+        setActiveClassCountLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load active classes", err);
+        setActiveClassCountLoading(false);
+      });
+  };  
+  useEffect(() => {
+
+    fetchClassCount();
+    fetchStudentCount();
+  }, []);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -30,65 +67,142 @@ export function DashboardPage() {
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-4">
-          {/* Stats Cards Section */}
+          {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* ... (Keep your existing Stats Cards here) */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Students
+                </CardTitle>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  className="h-4 w-4 text-muted-foreground"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{studentCountLoading ? "—" : activeStudentCount}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Active Classes
+                </CardTitle>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  className="h-4 w-4 text-muted-foreground"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{activeClassCount}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Pending Assignments
+                </CardTitle>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  className="h-4 w-4 text-muted-foreground"
+                >
+                  <rect width="20" height="14" x="2" y="5" rx="2" />
+                  <path d="M2 10h20" />
+                </svg>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">12</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Unread Messages
+                </CardTitle>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  className="h-4 w-4 text-muted-foreground"
+                >
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">7</div>
+                <p className="text-xs text-muted-foreground">
+                  +2 since yesterday
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Recent Classes */}
+          {/* Recent Classes - Full Width Row */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle>Recent Classes</CardTitle>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/classes" className="flex items-center gap-1">
-                  View All <ChevronRight className="h-4 w-4" />
-                </Link>
-              </Button>
             </CardHeader>
             <CardContent>
               <RecentClasses />
             </CardContent>
           </Card>
 
-          {/* Upcoming Assignments */}
+          {/* Upcoming Assignments - Full Width Row */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle>Upcoming Assignments</CardTitle>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/assignments" className="flex items-center gap-1">
-                  View All <ChevronRight className="h-4 w-4" />
-                </Link>
-              </Button>
             </CardHeader>
             <CardContent>
               <UpcomingAssignments />
             </CardContent>
           </Card>
 
-          {/* Attendance and Messages Row */}
+          {/* Student Attendance and Recent Messages */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-12">
-            <Link
-              href="/attendance"
-              className="col-span-2 lg:col-span-4 block no-underline"
-            >
-              <Card className="h-full cursor-pointer hover:bg-accent/50 transition-colors">
-                <CardHeader>
-                  <CardTitle>Student Attendance</CardTitle>
-                  <CardDescription>Last 7 days</CardDescription>
-                  {/* View button removed here */}
-                </CardHeader>
-                <CardContent>
-                  <StudentAttendance />
-                </CardContent>
-              </Card>
-            </Link>
-
+            <Card className="col-span-2 lg:col-span-4">
+              <CardHeader>
+                <CardTitle>Student Attendance</CardTitle>
+                <CardDescription>Last 7 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <StudentAttendance />
+              </CardContent>
+            </Card>
             <Card className="col-span-2 lg:col-span-8">
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader>
                 <CardTitle>Recent Messages</CardTitle>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/messages">Open Inbox</Link>
-                </Button>
               </CardHeader>
               <CardContent>
                 <RecentMessages />
@@ -96,36 +210,21 @@ export function DashboardPage() {
             </Card>
           </div>
         </TabsContent>
-
         <TabsContent value="analytics" className="space-y-4">
           <AnalyticsDashboard />
         </TabsContent>
-
         <TabsContent value="reports" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>System Reports</CardTitle>
+              <CardTitle>Reports</CardTitle>
               <CardDescription>
-                Select a report type to generate detailed data.
+                Generate and view reports about student performance.
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <Button variant="outline" className="h-24 flex-col gap-2" asChild>
-                <Link href="/reports/attendance">
-                  <span className="font-bold text-lg">Attendance Report</span>
-                  <span className="text-xs text-muted-foreground text-center">
-                    Export weekly or monthly student logs
-                  </span>
-                </Link>
-              </Button>
-              <Button variant="outline" className="h-24 flex-col gap-2" asChild>
-                <Link href="/reports/performance">
-                  <span className="font-bold text-lg">Performance Report</span>
-                  <span className="text-xs text-muted-foreground text-center">
-                    Analyze student grades and progress
-                  </span>
-                </Link>
-              </Button>
+            <CardContent className="h-[400px] flex items-center justify-center">
+              <p className="text-muted-foreground">
+                Reports content coming soon
+              </p>
             </CardContent>
           </Card>
         </TabsContent>

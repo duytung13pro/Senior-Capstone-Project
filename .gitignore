@@ -20,9 +20,5 @@ target/
 application-local.yml
 *.zip
 
-<<<<<<< HEAD
-.db-mongodb
-=======
 #database
 .db-mongodb/
->>>>>>> Teacher-student#1
