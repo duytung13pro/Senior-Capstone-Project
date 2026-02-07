@@ -54,12 +54,15 @@ export default function Home() {
             <Button className="w-full md:w-64 h-12 text-base font-medium bg-green-600 hover:bg-green-700 shadow-md">
               {t.hero.freeTrial}
             </Button>
-            <Button
-              variant="outline"
-              className="w-full md:w-64 h-12 text-base font-medium border-2 border-amber-500 text-amber-600 bg-amber-50 hover:bg-amber-100 shadow-sm"
-            >
-              {t.hero.viewCourses}
-            </Button>
+            <Link href="/all-courses">
+              <Button
+                variant="outline"
+                className="w-full md:w-64 h-12 text-base font-medium border-2 border-amber-500 text-amber-600 bg-amber-50 hover:bg-amber-100 shadow-sm"
+              >
+                {t.hero.viewCourses}
+              </Button>
+          </Link>
+
             <Button
               variant="outline"
               className="w-full md:w-64 h-12 text-base font-medium border-2 border-orange-500 text-orange-600 bg-orange-50 hover:bg-orange-100 shadow-sm"
