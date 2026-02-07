@@ -1,0 +1,67 @@
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27018:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    volumes:
+      - ./.db-mongodb:/data/db:delegated
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: backend
+    ports:
+      - 8008:8080
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: . # This allows Docker to see the 'frontend' folder
+      dockerfile: frontend/Dockerfile
+      target: frontend 
+    ports:
+      - 3000:3000
+    working_dir: /frontend
+    command: npm start
+    depends_on:
+      - backend
+
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: frontend
+    volumes:
+      - .:/workspaces/senior-project # Matches your devcontainer.json
+      - ./.devcontainer/frontend/.vscode:/workspaces/senior-project/.vscode
+      - /home/${HOST_USERNAME}/.ssh:/home/senior/.ssh:cached
+      - /home/${HOST_USERNAME}/.config:/home/senior/.config:cached
+    ports:
+      - 3001:3000
+    command: sleep infinity
+    depends_on:
+      - backend
+      - mongo
+
+  backend-dev:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      target: backend
+    volumes:
+      - .:/workspaces/senior-project
+      - ./.devcontainer/backend/.vscode:/workspaces/senior-project/.vscode
+    ports:
+      - 8080:8080
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    command: sleep infinity
+    depends_on:
+      - mongo
