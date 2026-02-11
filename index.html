@@ -3,279 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Manual - Project JQK </title>
+    <title>Copilot Instructions - Project Rewood</title>
     <style>
-        /* General Styles */
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #ecf0f1;
-            --text-color: #333;
-            --code-bg: #f4f4f4;
+            --primary-bg: #ffffff;
+            --sidebar-bg: #f8f9fa;
+            --accent-color: #0070f3; /* Next.js Blue */
+            --spring-green: #6db33f; /* Spring Boot Green */
+            --text-main: #171717;
+            --text-muted: #666666;
+            --border: #eaeaea;
+            --code-bg: #fafafa;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
             line-height: 1.6;
-            color: var(--text-color);
+            color: var(--text-main);
             margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
+            display: flex;
         }
 
-        /* Layout */
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Navigation */
+        /* Sidebar Navigation */
         nav {
-            background-color: var(--primary-color);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            width: 280px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            padding: 2rem 1rem;
+            overflow-y: auto;
         }
-        
+
+        nav h2 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+        }
+
         nav ul {
             list-style: none;
             padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        nav li {
-            margin: 0 15px;
         }
 
         nav a {
-            color: white;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-transform: uppercase;
+            color: var(--text-main);
+            display: block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
         nav a:hover {
-            color: var(--secondary-color);
+            background: rgba(0,0,0,0.05);
+            color: var(--accent-color);
         }
 
-        /* Typography */
-        h1, h2, h3 {
-            color: var(--primary-color);
+        /* Main Content */
+        main {
+            margin-left: 280px;
+            max-width: 900px;
+            padding: 3rem 4rem;
         }
 
-        h1 {
-            border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 10px;
-            margin-top: 0;
+        header {
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
         }
 
-        h2 {
-            margin-top: 40px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.8rem; margin-top: 3rem; color: var(--accent-color); }
+        h3 { font-size: 1.3rem; margin-top: 2rem; }
 
-        /* Components */
-        .note {
-            background-color: #e8f4fd;
-            border-left: 5px solid var(--secondary-color);
-            padding: 15px;
-            margin: 20px 0;
-            font-size: 0.95rem;
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 5px;
+            background: #eee;
         }
+        .badge-frontend { background: #e0f2fe; color: #0369a1; }
+        .badge-backend { background: #f0fdf4; color: #166534; }
 
         code {
-            background-color: var(--code-bg);
-            padding: 2px 5px;
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
             border-radius: 4px;
-            font-family: "Courier New", Courier, monospace;
-            color: #d63031;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
         }
 
         pre {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-
-        /* Screenshot Placeholders */
-        .screenshot-placeholder {
-            width: 100%;
-            height: 300px;
-            background-color: #e0e0e0;
-            border: 2px dashed #999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            margin: 20px 0;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1.5rem;
             border-radius: 8px;
-            font-style: italic;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 20px;
-            color: #777;
-            font-size: 0.8rem;
-            border-top: 1px solid #eee;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
         }
 
-        /* FAQ Section */
-        details {
-            margin-bottom: 10px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
         }
 
-        summary {
-            cursor: pointer;
-            font-weight: bold;
-            color: var(--secondary-color);
+        th { background: var(--sidebar-bg); font-weight: 600; }
+
+        .callout {
+            padding: 1.25rem;
+            border-left: 4px solid var(--accent-color);
+            background: #f0f7ff;
+            margin: 2rem 0;
         }
 
-        details[open] summary {
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            color: var(--primary-color);
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
-            .container { padding: 20px; }
-            nav li { margin: 5px 10px; }
+        @media (max-width: 768px) {
+            nav { display: none; }
+            main { margin-left: 0; padding: 2rem; }
         }
     </style>
 </head>
 <body>
 
     <nav>
+        <h2>Project Rewood</h2>
         <ul>
-            <li><a href="#intro">Introduction</a></li>
-            <li><a href="#install">Installation</a></li>
-            <li><a href="#usage">User Guide</a></li>
-            <li><a href="#glossary">Glossary</a></li>
-            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#workflows">Workflows</a></li>
+            <li><a href="#rbac">Role-Based Access</a></li>
+            <li><a href="#reference">File Reference</a></li>
         </ul>
     </nav>
 
-    <div class="container">
-        
-        <header id="intro">
-            <h1>Project JQK User Manual</h1>
-            <p><strong>Version:</strong> 1.0 | <strong>Last Updated:</strong> 2/10/2026</p>
-            <p>Welcome to the official user guide for <strong>Project JQK </strong>. This document is designed to help you install, configure, and utilize the system effectively. Whether you are a first-time user or an administrator, this guide covers the essential steps to get you up and running.</p>
-            
-            <div class="note">
-                <strong>Note:</strong> This project was created as a Senior Capstone requirement. If you encounter bugs not listed in the FAQ, please contact the developer at nguye2kh@mail.uc.edu .
-            </div>
+    <main>
+        <header id="overview">
+            <h1>Copilot Instructions</h1>
+            <p style="color: var(--text-muted);">Version 2.0 | Rewood Full-Stack Chinese Learning Platform</p>
         </header>
 
-        <section id="install">
-            <h2>1. Installation & Setup</h2>
-            <p>Before using Project JQK, ensure your device meets the following requirements:</p>
+        <section>
+            <p><strong>Project Rewood</strong> is a specialized platform with role-based portals (Student, Teacher, Admin, Center) built using Next.js 15 and Spring Boot 3.4.4.</p>
+            
+            <div class="callout">
+                <strong>Critical:</strong> This documentation is optimized for AI Pair Programming (Copilot). Always reference the <code>middleware.ts</code> when modifying dashboard routes.
+            </div>
+        </section>
+
+        <section id="architecture">
+            <h2>Architecture Stack</h2>
+            
+            <h3><span class="badge badge-frontend">Frontend</span> Next.js 15</h3>
             <ul>
-                <li>Operating System: Windows 10+, macOS, or Linux</li>
-                <li>Internet Connection: Required for initial setup</li>
-                <li>Browser: Chrome, Firefox, or Edge (latest versions)</li>
+                <li><strong>Path:</strong> <code>/frontend</code></li>
+                <li><strong>Patterns:</strong> App Router, Route Groups <code>(student)</code>, Server Actions.</li>
+                <li><strong>Styling:</strong> TailwindCSS + Radix UI components.</li>
             </ul>
 
-            <h3>Step-by-Step Installation</h3>
-            <ol>
-                <li>Download the latest release package from the repository.</li>
-                <li>Unzip the file to your desired folder.</li>
-                <li>Open the terminal (or command prompt) and navigate to the folder.</li>
-                <li>Run the following command to install dependencies:</li>
-            </ol>
-            
-            <pre>npm install
-npm start</pre>
-
-            <p>Once the installation is complete, you should see a success message indicating the server is running on <code>localhost:3000</code>.</p>
-        </section>
-
-        <section id="usage">
-            <h2>2. How to Use the System</h2>
-            
-            <h3>The Dashboard</h3>
-            <p>Upon logging in, you will be greeted by the main dashboard. This is the central hub where you can view your data analytics and manage settings.</p>
-
-            <div class="screenshot-placeholder">
-                [Insert Screenshot: Main Dashboard View Here]<br>
-                <em>(To add image: &lt;img src="path-to-image.jpg" width="100%"&gt;)</em>
-            </div>
-
-            <h3>Creating a New Entry</h3>
-            <p>To add new data to the system, follow these steps:</p>
-            <ol>
-                <li>Click the large blue <strong>"New Entry"</strong> button in the top right corner.</li>
-                <li>Fill out the required fields marked with an asterisk (*).</li>
-                <li>Click <strong>Submit</strong>.</li>
-            </ol>
-
-            <div class="screenshot-placeholder">
-                [Insert Screenshot: New Entry Modal Window]
-            </div>
-
-            <div class="note">
-                <strong>Tip:</strong> You can save your progress as a draft if you aren't ready to publish immediately.
-            </div>
-        </section>
-
-        <section id="glossary">
-            <h2>3. Glossary of Terms</h2>
-            <p>Here are definitions for technical terms used within this system:</p>
+            <h3><span class="badge badge-backend">Backend</span> Spring Boot 3.4.4</h3>
             <ul>
-                <li><strong>API (Application Programming Interface):</strong> The tool that allows our system to talk to the database.</li>
-                <li><strong>CRUD:</strong> An acronym standing for Create, Read, Update, and Delete. These are the four basic actions you can perform on data in this app.</li>
-                <li><strong>Latency:</strong> The slight delay that may occur between clicking a button and seeing the result.</li>
+                <li><strong>Path:</strong> <code>/backend</code></li>
+                <li><strong>Port:</strong> 8080 (API endpoints under <code>/api/*</code>).</li>
+                <li><strong>Persistence:</strong> MongoDB (Port 27018 via Docker).</li>
             </ul>
         </section>
 
-        <section id="faq">
-            <h2>4. Frequently Asked Questions (FAQ)</h2>
-            
-            <details>
-                <summary>I forgot my password. How do I reset it?</summary>
-                <p>Currently, password reset must be done by an administrator. Please contact support to request a temporary password.</p>
-            </details>
+        <section id="workflows">
+            <h2>Development Workflows</h2>
+            <h3>Local Start-up</h3>
+            <p>To run the services independently for debugging:</p>
+            <pre># Terminal 1 (Backend)
+cd backend && mvn spring-boot:run
 
-            <details>
-                <summary>Why is the "Submit" button greyed out?</summary>
-                <p>The submit button is disabled until all required fields (marked with red asterisks) are filled out correctly.</p>
-            </details>
+# Terminal 2 (Frontend)
+cd frontend && npm run dev</pre>
 
-            <details>
-                <summary>Does this work on mobile phones?</summary>
-                <p>Yes! The layout is responsive, though for complex data entry, we recommend using a tablet or desktop computer.</p>
-            </details>
-
-            <details>
-                <summary>I see a "404 Error" message. What does that mean?</summary>
-                <p>This means the page you are looking for cannot be found. Try refreshing your browser or returning to the dashboard.</p>
-            </details>
+            <h3>Docker Orchestration</h3>
+            <p>To build the entire stack (DB, API, Web):</p>
+            <pre>docker-compose up --build</pre>
         </section>
 
-        <footer>
-            <p>&copy; 2024 Project JQK/ Jay Dao - Khai Nguyen - Quoc Huynh. All rights reserved.</p>
-            <p>Senior Capstone Project | University of Cincinnati</p>
+        <section id="rbac">
+            <h2>Role-Based Access Control (RBAC)</h2>
+            <p>The system enforces security via a hybrid cookie/session approach:</p>
+            <ol>
+                <li><strong>Login:</strong> Backend returns role (TEACHER, STUDENT, etc.).</li>
+                <li><strong>Enforcement:</strong> <code>middleware.ts</code> reads <code>userRole</code> cookie and redirects unauthorized role-group access.</li>
+                <li><strong>Server Actions:</strong> Uses <code>requireRole()</code> from <code>/lib/auth/rbac.ts</code> to gate database operations.</li>
+            </ol>
+        </section>
+
+        <section id="reference">
+            <h2>Important File Reference</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>File / Directory</th>
+                        <th>Responsibility</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>frontend/middleware.ts</code></td>
+                        <td>Route protection & role enforcement</td>
+                    </tr>
+                    <tr>
+                        <td><code>frontend/lib/models/</code></td>
+                        <td>Mongoose schemas (Frontend)</td>
+                    </tr>
+                    <tr>
+                        <td><code>backend/src/.../model/</code></td>
+                        <td>Spring Documents (Backend)</td>
+                    </tr>
+                    <tr>
+                        <td><code>frontend/app/actions/</code></td>
+                        <td>Server Actions for DB logic</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="callout" style="border-color: #f59e0b; background: #fffbeb;">
+            <strong>Warning:</strong> Password hashing (BCrypt) is currently a [TODO]. Do not deploy to production with current plaintext storage in <code>User.java</code>.
+        </div>
+
+        <footer style="margin-top: 5rem; font-size: 0.8rem; color: #999;">
+            © 2026 Project Rewood | Jay Dao - Khai Nguyen - Quoc Huynh. Senior Capstone | University of Cincinnati.
         </footer>
+    </main>
 
-    </div>
 </body>
 </html>
