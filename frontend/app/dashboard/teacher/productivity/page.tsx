@@ -6,7 +6,7 @@ export default function Productivity() {
   return (
     <DashboardLayout>
       <Suspense fallback={<div className="p-8">Loading productivity tools...</div>}>
-              <ProductivityToolsPage />
+        <ProductivityToolsPage />
       </Suspense>
     </DashboardLayout>
   )

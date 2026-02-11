@@ -27,6 +27,13 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // Skip static optimization for role-based pages during build
+  // This prevents prerender errors when pages require runtime data/authentication
+  staticPageGenerationTimeout: 0,
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 5,
+  },
 }
 
 if (userConfig) {

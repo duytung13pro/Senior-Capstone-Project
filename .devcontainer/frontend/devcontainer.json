@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "frontend-senior-dev",
   "initializeCommand": "bash ops.sh init",
   "postCreateCommand": "bash .devcontainer/frontend/post-create.sh",
   "postAttachCommand": "bash .devcontainer/frontend/post-attach.sh",
@@ -16,7 +16,7 @@
         "editor.fontSize": 12,
         "terminal.integrated.fontFamily": "Hurmit Nerd Font",
         "terminal.integrated.fontSize": 12,
-        "workbench.colorTheme": "Default Dark Modern",
+        "workbench.colorTheme": "Best Themes - Catppuccin",
         "editor.formatOnSave": true,
         "editor.insertSpaces": true,
         "[typescriptreact]": {
@@ -52,7 +52,8 @@
         "ms-azuretools.vscode-containers",
         "tamasfe.even-better-toml",
         "bradlc.vscode-tailwindcss",
-        "usernamehw.errorlens"
+        "usernamehw.errorlens",
+        "lakshits11.best-themes-redefined"
       ]
     }
   }

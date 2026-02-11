@@ -2,6 +2,8 @@ import { Suspense } from "react" // 1. Import Suspense
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { StudentProgressPage } from "@/components/student-progress-page"
 
+export const dynamic = 'force-dynamic';
+
 export default function StudentProgress() {
   return (
     <DashboardLayout>

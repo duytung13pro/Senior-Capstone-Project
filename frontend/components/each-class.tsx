@@ -100,7 +100,7 @@ export function EachClass() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => router.push("/tutor-fe/classes")}
+              onClick={() => router.push("/dashboard/teacher/classes")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
@@ -114,7 +114,7 @@ export function EachClass() {
           <div className="flex gap-2">
           <AddStudentButton classId={classData.id} onSuccess={() => {fetchClass();fetchStudents();}}/>
           <RemoveStudentButton classId={classData.id} onSuccess={() => {fetchClass();fetchStudents();}}/>
-          <Button variant="outline" onClick={() => router.push(`/tutor-fe/classes/${classData.id}/assignments`)}>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/teacher/classes/${classData.id}/assignments`)}>
             Assignments
           </Button>
           </div>

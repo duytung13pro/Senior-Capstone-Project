@@ -22,3 +22,5 @@ application-local.yml
 
 #database
 .db-mongodb/
+
+.zsh_history

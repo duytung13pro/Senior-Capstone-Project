@@ -1,7 +1,6 @@
 import { Suspense } from "react" // 1. Import Suspense
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { AnnouncementsPage } from "@/components/announcements-page"
-import { AssignmentsPage } from "@/components/assignments-page"
 
 export default function Announcements() {
   return (

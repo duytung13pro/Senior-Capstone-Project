@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -25,7 +27,7 @@ interface Assignment {
   createdAt: string;
 }
 
-export default function AssignmentsPage() {
+export function AssignmentsPage() {
   const { classId } = useParams<{ classId: string }>();
 
   const [assignments, setAssignments] = useState<Assignment[]>([]);

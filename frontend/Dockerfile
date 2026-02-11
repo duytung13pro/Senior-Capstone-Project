@@ -24,8 +24,10 @@ COPY --from=deps /frontend/node_modules ./node_modules
 #Provide variables for build process
 ENV MONGODB_URI=mongodb://admin:admin@mongo:27017/senior_project?authSource=admin
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
-RUN npm run build
+# Build with verbose logging to help debug prerendering issues
+RUN npm run build 2>&1 | tee build.log
 
 # Stage 3: Production runner (The 'frontend' target for Compose)
 FROM node:22.14.0-alpine AS frontend
@@ -35,7 +37,6 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy only the compiled output to keep the image small
-COPY --from=builder /frontend/public ./public
 COPY --from=builder /frontend/.next ./.next
 COPY --from=builder /frontend/node_modules ./node_modules
 COPY --from=builder /frontend/package.json ./package.json
