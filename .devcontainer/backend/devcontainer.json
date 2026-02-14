@@ -8,6 +8,13 @@
   "runServices": ["backend-dev"],
   "shutdownAction": "none",
   "workspaceFolder": "/workspaces/senior-project",
+  "forwardPorts": [8080, 27018],
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/senior/.ssh,type=bind,consistency=cached"
+  ],
+  "remoteEnv": {
+    "GIT_EDITOR": "code --wait"
+  },
   "customizations": {
     "vscode": {
       "settings": {
@@ -16,6 +23,7 @@
         "editor.fontSize": 12,
         "terminal.integrated.fontFamily": "Hurmit Nerd Font",
         "terminal.integrated.fontSize": 12,
+        "terminal.integrated.defaultProfile.linux": "zsh",
         "workbench.colorTheme": "Default Dark Modern",
         "java.configuration.updateBuildConfiguration": "automatic",
         "java.compile.nullAnalysis.mode": "automatic",

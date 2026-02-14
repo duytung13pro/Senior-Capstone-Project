@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
 
-export function LoginPage() {
+export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,13 +18,13 @@ export function LoginPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  
+
   // Handle User request when trying to login.
   // Request will be sent to localhosts:8080/api/login at localhosts:8080
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
       const res = await fetch("http://localhost:8080/api/login", {
         method: "POST",
@@ -41,16 +41,16 @@ export function LoginPage() {
 
       // Handle non-2xx responses
       if (!res.ok) {
-        throw new Error(errorData.message || "Login failed");
+        throw new Error(data.message || "Login failed");
       }
-  
+
       // If backend returns user / token info
       console.log("Login success:", data);
-      
+
       // save role so layouts can read it
       localStorage.setItem("role", data.role);
       localStorage.setItem("userId", data.id);
-      
+
       // Redirect after successful login
       if (data.role === "TEACHER") {
         router.push("/dashboard");
@@ -61,14 +61,13 @@ export function LoginPage() {
       }
     } catch (error) {
       console.error("Login failed:", error);
-  
+
       // show error to user
       alert(error instanceof Error ? error.message : "Login failed");
     } finally {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-[#FFF8E9] flex flex-col">
@@ -83,12 +82,17 @@ export function LoginPage() {
               height={100}
               className="w-20 h-20"
             />
-            <span className="text-green-800 font-bold text-lg">Rewood Project</span>
+            <span className="text-green-800 font-bold text-lg">
+              Rewood Project
+            </span>
           </div>
         </Link>
         <div className="text-sm text-gray-600">
           Chưa có tài khoản?{" "}
-          <Link href="/register" className="text-green-600 font-medium hover:underline">
+          <Link
+            href="/register"
+            className="text-green-600 font-medium hover:underline"
+          >
             Đăng ký ngay
           </Link>
         </div>
@@ -100,14 +104,21 @@ export function LoginPage() {
           {/* Login Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">Đăng nhập</h1>
-              <p className="text-gray-600">Chào mừng trở lại! Vui lòng nhập thông tin của bạn</p>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                Đăng nhập
+              </h1>
+              <p className="text-gray-600">
+                Chào mừng trở lại! Vui lòng nhập thông tin của bạn
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Email hoặc số điện thoại
                   </label>
                   <Input
@@ -123,7 +134,10 @@ export function LoginPage() {
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Mật khẩu
                     </label>
                     <Link
@@ -149,7 +163,9 @@ export function LoginPage() {
                 <Checkbox
                   id="remember"
                   checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    setRememberMe(checked as boolean)
+                  }
                 />
                 <label
                   htmlFor="remember"
@@ -179,7 +195,9 @@ export function LoginPage() {
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Hoặc đăng nhập với</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    Hoặc đăng nhập với
+                  </span>
                 </div>
               </div>
 
@@ -265,7 +283,10 @@ export function LoginPage() {
             </p>
           </div>
           <div className="flex gap-4">
-            <Link href="https://www.facebook.com/" className="text-gray-600 hover:text-blue-600">
+            <Link
+              href="https://www.facebook.com/"
+              className="text-gray-600 hover:text-blue-600"
+            >
               <Image
                 src="/icon-facebook.svg"
                 alt="Facebook"
@@ -274,7 +295,10 @@ export function LoginPage() {
                 className="w-5 h-5"
               />
             </Link>
-            <Link href="https://www.instagram.com/" className="text-gray-600 hover:text-pink-600">
+            <Link
+              href="https://www.instagram.com/"
+              className="text-gray-600 hover:text-pink-600"
+            >
               <Image
                 src="/icon-instagram.svg"
                 alt="Instagram"
@@ -283,7 +307,10 @@ export function LoginPage() {
                 className="w-5 h-5"
               />
             </Link>
-            <Link href="https://github.com/" className="text-gray-600 hover:text-gray-800">
+            <Link
+              href="https://github.com/"
+              className="text-gray-600 hover:text-gray-800"
+            >
               <Image
                 src="/icon-github.svg"
                 alt="GitHub"

@@ -8,6 +8,14 @@
   "runServices": ["frontend-dev"],
   "shutdownAction": "none",
   "workspaceFolder": "/workspaces/senior-project",
+  "forwardPorts": [3000, 8080],
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/senior/.ssh,type=bind,consistency=cached"
+  ],
+  "remoteEnv": {
+    "NODE_ENV": "development",
+    "GIT_EDITOR": "code --wait"
+  },
   "customizations": {
     "vscode": {
       "settings": {
@@ -16,7 +24,8 @@
         "editor.fontSize": 12,
         "terminal.integrated.fontFamily": "Hurmit Nerd Font",
         "terminal.integrated.fontSize": 12,
-        "workbench.colorTheme": "Best Themes - Catppuccin",
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "workbench.colorTheme": "Best Themes - Github Black",
         "editor.formatOnSave": true,
         "editor.insertSpaces": true,
         "[typescriptreact]": {
@@ -46,6 +55,7 @@
         "eriklynd.json-tools",
         "esbenp.prettier-vscode",
         "github.copilot",
+        "github.copilot-chat",
         "github.vscode-pull-request-github",
         "mechatroner.rainbow-csv",
         "medo64.render-crlf",

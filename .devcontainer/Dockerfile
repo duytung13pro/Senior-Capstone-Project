@@ -55,11 +55,11 @@ RUN sudo npm install n -g
 RUN sudo n stable
 RUN sudo npm update npm -g
 
-# # neo-vim and dependencies
-# RUN sudo add-apt-repository ppa:neovim-ppa/unstable -y
-# RUN sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y \
-#     make gcc ripgrep unzip git xclip neovim fonts-noto-color-emoji
-# # for configurations, recommended checkout: https://github.com/nvim-lua/kickstart.nvim
+# neo-vim and dependencies
+RUN sudo add-apt-repository ppa:neovim-ppa/unstable -y
+RUN sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y \
+    make gcc ripgrep unzip git xclip neovim fonts-noto-color-emoji
+# for configurations, recommended checkout: https://github.com/nvim-lua/kickstart.nvim
 
 # lsp, linters, formatters
 RUN . /home/${USER_NAME}/.local/bin/env && uv tool install ruff

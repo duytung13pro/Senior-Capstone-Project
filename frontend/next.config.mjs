@@ -1,3 +1,7 @@
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)))
 let userConfig = undefined
 try {
   // try to import ESM first
@@ -27,12 +31,17 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-  // Skip static optimization for role-based pages during build
-  // This prevents prerender errors when pages require runtime data/authentication
-  staticPageGenerationTimeout: 0,
+  outputFileTracingRoot: projectRoot,
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 5,
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "@": projectRoot,
+    }
+    return config
   },
 }
 

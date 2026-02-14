@@ -173,3 +173,41 @@ Each portal has **completely different** navigation menus:
 3. **Develop admin portal** - Full implementation with user/center management
 4. **Develop center portal** - Franchise-level analytics and reporting
 5. **Test role switching** - Verify users can't access other roles' pages
+
+## Main Page
+1. http://localhost:3001/ - Landing page
+## Auth Pages
+1. http://localhost:3001/auth/login - Login page
+2. http://localhost:3001/auth/forgot-password - Forgot password
+## Student Dashboard
+Set localStorage: localStorage.setItem('role', 'STUDENT')
+
+1. http://localhost:3001/dashboard/student - Main student dashboard
+2. http://localhost:3001/dashboard/student/analytics - Analytics/Progress tracking
+3. http://localhost:3001/dashboard/student/my-classes - My classes
+4. http://localhost:3001/dashboard/student/assignments - Assignments
+5. http://localhost:3001/dashboard/student/grades - Grades
+6. http://localhost:3001/dashboard/student/progress - Progress
+7. http://localhost:3001/dashboard/student/resources - Resources
+8. http://localhost:3001/dashboard/student/messages - Messages
+9. http://localhost:3001/dashboard/student/schedule - Schedule
+10. http://localhost:3001/dashboard/student/profile - Profile
+## Teacher Dashboard
+Set localStorage: localStorage.setItem('role', 'TEACHER')
+
+1. http://localhost:3001/dashboard/teacher - Main teacher dashboard
+2. http://localhost:3001/dashboard/teacher/classes - Classes
+3. http://localhost:3001/dashboard/teacher/student-progress - Student progress
+4. http://localhost:3001/dashboard/teacher/lesson-plans - Lesson plans
+5. http://localhost:3001/dashboard/teacher/announcements - Announcements
+6. http://localhost:3001/dashboard/teacher/messages - Messages
+7. http://localhost:3001/dashboard/teacher/attendance - Attendance
+8. http://localhost:3001/dashboard/teacher/profile - Profile
+## Admin Dashboard
+Set localStorage: localStorage.setItem('role', 'ADMIN')
+
+1. http://localhost:3001/dashboard/admin - Admin dashboard (may be WIP)
+## Center Dashboard
+Set localStorage: localStorage.setItem('role', 'CENTER')
+
+1. http://localhost:3001/dashboard/center - Center dashboard (may be WIP)

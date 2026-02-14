@@ -1,4 +1,4 @@
-# Docker Build Prerender Fixes
+`# Docker Build Prerender Fixes
 
 ## Problem Statement
 After migrating from a Standard Monorepo architecture to a Containerized Micro-Frontend Architecture, the Docker build was failing with prerendering errors on role-based dashboard pages, specifically:

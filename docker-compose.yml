@@ -2,7 +2,7 @@ services:
   mongo:
     image: mongo:latest
     ports:
-      - 27018:27017
+      - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
@@ -15,7 +15,7 @@ services:
       dockerfile: backend/Dockerfile
       target: backend
     ports:
-      - 8008:8080
+      - 8080:8080
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
@@ -44,7 +44,7 @@ services:
       - /home/${HOST_USERNAME}/.ssh:/home/senior/.ssh:cached
       - /home/${HOST_USERNAME}/.config:/home/senior/.config:cached
     ports:
-      - 3001:3000
+      - 3000:3000
     command: sleep infinity
     depends_on:
       - backend
