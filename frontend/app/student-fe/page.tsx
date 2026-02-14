@@ -1,8 +1,10 @@
-export default function StudentDashboard() {
-    return (
-      <div className="p-6">
-        <h1 className="text-2xl font-bold">Student Dashboard</h1>
-      </div>
-    );
-  }
-  
+import { DashboardLayout } from "@/components/dashboard-layout"
+import { StudentDashboardPage } from "@/components/student-dashboard-page"
+
+export default function Home() {
+  return (
+    <DashboardLayout>
+      <StudentDashboardPage />
+    </DashboardLayout>
+  )
+}

@@ -29,15 +29,23 @@ import {useEffect, useState} from "react";
 export function Header() {
   const { setTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [profile, setProfile] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null);
+  const [banner,setBanner] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
   const router = useRouter();
   // Fetch data from backend to load personal info
   useEffect(() => {
     const userId = localStorage.getItem("userId")
+    const role = localStorage.getItem("role")
     if (!userId) return
-  
+
+    if (role == "STUDENT"){
+      setBanner("Student") 
+    }
+    else if (role == "TEACHER"){
+      setBanner("Teacher") 
+    }
+
     fetch(`http://localhost:8080/api/users/${userId}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to load profile")
@@ -67,7 +75,7 @@ export function Header() {
         <div className="ml-2 pl-16">
           <Link href="/tutor-fe" className="flex items-center gap-2 font-semibold">
             <span className="text-xl text-primary">汉语学习</span>
-            <span className="text-lg">Teacher Portal</span>
+            <span className="text-lg">{banner} Portal</span>
           </Link>
         </div>
         <div className="ml-auto flex items-center gap-4">
