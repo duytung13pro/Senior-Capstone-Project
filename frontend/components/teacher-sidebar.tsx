@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-export function Sidebar() {
+export function TeacherSidebar() {
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
   const [pinned, setPinned] = useState(false);
