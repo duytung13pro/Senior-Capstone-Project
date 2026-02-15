@@ -1,11 +1,16 @@
 package com.main.backend.controller;
 
+import com.main.backend.dto.AddStudentRequest;
 import com.main.backend.dto.AllStudentResponse;
+import com.main.backend.dto.StudentEnrolledClassResponse;
 import com.main.backend.dto.UpdateProfileRequest;
 import com.main.backend.dto.UserProfileResponse;
 import com.main.backend.model.Role;
 import com.main.backend.model.User;
+import com.main.backend.repository.AssignmentRepository;
+import com.main.backend.repository.ClassRepository;
 import com.main.backend.repository.UserRepository;
+import com.main.backend.model.Class;
 
 
 import java.io.IOException;
@@ -13,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +30,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final ClassRepository classRepository;
+    private final AssignmentRepository assignmentRepository;
 
-    public UserController(UserRepository userRepository) {
+    public UserController(ClassRepository classRepository, UserRepository userRepository, AssignmentRepository assignmentRepository) {
         this.userRepository = userRepository;
+        this.classRepository = classRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     @GetMapping("/{id}")
@@ -110,6 +120,29 @@ public class UserController {
                 user.getEmail()
             ))
             .toList();
+    }
+
+    // Endpoint to receive a list of classId that students are enrolled in
+    @GetMapping("/{id}/enrolled-course")
+    public List<String> getUserEnrolledClass(@PathVariable String id) {
+        List<String> enrolledClassId = classRepository.findAll().stream().filter(c -> c.getStudentIds().contains(id))
+                                        .map(c -> c.getId()).toList();
+        return enrolledClassId;
+    }
+
+    // API endpoint when  a student enroll to class
+    @PostMapping("/{studentid}/{classId}/enroll")
+    public ResponseEntity<?> enrollStudents(@PathVariable String studentId, @PathVariable String classId) {
+        // Get the class
+        
+        Class c = classRepository.findById(classId).orElseThrow(() -> new RuntimeException("Class not found"));
+        
+        // Check if student is not enroll yet
+        c.getStudentIds().add(studentId);
+            classRepository.save(c);
+            
+
+        return ResponseEntity.ok().build();
     }
 
 

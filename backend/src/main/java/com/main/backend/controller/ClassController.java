@@ -93,7 +93,6 @@ public class ClassController {
 
         return ResponseEntity.ok().build();
     }
-
     // API endpoint to remove a student from a class
     @PostMapping("/remove-student")
     public ResponseEntity<?> removeStudentFromClass(@RequestBody AddStudentRequest req) {
