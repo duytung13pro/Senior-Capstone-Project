@@ -38,7 +38,7 @@ export function StudentSidebar() {
     { name: "Resources", href: "/tutor-fe/resources", icon: FolderOpen },
     { name: "Productivity Tools", href: "/tutor-fe/productivity", icon: Tool },
     { name: "Profile & Settings", href: "/tutor-fe/profile", icon: Settings },
-    { name: "Enroll in Classes", href: "student-fe/all-courses", icon: BookOpen}
+    { name: "Enroll in Classes", href: "/student-fe/all-courses", icon: BookOpen}
   ];
 
   return (
