@@ -53,8 +53,8 @@ public class ClassController {
     }
 
     // API endpoint to see all of a teacher's classes
-    @GetMapping("/my")
-    public List<ClassResponse> getMyClasses(@RequestParam String teacherId) {
+    @GetMapping("/teacher/{teacherId}")
+    public List<ClassResponse> getMyClasses(@PathVariable String teacherId) {
 
         return classRepository
             .findByTeacherId(teacherId)
@@ -63,6 +63,16 @@ public class ClassController {
             .collect(Collectors.toList());
     }
 
+    // API endpoint to see all of a teacher's classes
+    @GetMapping("/student/{studentId}")
+    public List<ClassResponse> getStudentClasses(@PathVariable String studentId) {
+
+        return classRepository
+            .findByStudentIdsContains(studentId)
+            .stream()
+            .map(ClassResponse::new)
+            .collect(Collectors.toList());
+    }
     // API endpoint when adding a student to class
     @PostMapping("/add-student")
     public ResponseEntity<?> addStudentToClass(@RequestBody AddStudentRequest req) {
@@ -202,9 +212,7 @@ public class ClassController {
         assignment.setClassId(classId);
         assignment.setTitle(req.getTitle());
         assignment.setDescription(req.getDescription());
-        assignment.setDeadline(LocalDateTime.parse(req.getDeadline()).atZone(ZoneId.systemDefault())
-        .toInstant()
-);
+        assignment.setDeadline(LocalDateTime.parse(req.getDeadline()).atZone(ZoneId.systemDefault()).toInstant());
 
         assignment.setMaxScore(req.getMaxScore());
 

@@ -11,4 +11,7 @@ public interface ClassRepository extends MongoRepository<Class, String> {
 
     // Find all classes owned by a specific teacher
     List<Class> findByTeacherId(String teacherId);
+    // Find all classes a student enroll in
+    List<Class> findByStudentIdsContains(String studentId);
+
 }
