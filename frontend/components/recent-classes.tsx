@@ -18,13 +18,27 @@ export function RecentClasses() {
   const [recentClasses, setRecentClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
+
 
   // Fetch real data
   useEffect(() => {
     const teacherId = localStorage.getItem("userId");
+    const role = localStorage.getItem("role");
+    setRole(role);
+    var endpoint = ``;
+    // Set endpoint based on role
+    if(role == "STUDENT"){
+      endpoint = `http://localhost:8080/api/classes/student/${teacherId}`
+    }
+    else{
+      endpoint = `http://localhost:8080/api/classes/teacher/${teacherId}`
+    }
+
+    console.log(endpoint);
     if (!teacherId) return;
 
-    fetch(`http://localhost:8080/api/classes/teacher/${teacherId}`)
+    fetch(endpoint)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch classes");
         return res.json();
@@ -64,7 +78,7 @@ export function RecentClasses() {
               <TableHead>Level</TableHead>
               <TableHead>Time</TableHead>
               <TableHead>Days</TableHead>
-              <TableHead>Students</TableHead>
+              {role === "TEACHER" && (<TableHead>Students</TableHead>)}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -75,7 +89,7 @@ export function RecentClasses() {
                 <TableCell>{classItem.level}</TableCell>
                 <TableCell>{classItem.time}</TableCell>
                 <TableCell>{classItem.days}</TableCell>
-                <TableCell>{classItem.studentIds.length ?? 0}</TableCell>
+                {role === "TEACHER" && (<TableCell>{classItem.studentIds.length ?? 0}</TableCell>)}
                 <TableCell className="text-right">
                 <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${classItem.id}`)}>
                   View
