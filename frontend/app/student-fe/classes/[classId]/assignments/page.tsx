@@ -101,55 +101,7 @@ export default function AssignmentsPage() {
           </Button>
 
           <h1 className="text-3xl font-bold">Assignments</h1>
-        </div>
-
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New Assignment
-            </Button>
-          </DialogTrigger>
-
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Assignment</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <Input
-                placeholder="Assignment title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-
-              <Textarea
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-
-              <Input
-                type="datetime-local"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-              />
-
-              <Input
-                type="number"
-                value={maxScore}
-                onChange={(e) => setMaxScore(Number(e.target.value))}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button onClick={handleCreateAssignment} disabled={creating}>
-                {creating ? "Creating..." : "Create"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        </div>        
       </div>
 
       {loading ? (
