@@ -41,7 +41,7 @@ interface ClassDetail {
   studentIds: string[];
 }
 
-export function EachClass() {
+export function StudentEachClass() {
   const { classId } = useParams();
   const router = useRouter();
 

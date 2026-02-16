@@ -206,7 +206,7 @@ export function StudentClassesPage() {
                   <TableCell>{c.days}</TableCell>
                   <TableCell className="text-right">
                     {/* View button – */}
-                    <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${c.id}`)}>
+                    <Button variant="ghost" size="sm" onClick={() => router.push(`/student-fe/classes/${c.id}`)}>
                       View
                 </Button>
 

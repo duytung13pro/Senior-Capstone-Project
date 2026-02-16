@@ -91,9 +91,9 @@ export function RecentClasses() {
                 <TableCell>{classItem.days}</TableCell>
                 {role === "TEACHER" && (<TableCell>{classItem.studentIds.length ?? 0}</TableCell>)}
                 <TableCell className="text-right">
-                <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${classItem.id}`)}>
-                  View
-                </Button>
+                {role ==="TEACHER" && (<Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${classItem.id}`)}>View</Button>)}
+                {role ==="STUDENT" && (<Button variant="ghost" size="sm" onClick={() => router.push(`/student-fe/classes/${classItem.id}`)}>View</Button>)}
+
                 </TableCell>
               </TableRow>
             ))}
