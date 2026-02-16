@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function ClassesPage() {
+export function TeacherClassesPage() {
   const router = useRouter();
 
 
@@ -72,7 +72,7 @@ export function ClassesPage() {
       return;
     }
     // Send the request
-    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
+    fetch(`http://localhost:8080/api/classes/teacher/${teacherId}`)
       .then((res) => res.json())
       .then((data) => {
         setClasses(data); 
