@@ -27,8 +27,8 @@ export function StudentSidebar() {
   const [pinned, setPinned] = useState(false);
 
   const navigation = [
-    { name: "Dashboard", href: "/tutor-fe", icon: Home },
-    { name: "My Classes", href: "/tutor-fe/classes", icon: BookOpen },
+    { name: "Dashboard", href: "/student-fe", icon: Home },
+    { name: "My Classes", href: "/student-fe/classes", icon: BookOpen },
     { name: "Lesson Plans", href: "/tutor-fe/lesson-plans", icon: BookMarked },
     { name: "Assignments", href: "/tutor-fe/assignments", icon: FileText },
     { name: "Student Progress", href: "/tutor-fe/student-progress", icon: BarChart },
