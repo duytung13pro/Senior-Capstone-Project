@@ -1,7 +1,6 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams,useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +25,8 @@ interface Assignment {
 }
 
 export default function AssignmentsPage() {
+  const router = useRouter();
+
   const { classId } = useParams<{ classId: string }>();
 
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -91,7 +92,17 @@ export default function AssignmentsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Assignments</h1>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/tutor-fe/classes/${classId}`)}
+          >
+            Back
+          </Button>
+
+          <h1 className="text-3xl font-bold">Assignments</h1>
+        </div>
+
 
         <Dialog>
           <DialogTrigger asChild>
@@ -153,16 +164,28 @@ export default function AssignmentsPage() {
                 <th className="p-3 text-left">Title</th>
                 <th className="p-3 text-left">Description</th>
                 <th className="p-3 text-left">Deadline</th>
+                <th className="p-3 text-left">Action</th>
+
             </tr>
             </thead>
             <tbody>
             {assignments.map((assignment) => (
-                <tr key={assignment.id} className="border-t hover:bg-muted/50">
-                <td className="p-3 font-medium">{assignment.title}</td>
+              <tr key={assignment.id} className="border-t hover:bg-muted/50">
+              <td className="p-3 font-medium">{assignment.title}</td>
+              <td className="p-3">{assignment.description}</td>
+              <td className="p-3">{assignment.deadline}</td>
 
-                <td className="p-3">{assignment.description}</td>
-                <td className="p-3">{assignment.deadline}</td>
-                </tr>
+              <td className="p-3">
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    router.push(`/tutor-fe/classes/${classId}/assignments/${assignment.id}`)}
+                >
+                  View
+                </Button>
+              </td>
+            </tr>
+
             ))}
             </tbody>
         </table>

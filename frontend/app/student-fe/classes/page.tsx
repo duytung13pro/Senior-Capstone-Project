@@ -1,10 +1,10 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
-import { TeacherClassesPage } from "@/components/teacher-classes-page"
+import { StudentClassesPage } from "@/components/student-classes-page"
 
 export default function Classes() {
   return (
     <DashboardLayout>
-      <TeacherClassesPage />
+      <StudentClassesPage />
     </DashboardLayout>
   )
 }
