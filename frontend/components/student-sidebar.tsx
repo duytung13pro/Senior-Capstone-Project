@@ -29,13 +29,9 @@ export function StudentSidebar() {
   const navigation = [
     { name: "Dashboard", href: "/student-fe", icon: Home },
     { name: "My Classes", href: "/student-fe/classes", icon: BookOpen },
-    { name: "Lesson Plans", href: "/tutor-fe/lesson-plans", icon: BookMarked },
     { name: "Assignments", href: "/tutor-fe/assignments", icon: FileText },
-    { name: "Student Progress", href: "/tutor-fe/student-progress", icon: BarChart },
-    { name: "Attendance", href: "/tutor-fe/attendance", icon: Calendar },
     { name: "Messages", href: "/tutor-fe/messages", icon: MessageSquare },
     { name: "Announcements", href: "/tutor-fe/announcements", icon: Megaphone },
-    { name: "Resources", href: "/tutor-fe/resources", icon: FolderOpen },
     { name: "Productivity Tools", href: "/tutor-fe/productivity", icon: Tool },
     { name: "Profile & Settings", href: "/tutor-fe/profile", icon: Settings },
     { name: "Enroll in Classes", href: "/student-fe/all-courses", icon: BookOpen}
