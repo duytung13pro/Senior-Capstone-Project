@@ -31,15 +31,15 @@ RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools
 RUN git clone --depth=1 \
     https://github.com/romkatv/powerlevel10k.git \
     ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-COPY --chown=${USER_NAME}:${USER_NAME} .p10k.zsh /home/${USER_NAME}/.p10k.zsh
-COPY --chown=${USER_NAME}:${USER_NAME} gitstatusd-linux-x86_64 \
+COPY --chown=${USER_NAME}:${USER_NAME} .devcontainer/.p10k.zsh /home/${USER_NAME}/.p10k.zsh
+COPY --chown=${USER_NAME}:${USER_NAME} .devcontainer/gitstatusd-linux-x86_64 \
     /home/${USER_NAME}/.cache/gitstatus/gitstatusd-linux-x86_64
 
 # gdu
 RUN sudo add-apt-repository ppa:daniel-milde/gdu -y
 RUN sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y \
     gdu
-COPY --chown=${USER_NAME}:${USER_NAME} .gdu.yaml /home/${USER_NAME}/.gdu.yaml
+COPY --chown=${USER_NAME}:${USER_NAME} .devcontainer/.gdu.yaml /home/${USER_NAME}/.gdu.yaml
 
 # rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
@@ -77,8 +77,8 @@ RUN sudo apt-get update && sudo apt-get install -y mongodb-mongosh
 # FROM database AS example
 # COPY --chown=${USER_NAME}:${USER_NAME} example/.zshrc /home/${USER_NAME}/.zshrc
 
-# FROM database AS automation
-# COPY --chown=${USER_NAME}:${USER_NAME} automation/.zshrc /home/${USER_NAME}/.zshrc
+FROM database AS automation
+COPY --chown=${USER_NAME}:${USER_NAME} .devcontainer/automation/.zshrc /home/${USER_NAME}/.zshrc
 
 RUN sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y pipx
 
@@ -91,11 +91,16 @@ RUN pipx install playwright &&  \
 RUN sudo apt-get remove -y pipx
 
 FROM database AS backend
-COPY --chown=${USER_NAME}:${USER_NAME} backend/.zshrc /home/${USER_NAME}/.zshrc
+COPY --chown=${USER_NAME}:${USER_NAME} .devcontainer/backend/.zshrc /home/${USER_NAME}/.zshrc
 
 RUN sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install -y \
     openjdk-17-jdk \
     ffmpeg
 
 FROM base AS frontend
-COPY --chown=${USER_NAME}:${USER_NAME} frontend/.zshrc /home/${USER_NAME}/.zshrc
+
+# Ensure shell is properly set
+SHELL ["/usr/bin/zsh", "-c"]
+
+# Copy custom zshrc if it exists, otherwise zsh will use defaults
+COPY --chown=${USER_NAME}:${USER_NAME} .devcontainer/frontend/.zshrc /home/${USER_NAME}/.zshrc

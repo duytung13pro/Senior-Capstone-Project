@@ -3,4 +3,4 @@
 sh .devcontainer/post-create.sh
 
 # Copy the default configuration file to the backend resources directory
-cp .devcontainer/backend/little-config.secret.yml.default backend/src/main/resources/little-config.secret.yml
+cp .devcontainer/backend/senior-config.secret.yml.default backend/src/main/resources/senior-config.secret.yml

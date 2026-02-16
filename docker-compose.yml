@@ -15,7 +15,7 @@ services:
       dockerfile: backend/Dockerfile
       target: backend
     ports:
-      - 8080:8080
+      - 8008:8080
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
@@ -23,12 +23,14 @@ services:
 
   frontend:
     build:
-      context: . # This allows Docker to see the 'frontend' folder
-      dockerfile: frontend/Dockerfile
-      target: frontend 
+      context: frontend          # Now pointing just to the parent folder
+      dockerfile: Dockerfile     # The Dockerfile is now directly inside /frontend
     ports:
-      - 3000:3000
+      - 3000:3000                # You only need one port now!
     working_dir: /frontend
+    volumes:                     # (Highly Recommended) Mounts your code for hot-reloading
+      - ./frontend:/frontend
+      - /frontend/node_modules   # Prevents local node_modules from overwriting container's
     command: npm start
     depends_on:
       - backend
@@ -36,15 +38,15 @@ services:
   frontend-dev:
     build:
       context: .
-      dockerfile: frontend/Dockerfile
+      dockerfile: .devcontainer/Dockerfile
       target: frontend
     volumes:
-      - .:/workspaces/senior-project # Matches your devcontainer.json
-      - ./.devcontainer/frontend/.vscode:/workspaces/senior-project/.vscode
+      - .:/workspaces/senior-capstone-project # Matches your devcontainer.json
+      - ./.devcontainer/frontend/.vscode:/workspaces/senior-capstone-project/.vscode
       - /home/${HOST_USERNAME}/.ssh:/home/senior/.ssh:cached
       - /home/${HOST_USERNAME}/.config:/home/senior/.config:cached
     ports:
-      - 3000:3000
+      - 3001:3000
     command: sleep infinity
     depends_on:
       - backend
@@ -56,8 +58,8 @@ services:
       dockerfile: backend/Dockerfile
       target: backend
     volumes:
-      - .:/workspaces/senior-project
-      - ./.devcontainer/backend/.vscode:/workspaces/senior-project/.vscode
+      - .:/workspaces/senior-capstone-project
+      - ./.devcontainer/backend/.vscode:/workspaces/senior-capstone-project/.vscode
     ports:
       - 8080:8080
     environment:

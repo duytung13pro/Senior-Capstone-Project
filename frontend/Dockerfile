@@ -8,41 +8,48 @@ COPY frontend/package*.json ./
 RUN chown -R node:node /frontend
 USER node
 
-RUN npm install --legacy-peer-deps
+RUN npm ci --legacy-peer-deps
 
 # Stage 2: Build the application
 FROM node:22.14.0-alpine AS builder
 WORKDIR /frontend
-COPY --from=deps /frontend/node_modules ./node_modules
+COPY --from=deps --chown=node:node /frontend/node_modules ./node_modules
 # Copy all frontend source code from the subfolder
-COPY frontend/ . 
+COPY --chown=node:node frontend/ .
 
-# THEN copy the installed modules from the deps stage on top
-# This ensures Linux-specific binaries (like next) stay intact
-COPY --from=deps /frontend/node_modules ./node_modules
-
-#Provide variables for build process
+# #Provide variables for build process
+# Sets MongoDB connection string for build-time usage.
 ENV MONGODB_URI=mongodb://admin:admin@mongo:27017/senior_project?authSource=admin
+# Disables Next.js telemetry in this stage.
 ENV NEXT_TELEMETRY_DISABLED=1
+# Sets Node environment to production for the build.
 ENV NODE_ENV=production
 
-# Build with verbose logging to help debug prerendering issues
-RUN npm run build 2>&1 | tee build.log
+# Builds the Next.js app
+USER node
+RUN npm run build
 
 # Stage 3: Production runner (The 'frontend' target for Compose)
 FROM node:22.14.0-alpine AS frontend
 WORKDIR /frontend
 
+# Sets production mode for runtime.
 ENV NODE_ENV=production
+# Disables telemetry at runtime.
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy only the compiled output to keep the image small
-COPY --from=builder /frontend/.next ./.next
-COPY --from=builder /frontend/node_modules ./node_modules
-COPY --from=builder /frontend/package.json ./package.json
+# Copies built Next.js output.
+COPY --from=builder --chown=node:node /frontend/.next ./.next
+# Copies production dependencies.
+COPY --from=builder --chown=node:node /frontend/node_modules ./node_modules
+# Copies package.json for npm start
+COPY --from=builder --chown=node:node /frontend/package.json ./package.json
 
 # Install bash
 RUN apk add --no-cache bash
 
-EXPOSE 3000
+USER node
+
+EXPOSE 3001
 CMD ["npm", "start"]

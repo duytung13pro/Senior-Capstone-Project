@@ -7,7 +7,7 @@
   "service": "backend-dev",
   "runServices": ["backend-dev"],
   "shutdownAction": "none",
-  "workspaceFolder": "/workspaces/senior-project",
+  "workspaceFolder": "/workspaces/senior-capstone-project",
   "forwardPorts": [8080, 27018],
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/senior/.ssh,type=bind,consistency=cached"

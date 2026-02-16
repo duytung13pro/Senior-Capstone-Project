@@ -1,0 +1,99 @@
+{
+  "name": "automation",
+  "initializeCommand": "bash ops.sh init",
+  "postCreateCommand": "bash .devcontainer/automation/post-create.sh",
+  "postAttachCommand": "bash .devcontainer/automation/post-attach.sh",
+  "dockerComposeFile": "../../docker-compose.yml",
+  "service": "automation-dev",
+  "runServices": ["automation-dev"],
+  "shutdownAction": "none",
+  "workspaceFolder": "/workspaces/senior-capstone-project",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/Hermit.zip
+        "workbench.colorTheme": "Default Dark Modern",
+        "terminal.integrated.fontFamily": "Hurmit Nerd Font",
+        "terminal.integrated.fontSize": 12,
+        "terminal.integrated.cwd": "${workspaceFolder}/automation",
+        "editor.fontFamily": "Hurmit Nerd Font",
+        "editor.fontSize": 12,
+        "editor.formatOnSave": true,
+        "editor.insertSpaces": true,
+        "editor.inlayHints.enabled": "offUnlessPressed",
+        "editor.renderWhitespace": "all",
+        "code-eol.newlineCharacter": "¬",
+        "code-eol.returnCharacter": "¤",
+        "code-eol.crlfCharacter": "¤¬",
+        // docker
+        "[dockerfile]": {
+          "editor.defaultFormatter": "ms-azuretools.vscode-containers",
+          "editor.rulers": [120]
+        },
+        "[dockercompose]": {
+          "editor.defaultFormatter": "ms-azuretools.vscode-containers",
+          "editor.rulers": [120]
+        },
+        // python
+        "python.locator": "js",
+        "python.defaultInterpreterPath": "/home/senior/.uv/bin/python",
+        "ruff.interpreter": ["/home/senior/.uv/bin/python"],
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.rulers": [88]
+        },
+        // shellscript
+        "[shellscript]": {
+          "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode",
+          "editor.rulers": [120]
+        },
+        // json
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2
+        },
+        // yaml
+        "[yaml]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.tabSize": 2
+        },
+        "files.exclude": {
+          ".db-mongodb": true,
+          ".devcontainer/.p10k.zsh": true,
+          ".devcontainer/example": true,
+          ".devcontainer/backend": true,
+          ".devcontainer/frontend": true,
+          ".devcontainer/gitstatusd-linux-x86_64": true,
+          ".env": true,
+          ".gitmodules": true,
+          ".idx": true,
+          "backend": true,
+          "example": true,
+          "automation/**/__pycache__": true,
+          "automation/**/.pytest_cache": true,
+          "automation/uv.lock": true,
+          "frontend": true
+        },
+        "github.codespaces.devcontainerChangedNotificationStyle": "none"
+      },
+      "extensions": [
+        "charliermarsh.ruff",
+        "chekweitan.compare-view",
+        "cweijan.vscode-mysql-client2",
+        "eriklynd.json-tools",
+        "esbenp.prettier-vscode",
+        "github.copilot",
+        "jnoortheen.nix-ide",
+        "mads-hartmann.bash-ide-vscode",
+        "mechatroner.rainbow-csv",
+        "medo64.render-crlf",
+        "ms-azuretools.vscode-containers",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "tamasfe.even-better-toml",
+        "usernamehw.errorlens"
+      ]
+    }
+  }
+}

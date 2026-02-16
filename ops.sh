@@ -76,7 +76,7 @@ post_create() {
   container="senior-$service-1"
   printf "Running post-create script for %s...\n" "$service"
   if ! exe_aloud docker exec \
-    --workdir /workspaces/senior-project \
+    --workdir /workspaces/senior-capstone-project \
     "$container" \
     sh -c ".devcontainer/$context/post-create.sh; exit \$?" \
     &>".logs/post_create_$service.log"; then
@@ -93,7 +93,7 @@ post_attach() {
   container="senior-$service-1"
   printf "Running post-attach script for %s...\n" "$service"
   if ! exe_aloud docker exec \
-    --workdir /workspaces/senior-project \
+    --workdir /workspaces/senior-capstone-project \
     "$container" \
     sh -c ".devcontainer/$context/post-attach.sh; exit \$?" \
     &>".logs/post_attach_$service.log"; then
