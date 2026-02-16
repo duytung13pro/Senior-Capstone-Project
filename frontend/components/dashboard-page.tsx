@@ -32,10 +32,10 @@ export function DashboardPage() {
   };
 
   const fetchClassCount = async () => {
-    const teacherId = localStorage.getItem("userId");
-
-    if (!teacherId) return;
-    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+    
+    fetch(`http://localhost:8080/api/classes/teacher/${userId}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch classes");
         return res.json();

@@ -35,7 +35,7 @@ export function StudentDashboardPage() {
     const teacherId = localStorage.getItem("userId");
 
     if (!teacherId) return;
-    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
+    fetch(`http://localhost:8080/api/classes/student/${teacherId}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch classes");
         return res.json();
