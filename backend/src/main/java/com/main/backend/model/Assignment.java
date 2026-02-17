@@ -9,11 +9,12 @@ public class Assignment {
 
     private String title;
     private String description;
+    private String detail;
     private Instant deadline;
     private int maxScore;
 
     private Instant createdAt;
-
+    
     public Assignment() {}
 
     public String getId() {
@@ -71,4 +72,14 @@ public class Assignment {
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
+
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
+
 }

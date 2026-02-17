@@ -14,6 +14,8 @@ import com.main.backend.dto.ClassResponse;
 import com.main.backend.dto.CreateAssignmentRequest;
 import com.main.backend.dto.CreateAssignmentRespond;
 import com.main.backend.dto.CreateClassRequest;
+import com.main.backend.dto.UpdateDetailRequest;
+import com.main.backend.dto.UserProfileResponse;
 import com.main.backend.model.Assignment;
 import com.main.backend.model.Class;
 import com.main.backend.model.Role;
@@ -23,7 +25,7 @@ import com.main.backend.repository.ClassRepository;
 import com.main.backend.repository.UserRepository;
 
 @RestController
-@RequestMapping("/api/classes")
+@RequestMapping("/api/assignment")
 @CrossOrigin(origins = "http://localhost:3000")
 public class AssignmentController {
 
@@ -37,5 +39,24 @@ public class AssignmentController {
         this.assignmentRepository = assignmentRepository;
     }    
 
-    // API endpoint to View detail of an appointment
+    // API endpoint to View detail of an assignment
+    @GetMapping("/{assignmentid}")
+    public Assignment getClass(@PathVariable String assignmentid) 
+    {
+        Assignment assignment = assignmentRepository.findById(assignmentid).orElseThrow(() -> new RuntimeException("Class not found"));
+
+    return assignment;
+    }
+
+     // Create an assignment for class {classId}
+     @PutMapping("/{assignmentId}")
+     public String getAssignments(@PathVariable String assignmentId, @RequestBody UpdateDetailRequest RequestBody) 
+     {
+        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new RuntimeException("Assignment not found"));
+        assignment.setDetail(RequestBody.getDetail());
+        assignmentRepository.save(assignment);
+        return assignment.getDetail();
+
+     }
+
 }

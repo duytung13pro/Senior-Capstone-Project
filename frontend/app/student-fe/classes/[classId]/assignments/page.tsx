@@ -131,7 +131,7 @@ export default function AssignmentsPage() {
                 <Button
                   size="sm"
                   onClick={() =>
-                    router.push(`/tutor-fe/classes/${classId}/assignments/${assignment.id}`)}
+                    router.push(`/student-fe/classes/${classId}/assignments/${assignment.id}`)}
                 >
                   View
                 </Button>
