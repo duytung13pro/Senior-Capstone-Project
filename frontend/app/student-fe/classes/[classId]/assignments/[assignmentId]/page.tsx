@@ -144,13 +144,6 @@ export default function StudentAssignmentDetailPage() {
             {requirements !== originalDescription && (
               <span className="text-sm text-amber-600">Unsaved changes</span>
             )}
-            <Button 
-              onClick={handleSaveDescription} 
-              disabled={saving || requirements === originalDescription}
-              className="min-w-[80px]"
-            >
-              {saving ? "Saving..." : "Save"}
-            </Button>
           </div>
         </div>
 
@@ -159,51 +152,10 @@ export default function StudentAssignmentDetailPage() {
           value={requirements}
           onChange={(e) => setRequirements(e.target.value)}
           placeholder="Write assignment instructions, rubric, or details..."
+          readOnly
         />
 
       </div>
-
-      {/* Students Table */}
-      <div className="border rounded-lg">
-        <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold">Student Submissions</h2>
-        </div>
-
-        <table className="w-full text-sm">
-          <thead className="bg-muted">
-            <tr>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {students.length > 0 ? (
-              students.map((s) => (
-                <tr key={s.studentId} className="border-t hover:bg-muted/50">
-                  <td className="p-3 font-medium">{s.studentName}</td>
-                  <td className="p-3">{s.email}</td>
-                  <td className="p-3">
-                    {s.submitted ? (
-                      <Badge className="bg-green-500">Submitted</Badge>
-                    ) : (
-                      <Badge variant="destructive">Missing</Badge>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={3} className="p-6 text-center text-muted-foreground">
-                  No students found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
     </div>
   );
 }
