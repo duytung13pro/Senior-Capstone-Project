@@ -3,8 +3,13 @@ import { NextRequest, NextResponse } from 'next/server'
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
+  // Allow public pages
+  if (pathname === '/' || pathname.startsWith('/_next') || pathname.includes('/public')) {
+    return NextResponse.next()
+  }
+
   // Allow auth pages without checking session
-  if (pathname.startsWith('/auth') || pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password')) {
+  if (pathname.startsWith('/auth')) {
     return NextResponse.next()
   }
 
@@ -13,18 +18,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // For dashboard routes, check user role (this would come from session/database)
+  // For dashboard routes, check user role from cookies
   if (pathname.startsWith('/dashboard')) {
-    // Get user role from session/cookie
-    const userRole = request.cookies.get('userRole')?.value
+    // Get user authentication from cookies
+    const userId = request.cookies.get('userId')?.value
+    const userRole = request.cookies.get('userRole')?.value?.toLowerCase()
 
-    if (!userRole) {
-      // No user role, redirect to login
-      return NextResponse.redirect(new URL('/login', request.url))
+    if (!userId || !userRole) {
+      // No user session, redirect to login
+      return NextResponse.redirect(new URL('/auth/login', request.url))
     }
 
     // Check if user is accessing the correct role-based path
-    if (userRole === 'teacher' && !pathname.includes('teacher')) {
+    if ((userRole === 'instructor' || userRole === 'teacher') && !pathname.includes('teacher')) {
       return NextResponse.redirect(new URL('/dashboard/teacher', request.url))
     }
 
@@ -34,10 +40,6 @@ export function middleware(request: NextRequest) {
 
     if (userRole === 'admin' && !pathname.includes('admin')) {
       return NextResponse.redirect(new URL('/dashboard/admin', request.url))
-    }
-
-    if (userRole === 'center' && !pathname.includes('center')) {
-      return NextResponse.redirect(new URL('/dashboard/center', request.url))
     }
   }
 

@@ -8,13 +8,16 @@
   "runServices": ["frontend-dev"],
   "shutdownAction": "none",
   "workspaceFolder": "/workspaces/senior-capstone-project",
-  "forwardPorts": [3001, 8080],
+  "forwardPorts": [3000, 8080],
   "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/senior/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/senior/.ssh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/senior/.gitconfig,type=bind,consistency=cached"
   ],
   "remoteEnv": {
     "NODE_ENV": "development",
-    "GIT_EDITOR": "code --wait"
+    "GIT_EDITOR": "code --wait",
+    "GIT_USER_NAME": "${localEnv:GIT_USER_NAME}",
+    "GIT_USER_EMAIL": "${localEnv:GIT_USER_EMAIL}"
   },
   "customizations": {
     "vscode": {

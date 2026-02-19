@@ -73,7 +73,7 @@ export function StudentHeader() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
       <div className="flex items-center gap-4 pl-16">
-        <Link href="/student" className="flex items-center gap-2">
+        <Link href="/dashboard/student" className="flex items-center gap-2">
           <span className="text-xl text-primary font-semibold">汉语学习</span>
           <span className="text-muted-foreground hidden sm:inline">Student Portal</span>
         </Link>
@@ -153,7 +153,7 @@ export function StudentHeader() {
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="justify-center">
-              <Link href="/student/notifications">View all notifications</Link>
+              <Link href="/dashboard/student/messages">View all notifications</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -176,7 +176,7 @@ export function StudentHeader() {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/student/profile">
+              <Link href="/dashboard/student/profile">
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Link>

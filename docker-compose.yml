@@ -18,6 +18,8 @@ services:
       - 8008:8080
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_SECURITY_USER_NAME=user1
+      - SPRING_SECURITY_USER_PASSWORD=123456
     depends_on:
       - mongo
 
@@ -26,7 +28,7 @@ services:
       context: frontend          # Now pointing just to the parent folder
       dockerfile: Dockerfile     # The Dockerfile is now directly inside /frontend
     ports:
-      - 3000:3000                # You only need one port now!
+      - 3000:3000                # Frontend port
     working_dir: /frontend
     volumes:                     # (Highly Recommended) Mounts your code for hot-reloading
       - ./frontend:/frontend
@@ -46,7 +48,7 @@ services:
       - /home/${HOST_USERNAME}/.ssh:/home/senior/.ssh:cached
       - /home/${HOST_USERNAME}/.config:/home/senior/.config:cached
     ports:
-      - 3001:3000
+      - 3000:3000
     command: sleep infinity
     depends_on:
       - backend
@@ -55,7 +57,7 @@ services:
   backend-dev:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: .devcontainer/Dockerfile
       target: backend
     volumes:
       - .:/workspaces/senior-capstone-project
@@ -64,6 +66,8 @@ services:
       - 8080:8080
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_SECURITY_USER_NAME=user1
+      - SPRING_SECURITY_USER_PASSWORD=123456
     command: sleep infinity
     depends_on:
       - mongo

@@ -40,6 +40,14 @@ export function Sidebar() {
     { name: "Profile & Settings", href: "/profile", icon: Settings },
   ]
 
+  const isActiveRoute = (href: string) => {
+    if (href === "/") {
+      return pathname === href
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
   return (
     <div
       className={cn(
@@ -73,7 +81,7 @@ export function Sidebar() {
             href={item.href}
             className={cn(
               "flex h-10 items-center gap-3 rounded-md px-3 transition-colors",
-              pathname === item.href
+              isActiveRoute(item.href)
                 ? "bg-sidebar-accent text-sidebar-accent-foreground"
                 : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
               !expanded && !pinned && "justify-center",

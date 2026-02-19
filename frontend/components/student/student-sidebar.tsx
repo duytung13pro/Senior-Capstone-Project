@@ -27,17 +27,25 @@ export function StudentSidebar() {
   const [pinned, setPinned] = useState(false)
 
   const navigation = [
-    { name: "Dashboard", href: "/student", icon: Home },
-    { name: "My Classes", href: "/student/classes", icon: BookOpen },
-    { name: "Assignments", href: "/student/assignments", icon: FileText },
-    { name: "Grades", href: "/student/grades", icon: Award },
-    { name: "Progress", href: "/student/progress", icon: TrendingUp },
-    { name: "Schedule", href: "/student/schedule", icon: Calendar },
-    { name: "Messages", href: "/student/messages", icon: MessageSquare },
-    { name: "Resources", href: "/student/resources", icon: FolderOpen },
-    { name: "Analytics", href: "/student/analytics", icon: BarChart3 },
-    { name: "Profile & Settings", href: "/student/profile", icon: Settings },
+    { name: "Dashboard", href: "/dashboard/student", icon: Home },
+    { name: "My Classes", href: "/dashboard/student/my-classes", icon: BookOpen },
+    { name: "Assignments", href: "/dashboard/student/assignments", icon: FileText },
+    { name: "Messages", href: "/dashboard/student/messages", icon: MessageSquare },
+    { name: "Grades", href: "/dashboard/student/grades", icon: Award },
+    { name: "Schedule", href: "/dashboard/student/schedule", icon: Calendar },
+    { name: "Analytics", href: "/dashboard/student/analytics", icon: BarChart3 },
+    { name: "Progress", href: "/dashboard/student/progress", icon: TrendingUp },
+    { name: "Resources", href: "/dashboard/student/resources", icon: FolderOpen },
+    { name: "Profile", href: "/dashboard/student/profile", icon: Settings },
   ]
+
+  const isActiveRoute = (href: string) => {
+    if (href === "/dashboard/student") {
+      return pathname === href
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
 
   return (
     <div
@@ -74,7 +82,7 @@ export function StudentSidebar() {
             href={item.href}
             className={cn(
               "flex h-10 items-center gap-3 rounded-md px-3 transition-colors",
-              pathname === item.href
+              isActiveRoute(item.href)
                 ? "bg-sidebar-accent text-sidebar-accent-foreground"
                 : "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
               !expanded && !pinned && "justify-center"

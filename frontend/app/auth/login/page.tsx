@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
+import { loginUser } from "@/app/actions/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,56 +16,42 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
 
-  // Handle User request when trying to login.
-  // Request will be sent to localhosts:8080/api/login at localhosts:8080
+  // Handle User login with MongoDB
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
-      const res = await fetch("http://localhost:8080/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          rememberMe,
-        }),
-      });
-      const data = await res.json();
+      const result = await loginUser(email, password);
 
-      // Handle non-2xx responses
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed");
+      if (!result.success) {
+        setError(result.message || "Đăng nhập thất bại");
+        setIsLoading(false);
+        return;
       }
 
-      // If backend returns user / token info
-      console.log("Login success:", data);
+      // Login successful, redirect based on role
+      if (result.user) {
+        const roleRoute = result.user.role.toLowerCase();
+        localStorage.setItem("userId", result.user.id);
+        localStorage.setItem("role", result.user.role);
 
-      // save role so layouts can read it
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("userId", data.id);
-
-      // Redirect after successful login
-      if (data.role === "TEACHER") {
-        router.push("/dashboard");
-      } else if (data.role === "STUDENT") {
-        router.push("/dashboard/student");
-      } else {
-        throw new Error("Unknown role");
+        if (roleRoute === "instructor" || roleRoute === "teacher") {
+          router.push("/dashboard/teacher");
+        } else if (roleRoute === "student") {
+          router.push("/dashboard/student");
+        } else if (roleRoute === "admin") {
+          router.push("/dashboard/admin");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (error) {
-      console.error("Login failed:", error);
-
-      // show error to user
-      alert(error instanceof Error ? error.message : "Login failed");
-    } finally {
+      console.error("Login error:", error);
+      setError("Đã xảy ra lỗi. Vui lòng thử lại.");
       setIsLoading(false);
     }
   };
@@ -90,7 +77,7 @@ export default function LoginPage() {
         <div className="text-sm text-gray-600">
           Chưa có tài khoản?{" "}
           <Link
-            href="/register"
+            href="/auth/register"
             className="text-green-600 font-medium hover:underline"
           >
             Đăng ký ngay
@@ -111,6 +98,12 @@ export default function LoginPage() {
                 Chào mừng trở lại! Vui lòng nhập thông tin của bạn
               </p>
             </div>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
