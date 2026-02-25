@@ -124,7 +124,7 @@ export default function StudentAssignmentDetailPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={() => router.push(`/tutor-fe/classes/${classId}/assignments`)}>
+        <Button variant="outline" onClick={() => router.push(`/student-fe/classes/${classId}/assignments`)}>
           ← Back to Assignments
         </Button>
 
