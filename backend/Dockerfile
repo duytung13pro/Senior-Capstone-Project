@@ -13,10 +13,10 @@ COPY backend/src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run
-FROM eclipse-temurin:17-jre-alpine AS backend
+FROM eclipse-temurin:17-jre AS backend
 
 # Install production dependencies and git for potential debugging. ffmpeg is needed for video processing.
-RUN apk update && apk upgrade && apk add --no-cache ffmpeg git
+RUN apt-get update && apt-get upgrade -y && apt-get install -y ffmpeg git
 
 WORKDIR /app
 
