@@ -1,1 +1,46 @@
+# FastAPI
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
 
+# LlamaIndex RAG Stack
+llama-index==0.9.48
+llama-index-vector-stores-chroma==0.1.10
+llama-index-embeddings-huggingface==0.6.1
+llama-index-llms-gemini==0.1.5
+
+# Vector DB
+chromadb==0.4.21
+
+# Document Processing
+pydantic==2.5.0
+pymongo==4.6.0
+python-dotenv==1.0.0
+PyPDF2==3.0.1
+
+# Chinese Language Support
+jieba==0.42.1
+opencc==1.1.6  # Chinese text normalization (Simplified <-> Traditional)
+
+# Vietnamese Language Support
+underthesea==1.3.5  # Vietnamese NLP library for tokenization, POS tagging, etc.
+
+# English Language Support
+nltk==3.8.1  # Natural Language Toolkit for English tokenization, stemming, etc.
+spacy==3.6.0  # Advanced NLP library for English
+en-core-web-sm==3.6.0  # SpaCy's small English model (download separately)
+
+# Embeddings
+sentence-transformers==2.2.2  # Multilingual embeddings (supports English, Chinese, Vietnamese)
+transformers==4.33.2  # Hugging Face library for PhoBERT and other models
+torch==2.0.1  # Required for Hugging Face models
+
+# OCR (for scanned documents)
+pytesseract==0.3.10
+Pillow==10.0.0  # Required for image processing with pytesseract
+
+# Language Detection
+langdetect==1.0.9  # Detects language dynamically (English, Chinese, Vietnamese)
+
+# Utility
+aiofiles==23.2.1
