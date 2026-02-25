@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 # Move directly into the backend directory so Maven sees a standard layout
 WORKDIR /app/backend
 
