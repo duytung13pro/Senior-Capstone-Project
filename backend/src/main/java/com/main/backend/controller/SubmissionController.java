@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.main.backend.dto.ClassResponse;
 import com.main.backend.dto.SubmissionDetailResponse;
+import com.main.backend.dto.SubmissionStateResponse;
 import com.main.backend.dto.SubmitAssignmentRequest;
 import com.main.backend.model.Assignment;
 import com.main.backend.model.Class;
@@ -72,21 +73,24 @@ public class SubmissionController {
 
         }
     }
+    @GetMapping("/{assignmentId}/submission-state")
+    public List<SubmissionStateResponse> getSubmisisonState(@PathVariable String assignmentId) 
+    {
+    List<Submission> alreadySubmitted = submissionRepository.findByAssignmentId(assignmentId);
+    List<String> alreadySubmittedIds = alreadySubmitted.stream().map(submission -> submission.getStudentId()).toList();
+
+    Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new RuntimeException("Assignment not found"));
+    Class c = classRepository.findById(assignment.getClassId()).orElseThrow(() -> new RuntimeException("Class not found"));
+    // Get all student from class
+    List<String> studentIds = c.getStudentIds();
+    List<User> students = userRepository.findByIdIn(studentIds);
+    List<SubmissionStateResponse> result = students.stream().map(s -> new SubmissionStateResponse(s.getId(), s.getFirstName() + " " + s.getLastName(), s.getEmail(), alreadySubmittedIds.contains(s.getId()))).toList();
+    // get student who have submitted
+
+    return result;
+
+
+    }
+
 }
-     // Create an assignment for class {classId}
-     //@PutMapping("/{assignmentId}/missing-submission")
-     //public String getMissingSubmission(@PathVariable String assignmentId) 
-     //{
-     //   Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new RuntimeException("Assignment not found"));
-     //   Class c = classRepository.findById(assignment.getClassId()).orElseThrow(() -> new RuntimeException("Class not found"));
-     //   // Get all student from class
-     //   List<String> stuentIds = c.getStudentIds();
-     //   // get student who have submitted
-//
-     //   // get student who have not submitted
-     //   assignment.setDetail(RequestBody.getDetail());
-     //   assignmentRepository.save(assignment);
-     //   return assignment.getDetail();
-//
-     //}
 
