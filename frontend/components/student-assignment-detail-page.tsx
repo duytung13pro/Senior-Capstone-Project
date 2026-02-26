@@ -29,6 +29,7 @@ export function StudentAssignmentDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [originalSubmission, setOriginalSubmission] = useState("");
 
+  
   /*Fetch Assignment */
   const fetchAssignment = async () => {
     const res = await fetch(
@@ -38,18 +39,29 @@ export function StudentAssignmentDetailPage() {
     setAssignment(data);
     setRequirements(data.detail || "");
   };
+  const fetchSubmission = async () => {
+    const userId = localStorage.getItem("userId")
+
+    const response = await fetch(`http://localhost:8080/api/submission/get-detail/${assignmentId}/${userId}`,);
+    
+    const data = await response.json();
+    setSubmission(data.content ?? "");
+    setOriginalSubmission(data.content ?? "");
+    };
+  // Fetch submission detail
 
   const loadPage = async () => {
     setLoading(true);
-    await Promise.all([fetchAssignment()]);
+    await Promise.all([fetchAssignment(),fetchSubmission()]);
     setLoading(false);
   };
   const handleSubmit = async () => {
     // Only save if description has changed
-    const userId = localStorage.getItem("userId")
 
     setSubmitting(true);
     try {
+      const userId = localStorage.getItem("userId")
+
       const response = await fetch(
         `http://localhost:8080/api/submission/${assignmentId}/submit`,
         {

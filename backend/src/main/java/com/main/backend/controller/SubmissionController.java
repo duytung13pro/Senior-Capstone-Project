@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.main.backend.dto.ClassResponse;
+import com.main.backend.dto.SubmissionDetailResponse;
 import com.main.backend.dto.SubmitAssignmentRequest;
 import com.main.backend.model.Assignment;
 import com.main.backend.model.Class;
@@ -54,7 +55,23 @@ public class SubmissionController {
 
         }
     }
+    // fetch content of a submission
+    @GetMapping("/get-detail/{assignmentId}/{userId}")
+    public SubmissionDetailResponse submit(@PathVariable String assignmentId,@PathVariable String userId) 
+    {
+        // Submission not exists yet
+        if(!submissionRepository.existsByAssignmentIdAndStudentId(assignmentId, userId)){
+            SubmissionDetailResponse result = new SubmissionDetailResponse("");
+            return result;
+        }
+        // Already exists
+        else{
+            Submission existingSubmission = submissionRepository.findByAssignmentIdAndStudentId(assignmentId, userId);
+            SubmissionDetailResponse result = new SubmissionDetailResponse(existingSubmission.getContent());
+            return result;
 
+        }
+    }
 }
      // Create an assignment for class {classId}
      //@PutMapping("/{assignmentId}/missing-submission")
