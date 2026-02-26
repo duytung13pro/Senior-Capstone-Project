@@ -6,20 +6,22 @@ public class Submission {
     private String id;
     private String assignmentId;
     private String studentId;
+    private String content;
     private Integer score;        // null if not graded
     private Instant submittedAt;
-    private boolean late;
+    private String status ;
     private String feedback;
 
     // Default constructor
     public Submission() {}
 
     // Constructor for new submission
-    public Submission(String assignmentId, String studentId, Instant submittedAt, boolean late) {
+    public Submission(String assignmentId, String studentId, String content, Instant submittedAt) {
         this.assignmentId = assignmentId;
         this.studentId = studentId;
         this.submittedAt = submittedAt;
-        this.late = late;
+        this.content = content;
+        this.status = null;
         this.score = null;
         this.feedback = null;
     }
@@ -28,7 +30,9 @@ public class Submission {
     public String getId() {
         return id;
     }
-
+    public String getContent() {
+        return content;
+    }
     public String getAssignmentId() {
         return assignmentId;
     }
@@ -45,8 +49,8 @@ public class Submission {
         return submittedAt;
     }
 
-    public boolean isLate() {
-        return late;
+    public String getStatus() {
+        return status;
     }
 
     public String getFeedback() {
@@ -56,6 +60,9 @@ public class Submission {
     // Setters
     public void setId(String id) {
         this.id = id;
+    }
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public void setAssignmentId(String assignmentId) {
@@ -74,8 +81,8 @@ public class Submission {
         this.submittedAt = submittedAt;
     }
 
-    public void setLate(boolean late) {
-        this.late = late;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void setFeedback(String feedback) {

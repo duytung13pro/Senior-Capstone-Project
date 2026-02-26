@@ -7,5 +7,6 @@ import com.main.backend.model.Submission;
 
 public interface SubmissionRepository extends MongoRepository<Submission, String> {
     List<Submission> findByAssignmentId(String assignmentId);
-
+    boolean existsByAssignmentIdAndStudentId(String assignmentId, String studentId);
+    Submission findByAssignmentIdAndStudentId(String assignmentId, String studentId);
 }

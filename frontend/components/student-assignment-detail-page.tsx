@@ -16,12 +16,6 @@ interface Assignment {
   detail: string;
 }
 
-interface StudentSubmission {
-  studentId: string;
-  studentName: string;
-  email: string;
-  submitted: boolean;
-}
 
 export function StudentAssignmentDetailPage() {
   const { classId, assignmentId } = useParams<{classId: string; assignmentId: string;}>();
@@ -29,11 +23,11 @@ export function StudentAssignmentDetailPage() {
 
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [requirements, setRequirements] = useState("");
-  const [students, setStudents] = useState<StudentSubmission[]>([]);
+  const [submission, setSubmission] = useState("");
+
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [originalDescription, setOriginalDescription] = useState("");
-  console.log("Params:", { classId, assignmentId }); // Debug: check if params are received
+  const [submitting, setSubmitting] = useState(false);
+  const [originalSubmission, setOriginalSubmission] = useState("");
 
   /*Fetch Assignment */
   const fetchAssignment = async () => {
@@ -43,79 +37,58 @@ export function StudentAssignmentDetailPage() {
     const data = await res.json();
     setAssignment(data);
     setRequirements(data.detail || "");
-    setOriginalDescription(data.detail || "");
-  };
-
-  const fetchStudents = async () => {
-    // You'll need to implement this endpoint or modify existing one
-    const res = await fetch(
-      `http://localhost:8080/api/classes/${classId}/assignments/${assignmentId}/submissions`
-    );
-    if (res.ok) {
-      const data = await res.json();
-      setStudents(data);
-    }
   };
 
   const loadPage = async () => {
     setLoading(true);
-    await Promise.all([fetchAssignment(), fetchStudents()]);
+    await Promise.all([fetchAssignment()]);
     setLoading(false);
   };
-
-  useEffect(() => {
-    loadPage();
-  }, [assignmentId]);
-
-  const handleSaveDescription = async () => {
+  const handleSubmit = async () => {
     // Only save if description has changed
-    if (requirements === originalDescription) {
-      toast({
-        title: "No changes",
-        description: "The description hasn't been modified.",
-        variant: "default",
-      });
-      return;
-    }
+    const userId = localStorage.getItem("userId")
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/assignment/${assignmentId}`,
+        `http://localhost:8080/api/submission/${assignmentId}/submit`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            detail: requirements,
+            content: submission,
+            studentId: userId
           }),
         }
       );
 
       if (response.ok) {
-        setOriginalDescription(requirements); 
-        alert("Success! Assignment description updated successfully.");
-
+        setOriginalSubmission(submission);        
         toast({
           title: "Success",
-          description: "Assignment description updated successfully.",
+          description: "Submit assignment successfully.",
           variant: "default",
         });
       } else {
         throw new Error("Failed to update");
       }
     } catch (error) {
-      console.error("Error saving description:", error);
+      console.error("Error submitting assignment", error);
       toast({
         title: "Error",
         description: "Failed to update assignment description. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setSaving(false);
+        setSubmitting(false);
     }
   };
+  useEffect(() => {
+    loadPage();
+  }, [assignmentId]);
+
 
   if (loading || !assignment) return <p className="p-6">Loading...</p>;
 
@@ -140,22 +113,39 @@ export function StudentAssignmentDetailPage() {
       <div className="border rounded-lg p-4 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Assignment Requirements</h2>
-          <div className="flex items-center gap-2">
-            {requirements !== originalDescription && (
-              <span className="text-sm text-amber-600">Unsaved changes</span>
-            )}
-          </div>
         </div>
 
         <Textarea
           className="min-h-[200px]"
           value={requirements}
-          onChange={(e) => setRequirements(e.target.value)}
-          placeholder="Write assignment instructions, rubric, or details..."
+          placeholder="assignment instructions, rubric, or details..."
           readOnly
         />
 
       </div>
+
+        {/* Submission Section */}
+        <div className="border rounded-lg p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Assignment Submission</h2>
+          <Button 
+              onClick={handleSubmit} 
+              disabled={submitting || submission === originalSubmission}
+              className="min-w-[80px]"
+            >
+              {submitting ? "Submitting..." : "Submit"}
+            </Button>
+        </div>
+
+        <Textarea
+          className="min-h-[200px]"
+          value={submission}
+          onChange={(e) => setSubmission(e.target.value)}
+          placeholder="Enter submission for this assignment"
+        />
+
+      </div>
+
     </div>
   );
 }

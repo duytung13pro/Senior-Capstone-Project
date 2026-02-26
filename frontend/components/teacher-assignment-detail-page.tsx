@@ -46,10 +46,10 @@ export function TeacherAssignmentDetailPage() {
     setOriginalDescription(data.detail || "");
   };
 
-  const fetchStudents = async () => {
+  const fetchMissingSubmission = async () => {
     // You'll need to implement this endpoint or modify existing one
     const res = await fetch(
-      `http://localhost:8080/api/classes/${classId}/assignments/${assignmentId}/submissions`
+      `http://localhost:8080/api/assignment/${assignmentId}/missing-submission`
     );
     if (res.ok) {
       const data = await res.json();
@@ -59,7 +59,7 @@ export function TeacherAssignmentDetailPage() {
 
   const loadPage = async () => {
     setLoading(true);
-    await Promise.all([fetchAssignment(), fetchStudents()]);
+    await Promise.all([fetchAssignment(), fetchMissingSubmission()]);
     setLoading(false);
   };
 
@@ -166,7 +166,7 @@ export function TeacherAssignmentDetailPage() {
       {/* Students Table */}
       <div className="border rounded-lg">
         <div className="p-4 border-b">
-          <h2 className="text-xl font-semibold">Student Submissions</h2>
+          <h2 className="text-xl font-semibold">Missing Submissions</h2>
         </div>
 
         <table className="w-full text-sm">
@@ -174,7 +174,6 @@ export function TeacherAssignmentDetailPage() {
             <tr>
               <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Email</th>
-              <th className="p-3 text-left">Status</th>
             </tr>
           </thead>
 
@@ -184,13 +183,6 @@ export function TeacherAssignmentDetailPage() {
                 <tr key={s.studentId} className="border-t hover:bg-muted/50">
                   <td className="p-3 font-medium">{s.studentName}</td>
                   <td className="p-3">{s.email}</td>
-                  <td className="p-3">
-                    {s.submitted ? (
-                      <Badge className="bg-green-500">Submitted</Badge>
-                    ) : (
-                      <Badge variant="destructive">Missing</Badge>
-                    )}
-                  </td>
                 </tr>
               ))
             ) : (

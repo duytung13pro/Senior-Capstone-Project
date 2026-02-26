@@ -1,63 +1,61 @@
 package com.main.backend.controller;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.main.backend.dto.AddStudentRequest;
-import com.main.backend.dto.AllStudentResponse;
 import com.main.backend.dto.ClassResponse;
-import com.main.backend.dto.CreateAssignmentRequest;
-import com.main.backend.dto.CreateAssignmentRespond;
-import com.main.backend.dto.CreateClassRequest;
-import com.main.backend.dto.UpdateDetailRequest;
-import com.main.backend.dto.UserProfileResponse;
+import com.main.backend.dto.SubmitAssignmentRequest;
 import com.main.backend.model.Assignment;
 import com.main.backend.model.Class;
 import com.main.backend.model.Role;
+import com.main.backend.model.Submission;
 import com.main.backend.model.User;
 import com.main.backend.repository.AssignmentRepository;
 import com.main.backend.repository.ClassRepository;
+import com.main.backend.repository.SubmissionRepository;
 import com.main.backend.repository.UserRepository;
 
 @RestController
-@RequestMapping("/api/assignment")
+@RequestMapping("/api/submission")
 @CrossOrigin(origins = "http://localhost:3000")
-public class AssignmentController {
+public class SubmissionController {
 
     private final ClassRepository classRepository;
     private final UserRepository userRepository;
     private final AssignmentRepository assignmentRepository;
+    private final SubmissionRepository submissionRepository;
 
-    public AssignmentController(ClassRepository classRepository, UserRepository userRepository, AssignmentRepository assignmentRepository) {
+    public SubmissionController(ClassRepository classRepository, UserRepository userRepository, AssignmentRepository assignmentRepository, SubmissionRepository submissionRepository) {
         this.userRepository = userRepository;
         this.classRepository = classRepository;
         this.assignmentRepository = assignmentRepository;
+        this.submissionRepository = submissionRepository;
     }    
 
-    // API endpoint to View detail of an assignment
-    @GetMapping("/{assignmentid}")
-    public Assignment getClass(@PathVariable String assignmentid) 
+    // Submit a submission for an assignment
+    // if submission already exist, update its content
+    @PostMapping("/{assignmentId}/submit")
+    public ResponseEntity<?> submit(@PathVariable String assignmentId, @RequestBody SubmitAssignmentRequest req) 
     {
-        Assignment assignment = assignmentRepository.findById(assignmentid).orElseThrow(() -> new RuntimeException("Class not found"));
+        // Assignment not exists yet
+        if(!submissionRepository.existsByAssignmentIdAndStudentId(assignmentId, req.getStudentId())){
+            Submission submission = new Submission(assignmentId, req.getStudentId(), req.getContent(), Instant.now());
+            submissionRepository.save(submission);
+            return ResponseEntity.ok().build();
+        }
+        // Already exists
+        else{
+            Submission existingSubmission = submissionRepository.findByAssignmentIdAndStudentId(assignmentId, req.getStudentId());
+            existingSubmission.setContent(req.getContent());
+            submissionRepository.save(existingSubmission);
+            return ResponseEntity.ok().build();
 
-    return assignment;
+        }
     }
 
-     // Create an assignment for class {classId}
-     @PutMapping("/{assignmentId}")
-     public String getAssignments(@PathVariable String assignmentId, @RequestBody UpdateDetailRequest RequestBody) 
-     {
-        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new RuntimeException("Assignment not found"));
-        assignment.setDetail(RequestBody.getDetail());
-        assignmentRepository.save(assignment);
-        return assignment.getDetail();
-
-     }
+}
      // Create an assignment for class {classId}
      //@PutMapping("/{assignmentId}/missing-submission")
      //public String getMissingSubmission(@PathVariable String assignmentId) 
@@ -74,4 +72,4 @@ public class AssignmentController {
      //   return assignment.getDetail();
 //
      //}
-}
+
