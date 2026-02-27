@@ -1,13 +1,15 @@
-import { Suspense } from "react" // 1. Import Suspense
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { ProfilePage } from "@/components/profile-page"
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { ProfileSettingsPage } from "@/components/profile-settings-page";
+import { getCurrentUserProfileSettings } from "@/app/actions/profile";
 
-export default function Profile() {
+export const dynamic = "force-dynamic";
+
+export default async function Profile() {
+  const profile = await getCurrentUserProfileSettings();
+
   return (
     <DashboardLayout>
-      <Suspense fallback={<div className="p-8">Loading profile...</div>}>
-        <ProfilePage />
-      </Suspense>
+      <ProfileSettingsPage initialData={profile} />
     </DashboardLayout>
-  )
+  );
 }
