@@ -10,9 +10,14 @@ public class CreateClassRequest {
     private String time;
     private String days;
     private String description;
+    private String room;
+    private Integer maxStudents;
+    private String startDate;
+    private String endDate;
     private String teacherId;
 
-    public CreateClassRequest() {}
+    public CreateClassRequest() {
+    }
 
     public String getName() {
         return name;
@@ -52,6 +57,38 @@ public class CreateClassRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public Integer getMaxStudents() {
+        return maxStudents;
+    }
+
+    public void setMaxStudents(Integer maxStudents) {
+        this.maxStudents = maxStudents;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 
     public String getTeacherId() {
