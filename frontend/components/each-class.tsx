@@ -38,6 +38,10 @@ interface ClassDetail {
   time: string;
   days: string;
   description: string;
+  room?: string;
+  maxStudents?: number;
+  startDate?: string;
+  endDate?: string;
   studentIds: string[];
 }
 
@@ -139,6 +143,22 @@ export function EachClass() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Students</span>
                 <span>{students.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Room</span>
+                <span>{classData.room || "-"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Capacity</span>
+                <span>{classData.maxStudents ?? "-"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Start Date</span>
+                <span>{classData.startDate || "-"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">End Date</span>
+                <span>{classData.endDate || "-"}</span>
               </div>
             </CardContent>
           </Card>
