@@ -16,6 +16,10 @@ public class ClassResponse {
     private String time;
     private String days;
     private String description;
+    private String room;
+    private Integer maxStudents;
+    private String startDate;
+    private String endDate;
     private Instant createdAt;
     private List<String> studentIds;
 
@@ -26,13 +30,18 @@ public class ClassResponse {
         this.time = c.getTime();
         this.days = c.getDays();
         this.description = c.getDescription();
+        this.room = c.getRoom();
+        this.maxStudents = c.getMaxStudents();
+        this.startDate = c.getStartDate();
+        this.endDate = c.getEndDate();
         this.createdAt = c.getCreatedAt();
         this.studentIds = c.getStudentIds();
     }
 
-    public List<String> getStudentIds(){
+    public List<String> getStudentIds() {
         return studentIds;
     }
+
     public String getId() {
         return id;
     }
@@ -55,6 +64,22 @@ public class ClassResponse {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public Integer getMaxStudents() {
+        return maxStudents;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
     }
 
     public Instant getCreatedAt() {
