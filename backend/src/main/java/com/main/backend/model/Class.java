@@ -25,23 +25,34 @@ public class Class {
 
     private String description;
 
+    private String room;
+
+    private Integer maxStudents;
+
+    private String startDate;
+
+    private String endDate;
+
     // Teacher who owns this class
     private String teacherId;
 
     private Instant createdAt = Instant.now();
 
     // List of student user IDs enrolled in this class
-    
+
     private List<String> studentIds = new ArrayList<>();
 
-    public Class() {}
+    public Class() {
+    }
 
     public String getId() {
         return id;
     }
-    public int getStudentCount(){
+
+    public int getStudentCount() {
         return studentIds.size();
     }
+
     public String getName() {
         return name;
     }
@@ -61,7 +72,7 @@ public class Class {
     public String getTime() {
         return time;
     }
-    
+
     public void setTime(String time) {
         this.time = time;
     }
@@ -69,7 +80,7 @@ public class Class {
     public String getDays() {
         return days;
     }
-    
+
     public void setDays(String days) {
         this.days = days;
     }
@@ -77,15 +88,47 @@ public class Class {
     public String getDescription() {
         return description;
     }
-    
+
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public void setRoom(String room) {
+        this.room = room;
+    }
+
+    public Integer getMaxStudents() {
+        return maxStudents;
+    }
+
+    public void setMaxStudents(Integer maxStudents) {
+        this.maxStudents = maxStudents;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 
     public String getTeacherId() {
         return teacherId;
     }
-    
+
     public void setTeacherId(String teacherId) {
         this.teacherId = teacherId;
     }
@@ -100,5 +143,5 @@ public class Class {
 
     public void setStudentIds(List<String> studentIds) {
         this.studentIds = studentIds;
-}
+    }
 }
