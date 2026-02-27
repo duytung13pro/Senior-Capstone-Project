@@ -5,6 +5,7 @@ import dbConnect from "@/lib/mongodb"
 import Enrollment from "@/lib/models/Enrollment"
 import Message from "@/lib/models/Message"
 import StudyAnalytics from "@/lib/models/StudyAnalytics"
+import { auth } from "@/auth"
 
 export const dynamic = "force-dynamic"
 
@@ -12,8 +13,9 @@ export async function GET(request: NextRequest) {
   try {
     await dbConnect()
 
+    const session = await auth()
     const { searchParams } = new URL(request.url)
-    const studentId = request.cookies.get("userId")?.value || searchParams.get("studentId")
+    const studentId = session?.user?.id || searchParams.get("studentId")
 
     if (!studentId) {
       return NextResponse.json({ success: false, error: "Missing studentId" }, { status: 400 })
