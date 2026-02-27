@@ -17,6 +17,7 @@ interface Assignment {
 }
 
 interface StudentSubmission {
+  submissionId: string;
   studentId: string;
   studentName: string;
   email: string;
@@ -65,7 +66,7 @@ export function TeacherAssignmentDetailPage() {
 
   useEffect(() => {
     loadPage();
-  }, [assignmentId]);
+  }, [assignmentId, classId]);
 
   const handleSaveDescription = async () => {
     // Only save if description has changed
@@ -175,6 +176,7 @@ export function TeacherAssignmentDetailPage() {
               <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Submitted</th>
+              <th className="p-3 text-left">Detail</th>
             </tr>
           </thead>
 
@@ -184,8 +186,25 @@ export function TeacherAssignmentDetailPage() {
                 <tr key={s.studentId} className="border-t hover:bg-muted/50">
                   <td className="p-3 font-medium">{s.studentName}</td>
                   <td className="p-3">{s.email}</td>
-                  <td className="p-3">{s.submitted ? "Submitted" : "Misisng"}</td>
-                </tr>
+                  <td className="p-3">
+  <Badge variant={s.submitted ? "default" : "destructive"}>
+    {s.submitted ? "Submitted" : "Missing"}
+  </Badge>
+</td>                  <td className="p-3">
+  {s.submitted ? (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() =>
+        router.push(`/tutor-fe/classes/${classId}/assignments/${assignmentId}/${s.submissionId}`)
+      }
+    >
+      View
+    </Button>
+  ) : (
+    <span className="text-muted-foreground text-xs">No submission</span>
+  )}
+</td>                  </tr>
               ))
             ) : (
               <tr>

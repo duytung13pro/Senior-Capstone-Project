@@ -1,6 +1,8 @@
 package com.main.backend.controller;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -73,24 +75,38 @@ public class SubmissionController {
 
         }
     }
-    @GetMapping("/{assignmentId}/submission-state")
-    public List<SubmissionStateResponse> getSubmisisonState(@PathVariable String assignmentId) 
-    {
-    List<Submission> alreadySubmitted = submissionRepository.findByAssignmentId(assignmentId);
-    List<String> alreadySubmittedIds = alreadySubmitted.stream().map(submission -> submission.getStudentId()).toList();
+@GetMapping("/{assignmentId}/submission-state")
+public List<SubmissionStateResponse> getSubmisisonState(@PathVariable String assignmentId)
+{
+    Assignment assignment = assignmentRepository.findById(assignmentId)
+            .orElseThrow(() -> new RuntimeException("Assignment not found"));
 
-    Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new RuntimeException("Assignment not found"));
-    Class c = classRepository.findById(assignment.getClassId()).orElseThrow(() -> new RuntimeException("Class not found"));
-    // Get all student from class
-    List<String> studentIds = c.getStudentIds();
-    List<User> students = userRepository.findByIdIn(studentIds);
-    List<SubmissionStateResponse> result = students.stream().map(s -> new SubmissionStateResponse(s.getId(), s.getFirstName() + " " + s.getLastName(), s.getEmail(), alreadySubmittedIds.contains(s.getId()))).toList();
-    // get student who have submitted
+    Class c = classRepository.findById(assignment.getClassId())
+            .orElseThrow(() -> new RuntimeException("Class not found"));
 
-    return result;
+    // all submissions for this assignment
+    List<Submission> submissions = submissionRepository.findByAssignmentId(assignmentId);
 
+    // IMPORTANT: map studentId -> submission
+    Map<String, Submission> submissionMap =
+            submissions.stream()
+                    .collect(Collectors.toMap(Submission::getStudentId, s -> s));
 
-    }
+    List<User> students = userRepository.findByIdIn(c.getStudentIds());
 
+    return students.stream().map(s -> {
+
+        Submission sub = submissionMap.get(s.getId());
+
+        return new SubmissionStateResponse(
+                sub != null ? sub.getId() : null,
+                s.getId(),
+                s.getFirstName() + " " + s.getLastName(),
+                s.getEmail(),
+                sub != null
+        );
+
+    }).toList();
+}
 }
 
