@@ -59,6 +59,13 @@ export function ClassesPage() {
   const [time, setTime] = useState("");
   const [days, setDays] = useState("");
   const [description, setDescription] = useState("");
+  const [room, setRoom] = useState("");
+  const [maxStudents, setMaxStudents] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [formError, setFormError] = useState("");
   // We'll run everytime the page is loaded.
   // Look at the database and fetch the Class data
   // based on teacherID
@@ -86,33 +93,71 @@ export function ClassesPage() {
 
 
   const handleCreateClass = async () => {
+    setFormError("");
+
+    if (!name.trim() || !level || !time.trim() || !days.trim()) {
+      setFormError("Please fill in Class Name, Level, Time, and Days.");
+      return;
+    }
+
+    if (maxStudents && Number(maxStudents) <= 0) {
+      setFormError("Max students must be greater than 0.");
+      return;
+    }
+
     const teacherId = localStorage.getItem("userId");
-    if (!teacherId) return;
+    if (!teacherId) {
+      setFormError("Teacher account is not found. Please log in again.");
+      return;
+    }
 
-    const res = await fetch("http://localhost:8080/api/classes/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        level,
-        time,
-        days,
-        description,
-        teacherId,
-      }),
-    });
+    setIsCreating(true);
 
-    const newClass = await res.json();
+    try {
+      const res = await fetch("http://localhost:8080/api/classes/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          level,
+          time,
+          days,
+          description,
+          room,
+          maxStudents: maxStudents ? Number(maxStudents) : null,
+          startDate,
+          endDate,
+          teacherId,
+        }),
+      });
 
-    // Immediately update UI without refresh
-    setClasses((prev) => [newClass, ...prev]);
+      if (!res.ok) {
+        setFormError("Failed to create class. Please check input and try again.");
+        return;
+      }
 
-    // Reset form
-    setName("");
-    setLevel("");
-    setTime("");
-    setDays("");
-    setDescription("");
+      const newClass = await res.json();
+
+      // Immediately update UI without refresh
+      setClasses((prev) => [newClass, ...prev]);
+
+      // Reset form
+      setName("");
+      setLevel("");
+      setTime("");
+      setDays("");
+      setDescription("");
+      setRoom("");
+      setMaxStudents("");
+      setStartDate("");
+      setEndDate("");
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to create class", error);
+      setFormError("Failed to create class. Please check backend connection.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const filteredClasses = classes.filter((c) =>
@@ -130,7 +175,7 @@ export function ClassesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">My Classes</h1>
 
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -154,7 +199,7 @@ export function ClassesPage() {
 
               <div>
                 <Label>Level</Label>
-                <Select onValueChange={setLevel}>
+                <Select value={level} onValueChange={setLevel}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select level" />
                   </SelectTrigger>
@@ -162,7 +207,7 @@ export function ClassesPage() {
                     <SelectItem value="BEGINNER">Beginner</SelectItem>
                     <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
                     <SelectItem value="ADVANCED">Advanced</SelectItem>
-                    <SelectItem value="ALL">All Levels</SelectItem>
+                    <SelectItem value="ALL_LEVEL">All Levels</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -187,15 +232,59 @@ export function ClassesPage() {
 
               <div>
                 <Label>Description</Label>
-                <Input
+                <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
+
+              <div>
+                <Label>Room</Label>
+                <Input
+                  placeholder="Room A-201"
+                  value={room}
+                  onChange={(e) => setRoom(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>Max Students</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="25"
+                  value={maxStudents}
+                  onChange={(e) => setMaxStudents(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+
+              {formError ? (
+                <p className="text-sm text-destructive">{formError}</p>
+              ) : null}
             </div>
 
             <DialogFooter>
-              <Button onClick={handleCreateClass}>Create Class</Button>
+              <Button onClick={handleCreateClass} disabled={isCreating}>
+                {isCreating ? "Creating..." : "Create Class"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -221,6 +310,8 @@ export function ClassesPage() {
               <TableHead>Level</TableHead>
               <TableHead>Time</TableHead>
               <TableHead>Days</TableHead>
+              <TableHead>Room</TableHead>
+              <TableHead>Capacity</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -228,7 +319,7 @@ export function ClassesPage() {
           <TableBody>
             {filteredClasses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center">
+                <TableCell colSpan={7} className="text-center">
                   No classes found.
                 </TableCell>
               </TableRow>
@@ -241,6 +332,8 @@ export function ClassesPage() {
                   </TableCell>
                   <TableCell>{c.time}</TableCell>
                   <TableCell>{c.days}</TableCell>
+                  <TableCell>{c.room || "-"}</TableCell>
+                  <TableCell>{c.maxStudents ?? "-"}</TableCell>
                   <TableCell className="text-right">
                     {/* View button – */}
                     <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${c.id}`)}>
