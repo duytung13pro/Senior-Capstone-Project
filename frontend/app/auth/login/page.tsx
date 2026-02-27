@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/app/actions/auth";
+import { getSession, signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,19 +25,23 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const result = await loginUser(email, password);
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
 
-      if (!result.success) {
-        setError(result.message || "Đăng nhập thất bại");
+      if (!result || result.error) {
+        setError("Đăng nhập thất bại");
         setIsLoading(false);
         return;
       }
 
-      // Login successful, redirect based on role
-      if (result.user) {
-        const roleRoute = result.user.role.toLowerCase();
-        localStorage.setItem("userId", result.user.id);
-        localStorage.setItem("role", result.user.role);
+      const session = await getSession();
+      if (session?.user) {
+        const roleRoute = session.user.role.toLowerCase();
+        localStorage.setItem("userId", session.user.id);
+        localStorage.setItem("role", session.user.role);
 
         if (roleRoute === "instructor" || roleRoute === "teacher") {
           router.push("/dashboard/teacher");
@@ -49,6 +53,7 @@ export default function LoginPage() {
           router.push("/dashboard");
         }
       }
+      setIsLoading(false);
     } catch (error) {
       console.error("Login error:", error);
       setError("Đã xảy ra lỗi. Vui lòng thử lại.");
