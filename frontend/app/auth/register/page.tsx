@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/app/actions/auth";
+import { getSession, signIn } from "next-auth/react";
 import {
   Select,
   SelectContent,
@@ -62,9 +63,23 @@ export default function RegisterPage() {
 
       // Registration successful, redirect to dashboard based on role
       if (result.user) {
-        const roleRoute = result.user.role.toLowerCase();
-        localStorage.setItem("userId", result.user.id);
-        localStorage.setItem("role", result.user.role);
+        const authResult = await signIn("credentials", {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        });
+
+        if (!authResult || authResult.error) {
+          setError("Đăng ký thành công nhưng đăng nhập tự động thất bại.");
+          setIsLoading(false);
+          return;
+        }
+
+        const session = await getSession();
+        const roleRoute =
+          session?.user?.role?.toLowerCase() || result.user.role.toLowerCase();
+        localStorage.setItem("userId", session?.user?.id || result.user.id);
+        localStorage.setItem("role", session?.user?.role || result.user.role);
 
         if (roleRoute === "instructor" || roleRoute === "teacher") {
           router.push("/dashboard/teacher");
@@ -198,7 +213,10 @@ export default function RegisterPage() {
                   placeholder="Nhập lại mật khẩu"
                   value={formData.confirmPassword}
                   onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
                   }
                   required
                   minLength={6}
