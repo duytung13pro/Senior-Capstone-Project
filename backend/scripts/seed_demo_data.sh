@@ -3,8 +3,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-http://localhost:8080}"
 BACKEND_BASIC_AUTH="${BACKEND_BASIC_AUTH:-}"
+BASE_URL="${BASE_URL:-http://localhost:8080}"
 
 check_backend() {
   local code
