@@ -64,6 +64,8 @@ export function RecentClasses() {
               <TableHead>Level</TableHead>
               <TableHead>Time</TableHead>
               <TableHead>Days</TableHead>
+              <TableHead>Room</TableHead>
+              <TableHead>Capacity</TableHead>
               <TableHead>Students</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -75,6 +77,8 @@ export function RecentClasses() {
                 <TableCell>{classItem.level}</TableCell>
                 <TableCell>{classItem.time}</TableCell>
                 <TableCell>{classItem.days}</TableCell>
+                <TableCell>{classItem.room || "-"}</TableCell>
+                <TableCell>{classItem.maxStudents ?? "-"}</TableCell>
                 <TableCell>{classItem.studentIds.length ?? 0}</TableCell>
                 <TableCell className="text-right">
                 <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${classItem.id}`)}>
