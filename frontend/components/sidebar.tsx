@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   BarChart,
   BookOpen,
@@ -16,37 +16,73 @@ import {
   BookMarked,
   PenToolIcon as Tool,
   Settings,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const [expanded, setExpanded] = useState(false)
-  const [pinned, setPinned] = useState(false)
+  const pathname = usePathname();
+  const [expanded, setExpanded] = useState(false);
+  const [pinned, setPinned] = useState(false);
 
   const navigation = [
-    { name: "Dashboard", href: "/", icon: Home },
-    { name: "My Classes", href: "/classes", icon: BookOpen },
-    { name: "Lesson Plans", href: "/lesson-plans", icon: BookMarked },
-    { name: "Assignments", href: "/assignments", icon: FileText },
-    { name: "Student Progress", href: "/student-progress", icon: BarChart },
-    { name: "Attendance", href: "/attendance", icon: Calendar },
-    { name: "Messages", href: "/messages", icon: MessageSquare },
-    { name: "Announcements", href: "/announcements", icon: Megaphone },
-    { name: "Resources", href: "/resources", icon: FolderOpen },
-    { name: "Productivity Tools", href: "/productivity", icon: Tool },
-    { name: "Profile & Settings", href: "/profile", icon: Settings },
-  ]
+    { name: "Dashboard", href: "/dashboard/teacher", icon: Home },
+    { name: "My Classes", href: "/dashboard/teacher/classes", icon: BookOpen },
+    {
+      name: "Lesson Plans",
+      href: "/dashboard/teacher/lesson-plans",
+      icon: BookMarked,
+    },
+    {
+      name: "Assignments",
+      href: "/dashboard/teacher/assignments",
+      icon: FileText,
+    },
+    {
+      name: "Student Progress",
+      href: "/dashboard/teacher/student-progress",
+      icon: BarChart,
+    },
+    {
+      name: "Attendance",
+      href: "/dashboard/teacher/attendance",
+      icon: Calendar,
+    },
+    {
+      name: "Messages",
+      href: "/dashboard/teacher/messages",
+      icon: MessageSquare,
+    },
+    {
+      name: "Announcements",
+      href: "/dashboard/teacher/announcements",
+      icon: Megaphone,
+    },
+    {
+      name: "Resources",
+      href: "/dashboard/teacher/resources",
+      icon: FolderOpen,
+    },
+    {
+      name: "Productivity Tools",
+      href: "/dashboard/teacher/productivity",
+      icon: Tool,
+    },
+    {
+      name: "Profile & Settings",
+      href: "/dashboard/teacher/profile",
+      icon: Settings,
+    },
+  ];
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
-      return pathname === href
+      return pathname === href;
     }
 
-    return pathname === href || pathname.startsWith(`${href}/`)
-  }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <div
@@ -59,7 +95,12 @@ export function Sidebar() {
       onMouseLeave={() => !pinned && setExpanded(false)}
     >
       <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-        <div className={cn("flex items-center gap-2", !expanded && !pinned && "hidden")}>
+        <div
+          className={cn(
+            "flex items-center gap-2",
+            !expanded && !pinned && "hidden",
+          )}
+        >
           <span className="text-xl text-primary">汉语学习</span>
         </div>
         <Button
@@ -67,11 +108,17 @@ export function Sidebar() {
           size="icon"
           className={cn("ml-auto", !expanded && !pinned && "hidden")}
           onClick={() => {
-            setPinned(!pinned)
+            setPinned(!pinned);
           }}
         >
-          {pinned ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-          <span className="sr-only">{pinned ? "Unpin Sidebar" : "Pin Sidebar"}</span>
+          {pinned ? (
+            <ChevronLeft className="h-5 w-5" />
+          ) : (
+            <ChevronRight className="h-5 w-5" />
+          )}
+          <span className="sr-only">
+            {pinned ? "Unpin Sidebar" : "Pin Sidebar"}
+          </span>
         </Button>
       </div>
       <nav className="flex flex-col gap-1 p-2 overflow-y-auto max-h-[calc(100vh-4rem)]">
@@ -88,10 +135,12 @@ export function Sidebar() {
             )}
           >
             <item.icon className="h-5 w-5 shrink-0" />
-            <span className={cn("truncate", !expanded && !pinned && "hidden")}>{item.name}</span>
+            <span className={cn("truncate", !expanded && !pinned && "hidden")}>
+              {item.name}
+            </span>
           </Link>
         ))}
       </nav>
     </div>
-  )
+  );
 }
