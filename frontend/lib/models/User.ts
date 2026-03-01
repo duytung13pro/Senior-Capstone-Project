@@ -7,6 +7,30 @@ export interface IUser extends mongoose.Document {
   role: "Student" | "Instructor" | "Admin"
   avatar?: string
   bio?: string
+  phone?: string
+  location?: string
+  studentId?: string
+  teacherId?: string
+  notifications: {
+    emailAssignments: boolean
+    emailGrades: boolean
+    emailMessages: boolean
+    emailAnnouncements: boolean
+    pushAssignments: boolean
+    pushGrades: boolean
+    pushMessages: boolean
+    pushReminders: boolean
+  }
+  preferences: {
+    language: "en" | "vi" | "zh"
+    timezone: string
+    theme: "light" | "dark" | "system"
+    accessibility: {
+      largeText: boolean
+      highContrast: boolean
+      reducedMotion: boolean
+    }
+  }
   createdAt: Date
   updatedAt: Date
 }
@@ -37,6 +61,30 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     avatar: String,
     bio: String,
+    phone: String,
+    location: String,
+    studentId: String,
+    teacherId: String,
+    notifications: {
+      emailAssignments: { type: Boolean, default: true },
+      emailGrades: { type: Boolean, default: true },
+      emailMessages: { type: Boolean, default: true },
+      emailAnnouncements: { type: Boolean, default: true },
+      pushAssignments: { type: Boolean, default: true },
+      pushGrades: { type: Boolean, default: true },
+      pushMessages: { type: Boolean, default: true },
+      pushReminders: { type: Boolean, default: true },
+    },
+    preferences: {
+      language: { type: String, enum: ["en", "vi", "zh"], default: "en" },
+      timezone: { type: String, default: "UTC" },
+      theme: { type: String, enum: ["light", "dark", "system"], default: "system" },
+      accessibility: {
+        largeText: { type: Boolean, default: false },
+        highContrast: { type: Boolean, default: false },
+        reducedMotion: { type: Boolean, default: false },
+      },
+    },
   },
   { timestamps: true },
 )
