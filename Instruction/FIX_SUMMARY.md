@@ -151,6 +151,7 @@ If you encounter any issues:
 ## Reference Documentation
 
 - [DOCKER_BUILD_FIXES.md](DOCKER_BUILD_FIXES.md) - Detailed technical explanation
+- [CLASS_CREATION_ENHANCEMENT.md](CLASS_CREATION_ENHANCEMENT.md) - Teacher class creation + MongoDB persistence enhancement notes
 - [.github/copilot-instructions.md](.github/copilot-instructions.md) - Architecture guide for AI agents
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Full project structure
 - [ROUTING_ARCHITECTURE.md](ROUTING_ARCHITECTURE.md) - Role-based routing details
