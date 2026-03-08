@@ -16,8 +16,9 @@ public class CreateAssignmentRespond {
     private int maxScore;
 
     private Instant createdAt;
+    private long submittedCount;
 
-    public CreateAssignmentRespond(Assignment assignment) {
+    public CreateAssignmentRespond(Assignment assignment, long submittedCount) {
         this.id = assignment.getId();
         this.classId = assignment.getClassId();
         this.title = assignment.getTitle();
@@ -25,6 +26,7 @@ public class CreateAssignmentRespond {
         this.deadline = assignment.getDeadline();
         this.maxScore = assignment.getMaxScore();
         this.createdAt = assignment.getCreatedAt();
+        this.submittedCount = submittedCount;
     }
 
     public String getId() {
@@ -47,5 +49,9 @@ public class CreateAssignmentRespond {
     }
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public long getSubmittedCount() {
+        return submittedCount;
     }
 }

@@ -1,52 +1,50 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  loadTeacherMessages,
+  TEACHER_MESSAGES_UPDATED_EVENT,
+  type TeacherMessage,
+} from "@/lib/teacher-messages";
 
-const recentMessages = [
-  {
-    id: "1",
-    sender: "Zhang Wei",
-    subject: "Question about homework",
-    class: "Beginner Mandarin",
-    time: "10:30 AM",
-    status: "Unread",
-    avatar: "ZW",
-  },
-  {
-    id: "2",
-    sender: "Li Mei",
-    subject: "Absence notification",
-    class: "Intermediate Conversation",
-    time: "Yesterday",
-    status: "Read",
-    avatar: "LM",
-  },
-  {
-    id: "3",
-    sender: "Wang Chen",
-    subject: "Extra practice materials",
-    class: "Advanced Writing",
-    time: "Yesterday",
-    status: "Unread",
-    avatar: "WC",
-  },
-  {
-    id: "4",
-    sender: "Liu Yang",
-    subject: "Assignment extension request",
-    class: "HSK 4 Preparation",
-    time: "May 19",
-    status: "Read",
-    avatar: "LY",
-  },
-];
+type RecentMessagesProps = {
+  onUnreadCountChange?: (count: number) => void;
+};
 
-export function RecentMessages() {
+export function RecentMessages({ onUnreadCountChange }: RecentMessagesProps) {
   const router = useRouter(); // Initialize router
+  const [messages, setMessages] = useState<TeacherMessage[]>([]);
+
+  useEffect(() => {
+    const syncMessages = () => {
+      setMessages(loadTeacherMessages());
+    };
+
+    syncMessages();
+    window.addEventListener(TEACHER_MESSAGES_UPDATED_EVENT, syncMessages);
+
+    return () => {
+      window.removeEventListener(TEACHER_MESSAGES_UPDATED_EVENT, syncMessages);
+    };
+  }, []);
+
+  const recentMessages = useMemo(() => messages.slice(0, 4), [messages]);
+
+  useEffect(() => {
+    if (!onUnreadCountChange) {
+      return;
+    }
+
+    const unreadCount = messages.filter(
+      (message) => message.status === "Unread",
+    ).length;
+    onUnreadCountChange(unreadCount);
+  }, [messages, onUnreadCountChange]);
 
   const handleMessageClick = (messageId: string) => {
-    router.push(`/messages?id=${messageId}`);
+    router.push(`/dashboard/teacher/messages?id=${messageId}`);
   };
 
   return (
@@ -54,7 +52,8 @@ export function RecentMessages() {
       {recentMessages.map((message) => (
         <div
           key={message.id}
-          className="flex items-start gap-4 rounded-lg border p-3 hover:bg-muted/50"
+          className="flex cursor-pointer items-start gap-4 rounded-lg border p-3 hover:bg-muted/50"
+          onClick={() => handleMessageClick(message.id)}
         >
           <Avatar className="h-10 w-10">
             <AvatarImage src="/placeholder.svg" alt={message.sender} />

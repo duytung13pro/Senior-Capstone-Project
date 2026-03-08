@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import { fetchApiFirstOk } from "@/lib/api";
 
 interface Assignment {
   id: string;
@@ -26,10 +27,14 @@ interface Assignment {
 }
 
 export default function AssignmentsPage() {
-  const { classId } = useParams<{ classId: string }>();
+  const params = useParams<{ classId: string | string[] }>();
+  const classId = Array.isArray(params.classId)
+    ? params.classId[0]
+    : params.classId;
 
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // form state
   const [title, setTitle] = useState("");
@@ -40,13 +45,28 @@ export default function AssignmentsPage() {
 
   // fetch assignments
   const fetchAssignments = async () => {
+    if (!classId) {
+      setErrorMessage("Invalid class id.");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const res = await fetch(
-      `http://localhost:8080/api/classes/${classId}/assignments`
-    );
-    const data = await res.json();
-    setAssignments(data);
-    setLoading(false);
+    setErrorMessage("");
+    try {
+      const res = await fetchApiFirstOk(`/api/classes/${classId}/assignments`, {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      setAssignments(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setAssignments([]);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to load assignments.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -54,38 +74,45 @@ export default function AssignmentsPage() {
   }, [classId]);
 
   const handleCreateAssignment = async () => {
-    if (!title || !deadline) return;
+    if (!title || !deadline || !classId) return;
 
     setCreating(true);
+    setErrorMessage("");
 
-    const res = await fetch(`http://localhost:8080/api/classes/${classId}/create-assignment`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        classId,
-        title,
-        description,
-        deadline,
-        maxScore,
-      }),
-    });
+    try {
+      const res = await fetchApiFirstOk(
+        `/api/classes/${classId}/create-assignment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            classId,
+            title,
+            description,
+            deadline,
+            maxScore,
+          }),
+        },
+        8000,
+      );
 
-    if (!res.ok) {
+      const newAssignment = await res.json();
+
+      // optimistic update
+      setAssignments((prev) => [newAssignment, ...prev]);
+
+      // reset form
+      setTitle("");
+      setDescription("");
+      setDeadline("");
+      setMaxScore(100);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to create assignment",
+      );
+    } finally {
       setCreating(false);
-      throw new Error("Failed to create assignment");
     }
-
-    const newAssignment = await res.json();
-
-    // optimistic update
-    setAssignments((prev) => [newAssignment, ...prev]);
-
-    // reset form
-    setTitle("");
-    setDescription("");
-    setDeadline("");
-    setMaxScore(100);
-    setCreating(false);
   };
 
   return (
@@ -143,31 +170,32 @@ export default function AssignmentsPage() {
 
       {loading ? (
         <p>Loading...</p>
+      ) : errorMessage ? (
+        <p className="text-destructive">{errorMessage}</p>
       ) : assignments.length === 0 ? (
         <p>No assignments yet.</p>
       ) : (
         <div className="rounded-md border">
-        <table className="w-full text-sm">
+          <table className="w-full text-sm">
             <thead className="bg-muted">
-            <tr>
+              <tr>
                 <th className="p-3 text-left">Title</th>
                 <th className="p-3 text-left">Description</th>
                 <th className="p-3 text-left">Deadline</th>
-            </tr>
+              </tr>
             </thead>
             <tbody>
-            {assignments.map((assignment) => (
+              {assignments.map((assignment) => (
                 <tr key={assignment.id} className="border-t hover:bg-muted/50">
-                <td className="p-3 font-medium">{assignment.title}</td>
+                  <td className="p-3 font-medium">{assignment.title}</td>
 
-                <td className="p-3">{assignment.description}</td>
-                <td className="p-3">{assignment.deadline}</td>
+                  <td className="p-3">{assignment.description}</td>
+                  <td className="p-3">{assignment.deadline}</td>
                 </tr>
-            ))}
+              ))}
             </tbody>
-        </table>
+          </table>
         </div>
-
       )}
     </div>
   );

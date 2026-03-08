@@ -1,14 +1,14 @@
-'use client'
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";  
+import { Textarea } from "@/components/ui/textarea";
 import LearningCarousel from "@/components/learning-carousel";
-import { useLanguage } from "@/i18n/useLanguage"
+import { useLanguage } from "@/i18n/useLanguage";
 
 export default function Home() {
-  const { t, changeLanguage } = useLanguage()
+  const { t, changeLanguage } = useLanguage();
 
   return (
     <div className="min-h-screen bg-[#FFF8E9]">
@@ -24,12 +24,27 @@ export default function Home() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => changeLanguage("vi")}>   🇻
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-green-300 bg-[#FFF8E9] text-green-800 hover:bg-[#f3efdf] hover:text-green-800"
+            onClick={() => changeLanguage("vi")}
+          >
+            VI
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => changeLanguage("en")}>          🇺
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-green-300 bg-[#FFF8E9] text-green-800 hover:bg-[#f3efdf] hover:text-green-800"
+            onClick={() => changeLanguage("en")}
+          >
+            EN
           </Button>
           <Link href="/auth/login">
-            <Button variant="outline" className="border-green-600 text-green-700">
+            <Button
+              variant="outline"
+              className="border-green-600 bg-[#FFF8E9] text-green-700 hover:bg-[#f3efdf] hover:text-green-800"
+            >
               {t.nav.login}
             </Button>
           </Link>
@@ -38,17 +53,16 @@ export default function Home() {
               {t.nav.register}
             </Button>
           </Link>
-</div>
-
+        </div>
       </header>
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 md:py-12 flex flex-col md:flex-row items-center">
         <div className="md:w-1/2 space-y-6">
-        <h1 className="text-4xl md:text-5xl font-bold text-green-800 leading-tight">
-          {t.hero.title} <br />
-          {t.hero.subtitle}
-        </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-green-800 leading-tight">
+            {t.hero.title} <br />
+            {t.hero.subtitle}
+          </h1>
 
           <div className="flex flex-col space-y-4">
             <Button className="w-full md:w-64 h-12 text-base font-medium bg-green-600 hover:bg-green-700 shadow-md">
@@ -89,7 +103,6 @@ export default function Home() {
           {t.whyChoose.description}
         </p>
 
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-orange-500 rounded-lg p-6 text-white">
             <div className="mb-4">
@@ -102,7 +115,7 @@ export default function Home() {
               />
             </div>
             <h3>{t.features.onlineMaterials.title}</h3>
-             <p>{t.features.onlineMaterials.desc}</p>
+            <p>{t.features.onlineMaterials.desc}</p>
           </div>
 
           <div className="bg-green-600 rounded-lg p-6 text-white">
@@ -116,7 +129,7 @@ export default function Home() {
               />
             </div>
             <h3>{t.features.clearPath.title}</h3>
-              <p>{t.features.clearPath.desc}</p>
+            <p>{t.features.clearPath.desc}</p>
           </div>
 
           <div className="bg-amber-500 rounded-lg p-6 text-white">
@@ -130,7 +143,7 @@ export default function Home() {
               />
             </div>
             <h3>{t.features.multiPlatform.title}</h3>
-              <p>{t.features.multiPlatform.desc}</p>
+            <p>{t.features.multiPlatform.desc}</p>
           </div>
         </div>
       </section>
@@ -225,14 +238,10 @@ export default function Home() {
             </h2>
             <p>{t.contact.description}</p>
 
-
             <form className="space-y-4">
               <Input placeholder={t.contact.form.name} className="bg-white" />
               <Input placeholder={t.contact.form.email} className="bg-white" />
-              <Input
-                placeholder={t.contact.form.phone}
-                className="bg-white"
-              />
+              <Input placeholder={t.contact.form.phone} className="bg-white" />
               <Textarea
                 placeholder={t.contact.form.mesage}
                 className="bg-white"
@@ -257,9 +266,7 @@ export default function Home() {
               className="w-24 h-24 cursor-pointer"
             />
             <div>
-              <p className="text-xs text-gray-500">
-                {t.footer.copyright}
-              </p>
+              <p className="text-xs text-gray-500">{t.footer.copyright}</p>
             </div>
           </div>
           <div className="flex gap-4">

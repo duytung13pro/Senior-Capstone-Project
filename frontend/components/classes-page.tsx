@@ -1,10 +1,9 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,10 +43,23 @@ import {
   FileText,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { fetchApiFirstOk } from "@/lib/api";
+
+type CreateClassPayload = {
+  name: string;
+  level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "ALL_LEVEL";
+  time: string;
+  days: string;
+  description: string | null;
+  room: string | null;
+  maxStudents: number | null;
+  startDate: string | null;
+  endDate: string | null;
+  teacherId: string;
+};
 
 export function ClassesPage() {
   const router = useRouter();
-
 
   const [searchQuery, setSearchQuery] = useState("");
   // Holds classes fetched from database
@@ -55,7 +67,7 @@ export function ClassesPage() {
   // Loading indicator
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
-  const [level, setLevel] = useState("");
+  const [level, setLevel] = useState<CreateClassPayload["level"] | "">("");
   const [time, setTime] = useState("");
   const [days, setDays] = useState("");
   const [description, setDescription] = useState("");
@@ -66,31 +78,87 @@ export function ClassesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [formError, setFormError] = useState("");
+
+  const resolveTeacherContext = async () => {
+    const localTeacherId = localStorage.getItem("userId") || "";
+    const localTeacherEmail = localStorage.getItem("userEmail") || "";
+
+    if (localTeacherId && localTeacherEmail) {
+      return { teacherId: localTeacherId, teacherEmail: localTeacherEmail };
+    }
+
+    try {
+      const sessionRes = await fetch("/api/auth/session", {
+        cache: "no-store",
+      });
+      if (!sessionRes.ok) {
+        return { teacherId: localTeacherId, teacherEmail: localTeacherEmail };
+      }
+
+      const sessionData = await sessionRes.json();
+      const sessionTeacherId = sessionData?.user?.id || localTeacherId;
+      const sessionTeacherEmail = sessionData?.user?.email || localTeacherEmail;
+
+      if (sessionTeacherId) {
+        localStorage.setItem("userId", sessionTeacherId);
+      }
+
+      if (sessionTeacherEmail) {
+        localStorage.setItem("userEmail", sessionTeacherEmail);
+      }
+
+      return {
+        teacherId: sessionTeacherId,
+        teacherEmail: sessionTeacherEmail,
+      };
+    } catch {
+      return { teacherId: localTeacherId, teacherEmail: localTeacherEmail };
+    }
+  };
   // We'll run everytime the page is loaded.
   // Look at the database and fetch the Class data
   // based on teacherID
   useEffect(() => {
-    const teacherId = localStorage.getItem("userId");
+    const loadClasses = async () => {
+      try {
+        const { teacherId, teacherEmail } = await resolveTeacherContext();
 
-    // Check for valid teacherId
-    if (!teacherId) {
-      console.error("No teacherId found");
-      setLoading(false);
-      return;
-    }
-    // Send the request
-    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setClasses(data); 
-        setLoading(false);
-      })
-      .catch((err) => {
+        if (!teacherId && !teacherEmail) {
+          console.error("No teacher context found");
+          setFormError("Teacher account is not found. Please log in again.");
+          setLoading(false);
+          return;
+        }
+
+        const queryParams = new URLSearchParams();
+        if (teacherId) {
+          queryParams.set("teacherId", teacherId);
+        }
+        if (teacherEmail) {
+          queryParams.set("teacherEmail", teacherEmail);
+        }
+
+        const res = await fetchApiFirstOk(
+          `/api/classes/my?${queryParams.toString()}`,
+          {
+            cache: "no-store",
+          },
+        );
+
+        const data = await res.json();
+        setClasses(data);
+      } catch (err) {
         console.error("Failed to load classes", err);
+        setFormError(
+          "Failed to load classes. Please check backend connection.",
+        );
+      } finally {
         setLoading(false);
-      });
-  }, []);
+      }
+    };
 
+    loadClasses();
+  }, []);
 
   const handleCreateClass = async () => {
     setFormError("");
@@ -105,36 +173,48 @@ export function ClassesPage() {
       return;
     }
 
-    const teacherId = localStorage.getItem("userId");
+    const { teacherId } = await resolveTeacherContext();
     if (!teacherId) {
       setFormError("Teacher account is not found. Please log in again.");
       return;
     }
 
+    const normalizedName = name.trim();
+    const normalizedTime = time.trim();
+    const normalizedDays = days.trim();
+    const normalizedDescription = description.trim();
+    const normalizedRoom = room.trim();
+
+    if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+      setFormError("End date must be after or equal to start date.");
+      return;
+    }
+
+    const payload: CreateClassPayload = {
+      name: normalizedName,
+      level: level as CreateClassPayload["level"],
+      time: normalizedTime,
+      days: normalizedDays,
+      description: normalizedDescription || null,
+      room: normalizedRoom || null,
+      maxStudents: maxStudents ? Number(maxStudents) : null,
+      startDate: startDate || null,
+      endDate: endDate || null,
+      teacherId,
+    };
+
     setIsCreating(true);
 
     try {
-      const res = await fetch("http://localhost:8080/api/classes/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          level,
-          time,
-          days,
-          description,
-          room,
-          maxStudents: maxStudents ? Number(maxStudents) : null,
-          startDate,
-          endDate,
-          teacherId,
-        }),
-      });
-
-      if (!res.ok) {
-        setFormError("Failed to create class. Please check input and try again.");
-        return;
-      }
+      const res = await fetchApiFirstOk(
+        "/api/classes/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+        8000,
+      );
 
       const newClass = await res.json();
 
@@ -154,14 +234,18 @@ export function ClassesPage() {
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Failed to create class", error);
-      setFormError("Failed to create class. Please check backend connection.");
+      setFormError(
+        error instanceof Error
+          ? error.message
+          : "Failed to create class. Please check backend connection.",
+      );
     } finally {
       setIsCreating(false);
     }
   };
 
   const filteredClasses = classes.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Loading UI. Load this while waiting for data
@@ -336,11 +420,15 @@ export function ClassesPage() {
                   <TableCell>{c.maxStudents ?? "-"}</TableCell>
                   <TableCell className="text-right">
                     {/* View button – */}
-                    <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${c.id}`)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        router.push(`/dashboard/teacher/classes/${c.id}`)
+                      }
+                    >
                       View
-                </Button>
-
-                    
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))

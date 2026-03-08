@@ -20,6 +20,7 @@ public class ClassResponse {
     private Integer maxStudents;
     private String startDate;
     private String endDate;
+    private String teacherId;
     private Instant createdAt;
     private List<String> studentIds;
 
@@ -34,6 +35,7 @@ public class ClassResponse {
         this.maxStudents = c.getMaxStudents();
         this.startDate = c.getStartDate();
         this.endDate = c.getEndDate();
+        this.teacherId = c.getTeacherId();
         this.createdAt = c.getCreatedAt();
         this.studentIds = c.getStudentIds();
     }
@@ -80,6 +82,10 @@ public class ClassResponse {
 
     public String getEndDate() {
         return endDate;
+    }
+
+    public String getTeacherId() {
+        return teacherId;
     }
 
     public Instant getCreatedAt() {

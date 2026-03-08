@@ -8,14 +8,14 @@
 @layer base {
   :root {
     /* Core theme (HSL – shadcn compatible) */
-    --background: 43 100% 96%;            /* #fff8e9 */
-    --foreground: 0 0% 20%;               /* #333333 */
+    --background: 42 62% 96%;             /* warm cream ~ #fcf9f0 */
+    --foreground: 28 18% 22%;             /* warm dark slate */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card: 44 70% 98%;
+    --card-foreground: 28 18% 22%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover: 44 70% 98%;
+    --popover-foreground: 28 18% 22%;
 
     --primary: 122 39% 49%;               /* #4caf50 */
     --primary-foreground: 0 0% 100%;
@@ -26,14 +26,14 @@
     --accent: 43 100% 92%;                /* #fff0d9 */
     --accent-foreground: 24 100% 62%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 42 36% 92%;
+    --muted-foreground: 28 12% 38%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    --border: 30 12% 84%;
+    --input: 30 12% 84%;
     --ring: 122 39% 49%;
 
     /* Charts */

@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo:latest
+    image: mongo:8.2
     ports:
       - 27017:27017
     environment:
@@ -8,6 +8,12 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
       - ./.db-mongodb:/data/db:delegated
+    healthcheck:
+      test: ["CMD", "mongosh", "--username", "admin", "--password", "admin", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   backend:
     build:
@@ -15,27 +21,38 @@ services:
       dockerfile: backend/Dockerfile
       target: backend
     ports:
-      - 8008:8080
+      - 8080:8080
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_SECURITY_USER_NAME=user1
       - SPRING_SECURITY_USER_PASSWORD=123456
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=senior_database
+      - SPRING_DATA_MONGODB_USERNAME=admin
+      - SPRING_DATA_MONGODB_PASSWORD=admin
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
 
   frontend:
     build:
-      context: frontend          # Now pointing just to the parent folder
-      dockerfile: Dockerfile     # The Dockerfile is now directly inside /frontend
+      context: .
+      dockerfile: frontend/Dockerfile
     ports:
       - 3000:3000                # Frontend port
+    environment:
+      - MONGODB_URI=mongodb://admin:admin@mongo:27017/senior_database?authSource=admin
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
     working_dir: /frontend
     volumes:                     # (Highly Recommended) Mounts your code for hot-reloading
       - ./frontend:/frontend
       - /frontend/node_modules   # Prevents local node_modules from overwriting container's
     command: npm start
     depends_on:
-      - backend
+      backend:
+        condition: service_started
 
   frontend-dev:
     build:
@@ -45,14 +62,14 @@ services:
     volumes:
       - .:/workspaces/senior-capstone-project # Matches your devcontainer.json
       - ./.devcontainer/frontend/.vscode:/workspaces/senior-capstone-project/.vscode
-      - /home/${HOST_USERNAME}/.ssh:/home/senior/.ssh:cached
-      - /home/${HOST_USERNAME}/.config:/home/senior/.config:cached
     ports:
-      - 3000:3000
+      - 3001:3000
     command: sleep infinity
     depends_on:
-      - backend
-      - mongo
+      backend:
+        condition: service_started
+      mongo:
+        condition: service_healthy
 
   backend-dev:
     build:
@@ -63,11 +80,18 @@ services:
       - .:/workspaces/senior-capstone-project
       - ./.devcontainer/backend/.vscode:/workspaces/senior-capstone-project/.vscode
     ports:
-      - 8080:8080
+      - 8081:8080
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_SECURITY_USER_NAME=user1
       - SPRING_SECURITY_USER_PASSWORD=123456
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=senior_database
+      - SPRING_DATA_MONGODB_USERNAME=admin
+      - SPRING_DATA_MONGODB_PASSWORD=admin
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
     command: sleep infinity
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy

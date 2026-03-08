@@ -72,6 +72,10 @@ Shared Mongo settings are defined in `backend/src/main/resources/application.pro
 Run examples:
 
 ```bash
+# Devcontainer/backend process connecting to MongoDB installed on host machine
+cd backend
+SPRING_PROFILES_ACTIVE=dev SPRING_DATA_MONGODB_HOST=host.docker.internal ./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+
 # Dev profile (Docker Mongo service "mongo")
 cd backend
 SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
@@ -80,3 +84,5 @@ SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
 cd backend
 SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run
 ```
+
+Note: The VS Code `Run Backend` task is configured to run on port `8081` to avoid local `8080` conflicts.

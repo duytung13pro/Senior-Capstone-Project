@@ -20,6 +20,7 @@ public class LessonPlan {
     private String activities;
     private String materials;
     private String assessment;
+    private String publishedAssignmentId;
     private boolean template;
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();
@@ -102,6 +103,14 @@ public class LessonPlan {
 
     public void setAssessment(String assessment) {
         this.assessment = assessment;
+    }
+
+    public String getPublishedAssignmentId() {
+        return publishedAssignmentId;
+    }
+
+    public void setPublishedAssignmentId(String publishedAssignmentId) {
+        this.publishedAssignmentId = publishedAssignmentId;
     }
 
     public boolean isTemplate() {

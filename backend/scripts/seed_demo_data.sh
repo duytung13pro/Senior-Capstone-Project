@@ -5,6 +5,9 @@ set -euo pipefail
 
 BACKEND_BASIC_AUTH="${BACKEND_BASIC_AUTH:-}"
 BASE_URL="${BASE_URL:-http://localhost:8080}"
+SEED_TEACHER_ID="${SEED_TEACHER_ID:-}"
+TEACHER_EMAIL="${TEACHER_EMAIL:-teacher.demo@rewood.local}"
+TEACHER_PASSWORD="${TEACHER_PASSWORD:-password123}"
 
 check_backend() {
   local code
@@ -98,18 +101,24 @@ login_user_id() {
 
 echo "Seeding demo users..."
 check_backend
-ensure_user "Linh" "Teacher" "0900000001" "teacher.demo@rewood.local" "password123" "TEACHER"
 ensure_user "An" "Student" "0900000002" "student1.demo@rewood.local" "password123" "STUDENT"
 ensure_user "Binh" "Student" "0900000003" "student2.demo@rewood.local" "password123" "STUDENT"
 ensure_user "Chi" "Student" "0900000004" "student3.demo@rewood.local" "password123" "STUDENT"
 
-TEACHER_ID=$(login_user_id "teacher.demo@rewood.local" "password123")
-if [[ -z "${TEACHER_ID}" ]]; then
-  echo "Failed to login teacher user at ${BASE_URL}/api/login"
-  if [[ -z "${BACKEND_BASIC_AUTH}" ]]; then
-    echo "Tip: try BACKEND_BASIC_AUTH=user:<your-password>" >&2
+if [[ -n "${SEED_TEACHER_ID}" ]]; then
+  TEACHER_ID="${SEED_TEACHER_ID}"
+  echo "Using provided teacher id: ${TEACHER_ID}"
+else
+  ensure_user "Linh" "Teacher" "0900000001" "${TEACHER_EMAIL}" "${TEACHER_PASSWORD}" "TEACHER"
+
+  TEACHER_ID=$(login_user_id "${TEACHER_EMAIL}" "${TEACHER_PASSWORD}")
+  if [[ -z "${TEACHER_ID}" ]]; then
+    echo "Failed to login teacher user at ${BASE_URL}/api/login"
+    if [[ -z "${BACKEND_BASIC_AUTH}" ]]; then
+      echo "Tip: try BACKEND_BASIC_AUTH=user:<your-password>" >&2
+    fi
+    exit 1
   fi
-  exit 1
 fi
 
 echo "Creating class for teacher ${TEACHER_ID}..."
@@ -156,6 +165,8 @@ post_json "/api/classes/${CLASS_ID}/create-assignment" "{
 }" >/dev/null
 
 echo "Seed complete."
-echo "Teacher login: teacher.demo@rewood.local / password123"
+if [[ -z "${SEED_TEACHER_ID}" ]]; then
+  echo "Teacher login: ${TEACHER_EMAIL} / ${TEACHER_PASSWORD}"
+fi
 echo "Student login: student1.demo@rewood.local / password123"
 echo "Class created with id: ${CLASS_ID}"

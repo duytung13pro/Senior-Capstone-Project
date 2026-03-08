@@ -13,48 +13,214 @@ import { UpcomingAssignments } from "@/components/upcoming-assignments";
 import { StudentAttendance } from "@/components/student-attendance";
 import { RecentMessages } from "@/components/recent-messages";
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import { fetchApiFirstOk } from "@/lib/api";
+
+type TeacherClass = {
+  id: string;
+  studentIds?: string[];
+};
+
+type AssignmentSummary = {
+  id?: string;
+  deadline?: string;
+};
+
+type LessonPlanSummary = {
+  date?: string;
+  status?: string;
+  template?: boolean;
+  publishedAssignmentId?: string;
+};
+
+function isPendingAssignment(deadlineIso?: string) {
+  if (!deadlineIso) {
+    return false;
+  }
+
+  const deadline = new Date(deadlineIso);
+  if (Number.isNaN(deadline.getTime())) {
+    return false;
+  }
+
+  return deadline.getTime() > Date.now();
+}
+
+function isPendingLessonPlan(plan: LessonPlanSummary) {
+  if (!plan || plan.template) {
+    return false;
+  }
+
+  const status = String(plan.status ?? "");
+  const isPendingLifecycle =
+    status === "Draft" ||
+    status === "Ready / Scheduled" ||
+    status === "Upcoming" ||
+    status === "Published";
+
+  if (!isPendingLifecycle) {
+    return false;
+  }
+
+  return isPendingAssignment(plan.date);
+}
+
+async function resolveTeacherContext() {
+  const localTeacherId = localStorage.getItem("userId") || "";
+  const localTeacherEmail = localStorage.getItem("userEmail") || "";
+
+  if (localTeacherId && localTeacherEmail) {
+    return { teacherId: localTeacherId, teacherEmail: localTeacherEmail };
+  }
+
+  try {
+    const sessionRes = await fetch("/api/auth/session", {
+      cache: "no-store",
+    });
+    if (!sessionRes.ok) {
+      return { teacherId: localTeacherId, teacherEmail: localTeacherEmail };
+    }
+
+    const sessionData = await sessionRes.json();
+    const sessionTeacherId = sessionData?.user?.id || localTeacherId;
+    const sessionTeacherEmail = sessionData?.user?.email || localTeacherEmail;
+
+    if (sessionTeacherId) {
+      localStorage.setItem("userId", sessionTeacherId);
+    }
+    if (sessionTeacherEmail) {
+      localStorage.setItem("userEmail", sessionTeacherEmail);
+    }
+
+    return {
+      teacherId: sessionTeacherId,
+      teacherEmail: sessionTeacherEmail,
+    };
+  } catch {
+    return { teacherId: localTeacherId, teacherEmail: localTeacherEmail };
+  }
+}
+
 export function DashboardPage() {
   const [activeClassCount, setActiveClassCount] = useState<number>(0);
-  const [classCountLoading, setActiveClassCountLoading] = useState(true);
   const [activeStudentCount, setActiveStudentCount] = useState<number>(0);
-  const [studentCountLoading, setStudentCountLoading] = useState(true);
+  const [pendingAssignmentCount, setPendingAssignmentCount] =
+    useState<number>(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0);
+  const [statsLoading, setStatsLoading] = useState(true);
 
-  const fetchStudentCount = async () => {
-    const teacherId = localStorage.getItem("userId");
-
-    if (!teacherId) return;
-    setStudentCountLoading(true);
-    const res = await fetch(`http://localhost:8080/api/classes/student-count?teacherId=${teacherId}`);
-    const data = await res.json();
-    setActiveStudentCount(data);
-    setStudentCountLoading(false);
-  };
-
-  const fetchClassCount = async () => {
-    const teacherId = localStorage.getItem("userId");
-
-    if (!teacherId) return;
-    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch classes");
-        return res.json();
-      })
-      .then(data => {
-        // data is an array of classes
-        setActiveClassCount(data.length);
-        setActiveClassCountLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to load active classes", err);
-        setActiveClassCountLoading(false);
-      });
-  };  
   useEffect(() => {
+    const fetchDashboardStats = async () => {
+      const { teacherId, teacherEmail } = await resolveTeacherContext();
 
-    fetchClassCount();
-    fetchStudentCount();
+      if (!teacherId && !teacherEmail) {
+        setStatsLoading(false);
+        return;
+      }
+
+      try {
+        const queryParams = new URLSearchParams();
+        if (teacherId) {
+          queryParams.set("teacherId", teacherId);
+        }
+        if (teacherEmail) {
+          queryParams.set("teacherEmail", teacherEmail);
+        }
+
+        const classRes = await fetchApiFirstOk(
+          `/api/classes/my?${queryParams.toString()}`,
+          { cache: "no-store" },
+        );
+        const classes: TeacherClass[] = await classRes.json();
+        const safeClasses = Array.isArray(classes) ? classes : [];
+
+        setActiveClassCount(safeClasses.length);
+
+        const uniqueStudentIds = new Set(
+          safeClasses.flatMap((teacherClass) =>
+            Array.isArray(teacherClass.studentIds)
+              ? teacherClass.studentIds
+              : [],
+          ),
+        );
+        setActiveStudentCount(uniqueStudentIds.size);
+
+        const assignmentGroups = await Promise.all(
+          safeClasses.map(async (teacherClass) => {
+            try {
+              const assignmentRes = await fetchApiFirstOk(
+                `/api/classes/${teacherClass.id}/assignments`,
+                { cache: "no-store" },
+              );
+              const data = await assignmentRes.json();
+              return Array.isArray(data) ? (data as AssignmentSummary[]) : [];
+            } catch {
+              return [];
+            }
+          }),
+        );
+
+        const assignmentItems = assignmentGroups.flat();
+        const assignmentIdSet = new Set(
+          assignmentItems
+            .map((assignment) => String(assignment.id ?? ""))
+            .filter((id) => id.length > 0),
+        );
+
+        const pendingAssignmentsFromClasses = assignmentItems.filter(
+          (assignment) => isPendingAssignment(assignment.deadline),
+        ).length;
+
+        let pendingLessonPlans = 0;
+
+        if (teacherId) {
+          try {
+            const lessonPlansRes = await fetchApiFirstOk(
+              `/api/lesson-plans?teacherId=${encodeURIComponent(teacherId)}`,
+              { cache: "no-store" },
+            );
+            const lessonPlansData: LessonPlanSummary[] =
+              await lessonPlansRes.json();
+
+            if (Array.isArray(lessonPlansData)) {
+              pendingLessonPlans = lessonPlansData.filter((plan) => {
+                if (!isPendingLessonPlan(plan)) {
+                  return false;
+                }
+
+                const publishedAssignmentId =
+                  typeof plan.publishedAssignmentId === "string"
+                    ? plan.publishedAssignmentId
+                    : "";
+
+                if (
+                  publishedAssignmentId &&
+                  assignmentIdSet.has(publishedAssignmentId)
+                ) {
+                  return false;
+                }
+
+                return true;
+              }).length;
+            }
+          } catch {
+            pendingLessonPlans = 0;
+          }
+        }
+
+        setPendingAssignmentCount(
+          pendingAssignmentsFromClasses + pendingLessonPlans,
+        );
+      } catch (error) {
+        console.error("Failed to load dashboard stats", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchDashboardStats();
   }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -91,7 +257,9 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{studentCountLoading ? "—" : activeStudentCount}</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? "—" : activeStudentCount}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -116,7 +284,9 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{activeClassCount}</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? "—" : activeClassCount}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -139,7 +309,9 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">12</div>
+                <div className="text-2xl font-bold">
+                  {statsLoading ? "—" : pendingAssignmentCount}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -161,10 +333,7 @@ export function DashboardPage() {
                 </svg>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">7</div>
-                <p className="text-xs text-muted-foreground">
-                  +2 since yesterday
-                </p>
+                <div className="text-2xl font-bold">{unreadMessagesCount}</div>
               </CardContent>
             </Card>
           </div>
@@ -185,7 +354,9 @@ export function DashboardPage() {
               <CardTitle>Upcoming Assignments</CardTitle>
             </CardHeader>
             <CardContent>
-              <UpcomingAssignments />
+              <UpcomingAssignments
+                onPendingCountChange={setPendingAssignmentCount}
+              />
             </CardContent>
           </Card>
 
@@ -205,7 +376,7 @@ export function DashboardPage() {
                 <CardTitle>Recent Messages</CardTitle>
               </CardHeader>
               <CardContent>
-                <RecentMessages />
+                <RecentMessages onUnreadCountChange={setUnreadMessagesCount} />
               </CardContent>
             </Card>
           </div>

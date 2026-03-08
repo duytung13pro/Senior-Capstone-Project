@@ -41,6 +41,7 @@ export default function LoginPage() {
       if (session?.user) {
         const roleRoute = session.user.role.toLowerCase();
         localStorage.setItem("userId", session.user.id);
+        localStorage.setItem("userEmail", session.user.email || "");
         localStorage.setItem("role", session.user.role);
 
         if (roleRoute === "instructor" || roleRoute === "teacher") {
@@ -125,7 +126,7 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Nhập email hoặc số điện thoại"
-                    className="w-full bg-gray-50"
+                    className="w-full border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 hover:bg-[#f9f9f7] focus-visible:bg-white focus-visible:border-green-500 focus-visible:ring-1 focus-visible:ring-green-200 focus-visible:ring-offset-0"
                     required
                   />
                 </div>
@@ -151,7 +152,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Nhập mật khẩu"
-                    className="w-full bg-gray-50"
+                    className="w-full border-gray-300 bg-white text-gray-900 placeholder:text-gray-500 hover:bg-[#f9f9f7] focus-visible:bg-white focus-visible:border-green-500 focus-visible:ring-1 focus-visible:ring-green-200 focus-visible:ring-offset-0"
                     required
                   />
                 </div>
@@ -175,7 +176,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 h-12 text-base font-medium"
+                className="h-12 w-full bg-green-600 text-white hover:bg-green-600/90"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -203,7 +204,7 @@ export default function LoginPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-11 border-gray-300 hover:bg-gray-50"
+                  className="h-11 border-gray-300 bg-white text-gray-900 hover:bg-[#f7f7f5] hover:text-gray-900"
                   onClick={() => console.log("Login with Google")}
                 >
                   <Image
@@ -218,7 +219,7 @@ export default function LoginPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-11 border-gray-300 hover:bg-gray-50"
+                  className="h-11 border-gray-300 bg-white text-gray-900 hover:bg-[#f7f7f5] hover:text-gray-900"
                   onClick={() => console.log("Login with Facebook")}
                 >
                   <Image

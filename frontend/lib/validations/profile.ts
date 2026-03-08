@@ -1,11 +1,28 @@
 import { z } from "zod"
 
+function isAvatarValueValid(value: string) {
+  if (!value) {
+    return true
+  }
+
+  const isHttpUrl = /^https?:\/\//i.test(value)
+  const isDataUrl = /^data:image\/[a-zA-Z0-9.+-]+;base64,/i.test(value)
+
+  return isHttpUrl || isDataUrl
+}
+
 export const profileInfoSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
   phone: z.string().trim().max(30, "Phone is too long").optional().or(z.literal("")),
   location: z.string().trim().max(120, "Location is too long").optional().or(z.literal("")),
   bio: z.string().trim().max(500, "Bio is too long").optional().or(z.literal("")),
-  avatar: z.string().trim().url("Avatar must be a valid URL").optional().or(z.literal("")),
+  avatar: z
+    .string()
+    .trim()
+    .max(2_000_000, "Avatar image is too large")
+    .refine(isAvatarValueValid, "Avatar must be a valid image URL or uploaded image")
+    .optional()
+    .or(z.literal("")),
 })
 
 export const notificationSettingsSchema = z.object({

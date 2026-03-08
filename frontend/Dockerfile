@@ -19,7 +19,7 @@ COPY --chown=node:node frontend/ .
 
 # #Provide variables for build process
 # Sets MongoDB connection string for build-time usage.
-ENV MONGODB_URI=mongodb://admin:admin@mongo:27017/senior_project?authSource=admin
+ENV MONGODB_URI=mongodb://admin:admin@mongo:27017/senior_database?authSource=admin
 # Disables Next.js telemetry in this stage.
 ENV NEXT_TELEMETRY_DISABLED=1
 # Sets Node environment to production for the build.

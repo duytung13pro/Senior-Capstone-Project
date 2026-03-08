@@ -1,6 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -51,11 +53,25 @@ import {
   type PreferenceSettingsInput,
   type ProfileInfoInput,
 } from "@/lib/validations/profile";
-import { Bell, Globe, Lock, Palette, Save } from "lucide-react";
+import { Bell, Globe, Lock, Palette, Save, Upload } from "lucide-react";
 
 type ProfileSettingsPageProps = {
   initialData: CurrentProfileSettings;
 };
+
+type ProfileTab = "profile" | "notifications" | "preferences" | "security";
+
+function toValidTab(value: string | null): ProfileTab {
+  if (
+    value === "profile" ||
+    value === "notifications" ||
+    value === "preferences" ||
+    value === "security"
+  ) {
+    return value;
+  }
+  return "profile";
+}
 
 function buildInitials(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -67,10 +83,17 @@ function buildInitials(name: string) {
 
 export function ProfileSettingsPage({ initialData }: ProfileSettingsPageProps) {
   const { toast } = useToast();
+  const { update } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDraggingAvatar, setIsDraggingAvatar] = useState(false);
   const [isSavingProfile, startSavingProfile] = useTransition();
   const [isSavingNotifications, startSavingNotifications] = useTransition();
   const [isSavingPreferences, startSavingPreferences] = useTransition();
   const [isChangingPassword, startChangingPassword] = useTransition();
+  const activeTab = toValidTab(searchParams.get("tab"));
 
   const profileForm = useForm<ProfileInfoInput>({
     resolver: zodResolver(profileInfoSchema),
@@ -109,6 +132,39 @@ export function ProfileSettingsPage({ initialData }: ProfileSettingsPageProps) {
   const liveName = profileForm.watch("name") || initialData.name;
   const liveAvatar = profileForm.watch("avatar") || "";
 
+  const handleAvatarFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid image",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 1024 * 1024) {
+      toast({
+        title: "Image too large",
+        description: "Please upload an image up to 1MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Failed to read image file"));
+      reader.readAsDataURL(file);
+    });
+
+    profileForm.setValue("avatar", dataUrl, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+  };
+
   const onSubmitProfile = (values: ProfileInfoInput) => {
     startSavingProfile(async () => {
       const result = await updateCurrentUserProfile(values);
@@ -128,6 +184,16 @@ export function ProfileSettingsPage({ initialData }: ProfileSettingsPageProps) {
         bio: result.profile.bio,
         avatar: result.profile.avatar,
       });
+
+      await update({
+        user: {
+          name: result.profile.name,
+          email: result.profile.email,
+        },
+      });
+
+      localStorage.setItem("userAvatar", result.profile.avatar || "");
+      window.dispatchEvent(new Event("profile-avatar-updated"));
 
       toast({ title: "Profile updated successfully" });
     });
@@ -195,7 +261,15 @@ export function ProfileSettingsPage({ initialData }: ProfileSettingsPageProps) {
         </p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={(nextTab) => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set("tab", nextTab);
+          router.replace(`${pathname}?${params.toString()}`);
+        }}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -291,13 +365,119 @@ export function ProfileSettingsPage({ initialData }: ProfileSettingsPageProps) {
                     name="avatar"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Avatar URL</FormLabel>
+                        <FormLabel>Profile Picture</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            value={field.value ?? ""}
-                            placeholder="https://example.com/avatar.png"
-                          />
+                          <div className="space-y-3">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (event) => {
+                                const selected = event.target.files?.[0];
+                                if (!selected) {
+                                  return;
+                                }
+
+                                try {
+                                  await handleAvatarFile(selected);
+                                } catch {
+                                  toast({
+                                    title: "Upload failed",
+                                    description:
+                                      "Could not process this image. Please try another file.",
+                                    variant: "destructive",
+                                  });
+                                } finally {
+                                  event.target.value = "";
+                                }
+                              }}
+                            />
+
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-dashed p-6 text-center transition-colors ${
+                                isDraggingAvatar
+                                  ? "border-primary bg-muted"
+                                  : "border-input"
+                              }`}
+                              onClick={() => fileInputRef.current?.click()}
+                              onKeyDown={(event) => {
+                                if (
+                                  event.key === "Enter" ||
+                                  event.key === " "
+                                ) {
+                                  event.preventDefault();
+                                  fileInputRef.current?.click();
+                                }
+                              }}
+                              onDragOver={(event) => {
+                                event.preventDefault();
+                                setIsDraggingAvatar(true);
+                              }}
+                              onDragLeave={(event) => {
+                                event.preventDefault();
+                                setIsDraggingAvatar(false);
+                              }}
+                              onDrop={async (event) => {
+                                event.preventDefault();
+                                setIsDraggingAvatar(false);
+                                const dropped = event.dataTransfer.files?.[0];
+                                if (!dropped) {
+                                  return;
+                                }
+
+                                try {
+                                  await handleAvatarFile(dropped);
+                                } catch {
+                                  toast({
+                                    title: "Upload failed",
+                                    description:
+                                      "Could not process this image. Please try another file.",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }}
+                            >
+                              <Upload className="h-5 w-5 text-muted-foreground" />
+                              <div className="text-sm">
+                                <p className="font-medium">
+                                  Drag and drop your image here
+                                </p>
+                                <p className="text-muted-foreground">
+                                  or click to browse files
+                                </p>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                PNG/JPG/WebP up to 1MB
+                              </p>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => fileInputRef.current?.click()}
+                              >
+                                Browse Image
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => {
+                                  field.onChange("");
+                                  profileForm.setValue("avatar", "", {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                    shouldTouch: true,
+                                  });
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

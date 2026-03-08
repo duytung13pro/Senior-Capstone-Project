@@ -3,6 +3,7 @@ package com.main.backend.dto;
 // Class to store data to be sent when adding students to a class
 public class AddStudentRequest {
     private String classId;
+    private String studentId;
     private String studentEmail;
 
     public AddStudentRequest() {}
@@ -21,5 +22,13 @@ public class AddStudentRequest {
 
     public void setStudentEmail(String studentEmail) {
         this.studentEmail = studentEmail;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 }

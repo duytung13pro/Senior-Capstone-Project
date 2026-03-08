@@ -14,7 +14,7 @@ import com.main.backend.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*" })
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -32,8 +32,8 @@ public class AuthController {
 
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(Map.of("message", "Email already registered"));
+                    .status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "Email already registered"));
         }
 
         User user = new User();
@@ -59,15 +59,14 @@ public class AuthController {
 
         if (user == null || !user.getPassword().equals(req.getPassword())) {
             return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "Invalid credentials"));
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid credentials"));
         }
 
         LoginResponse response = new LoginResponse(
-            user.getId(),
-            user.getEmail(),
-            user.getRole()
-        );
+                user.getId(),
+                user.getEmail(),
+                user.getRole());
 
         return ResponseEntity.ok(response);
     }

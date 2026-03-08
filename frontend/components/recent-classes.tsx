@@ -3,7 +3,8 @@ import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {useEffect, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
+import { fetchApiFirstOk } from "@/lib/api";
 import {
   Table,
   TableBody,
@@ -12,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 
 export function RecentClasses() {
   const [recentClasses, setRecentClasses] = useState<any[]>([]);
@@ -24,13 +24,12 @@ export function RecentClasses() {
     const teacherId = localStorage.getItem("userId");
     if (!teacherId) return;
 
-    fetch(`http://localhost:8080/api/classes/my?teacherId=${teacherId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch classes");
-        return res.json();
-      })
+    fetchApiFirstOk(`/api/classes/my?teacherId=${teacherId}`, {
+      cache: "no-store",
+    })
+      .then((res) => res.json())
       .then((data) => {
-        setRecentClasses(data);
+        setRecentClasses(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
@@ -38,6 +37,16 @@ export function RecentClasses() {
         setLoading(false);
       });
   }, []);
+
+  const visibleClasses = useMemo(() => {
+    return [...recentClasses]
+      .sort((a, b) => {
+        const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      })
+      .slice(0, 6);
+  }, [recentClasses]);
 
   // Loading state
   if (loading) {
@@ -52,7 +61,6 @@ export function RecentClasses() {
       </div>
     );
   }
-
 
   return (
     <div className="w-full">
@@ -71,7 +79,7 @@ export function RecentClasses() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentClasses.map((classItem) => (
+            {visibleClasses.map((classItem) => (
               <TableRow key={classItem.id}>
                 <TableCell className="font-medium">{classItem.name}</TableCell>
                 <TableCell>{classItem.level}</TableCell>
@@ -79,11 +87,21 @@ export function RecentClasses() {
                 <TableCell>{classItem.days}</TableCell>
                 <TableCell>{classItem.room || "-"}</TableCell>
                 <TableCell>{classItem.maxStudents ?? "-"}</TableCell>
-                <TableCell>{classItem.studentIds.length ?? 0}</TableCell>
+                <TableCell>
+                  {Array.isArray(classItem.studentIds)
+                    ? classItem.studentIds.length
+                    : 0}
+                </TableCell>
                 <TableCell className="text-right">
-                <Button variant="ghost" size="sm" onClick={() => router.push(`/tutor-fe/classes/${classItem.id}`)}>
-                  View
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      router.push(`/dashboard/teacher/classes/${classItem.id}`)
+                    }
+                  >
+                    View
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
