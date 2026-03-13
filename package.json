@@ -16,5 +16,8 @@
   ],
   "author": "Jay Dao",
   "license": "ISC",
-  "packageManager": "pnpm@10.28.1"
+  "packageManager": "pnpm@10.28.1",
+  "dependencies": {
+    "react-pdf": "^10.4.0"
+  }
 }

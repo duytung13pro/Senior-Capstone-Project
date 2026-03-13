@@ -16,6 +16,8 @@ import {
   TrendingUp,
   Settings,
   Award,
+  BrainCircuit,
+  BookMarked,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -36,6 +38,8 @@ export function StudentSidebar() {
     { name: "Analytics", href: "/dashboard/student/analytics", icon: BarChart3 },
     { name: "Progress", href: "/dashboard/student/progress", icon: TrendingUp },
     { name: "Resources", href: "/dashboard/student/resources", icon: FolderOpen },
+    { name: "Quiz Practice", href: "/dashboard/student/quiz-practice", icon: BrainCircuit },
+    { name: "Flashcards", href: "/dashboard/student/flashcards", icon: BookMarked },
     { name: "Profile", href: "/dashboard/student/profile", icon: Settings },
   ]
 

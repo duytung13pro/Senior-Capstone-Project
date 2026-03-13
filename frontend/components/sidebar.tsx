@@ -16,6 +16,7 @@ import {
   BookMarked,
   PenToolIcon as Tool,
   Settings,
+  BrainCircuit,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -31,6 +32,7 @@ export function Sidebar() {
     { name: "My Classes", href: "/classes", icon: BookOpen },
     { name: "Lesson Plans", href: "/lesson-plans", icon: BookMarked },
     { name: "Assignments", href: "/assignments", icon: FileText },
+    { name: "Quiz Practice", href: "/quiz-practice", icon: BrainCircuit },
     { name: "Student Progress", href: "/student-progress", icon: BarChart },
     { name: "Attendance", href: "/attendance", icon: Calendar },
     { name: "Messages", href: "/messages", icon: MessageSquare },

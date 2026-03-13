@@ -16,7 +16,12 @@ import {
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { FileText, Film, ImageIcon, Music, Plus, Search, Share2, Download, Trash } from "lucide-react"
+import { FileText, Film, ImageIcon, Music, Plus, Search, Share2, Download, Trash, ArrowLeft, Loader2, X } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import dynamic from "next/dynamic"
+
+const PdfViewer = dynamic(() => import("@/components/pdf-viewer"), { ssr: false })
 
 const resources = [
   {
@@ -27,6 +32,7 @@ const resources = [
     date: "May 15, 2023",
     size: "2.4 MB",
     icon: FileText,
+    url: "/media/sample.pdf",
   },
   {
     id: "2",
@@ -99,6 +105,49 @@ export function ResourcesPage() {
     class: "all",
   })
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedResource, setSelectedResource] = useState<any>(null)
+  const [translationResult, setTranslationResult] = useState<{ text: string; explanation: string } | null>(null)
+  const [isTranslating, setIsTranslating] = useState(false)
+
+  const handleResourceClick = (resource: any) => {
+    if (resource.type === "PDF") {
+      // In a real app, this URL would come from the backend.
+      // For demo, we assume the resource has a 'url' property or we use a placeholder.
+      if (!resource.url) {
+        alert("This PDF does not have a valid URL for the demo.")
+        return
+      }
+      setSelectedResource(resource)
+      setTranslationResult(null)
+    }
+  }
+
+  const handleTextSelect = async (text: string) => {
+    if (!text) return
+    setIsTranslating(true)
+    setTranslationResult(null) // Clear previous result
+    try {
+      // Call AI Service Translate Endpoint
+      const response = await fetch("http://localhost:8000/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text,
+          courseId: selectedResource?.class || "general",
+          targetLanguage: "English"
+        })
+      })
+      
+      const data = await response.json()
+      if (data.explanation) {
+        setTranslationResult({ text: text, explanation: data.explanation })
+      }
+    } catch (error) {
+      console.error("Translation error:", error)
+    } finally {
+      setIsTranslating(false)
+    }
+  }
 
   const filteredResources = resources.filter((resource) => {
     const typeMatch = filter.type === "all" || resource.type === filter.type
@@ -106,6 +155,69 @@ export function ResourcesPage() {
     const searchMatch = searchQuery === "" || resource.name.toLowerCase().includes(searchQuery.toLowerCase())
     return typeMatch && classMatch && searchMatch
   })
+
+  // PDF Viewer View
+  if (selectedResource) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-100px)] gap-4 relative">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" onClick={() => setSelectedResource(null)}>
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold">{selectedResource.name}</h2>
+              <p className="text-sm text-muted-foreground">Double-click any text to translate/explain with AI</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 border rounded-lg overflow-hidden bg-gray-50 relative flex justify-center">
+            <div className="w-full h-full overflow-auto flex justify-center p-8">
+               <PdfViewer 
+                 fileUrl={selectedResource.url} 
+                 onTextSelect={handleTextSelect} 
+               />
+            </div>
+
+            {/* AI Translation Overlay */}
+            {(isTranslating || translationResult) && (
+              <div className="absolute top-4 right-4 z-50 w-80 shadow-2xl">
+                <Card className="border-2 border-primary/20">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-primary/5">
+                    <CardTitle className="text-sm font-medium">
+                      AI Explanation
+                    </CardTitle>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTranslationResult(null)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    {isTranslating ? (
+                      <div className="flex flex-col items-center justify-center p-4">
+                         <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                         <p className="text-xs text-muted-foreground">Analyzing context...</p>
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-[200px] w-full pr-4">
+                         <div className="space-y-2">
+                           <div className="bg-muted p-2 rounded text-xs font-mono mb-2">
+                             "{translationResult?.text}"
+                           </div>
+                           <p className="text-sm leading-relaxed">
+                             {translationResult?.explanation}
+                           </p>
+                         </div>
+                      </ScrollArea>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -239,9 +351,14 @@ export function ResourcesPage() {
               filteredResources.map((resource) => (
                 <TableRow key={resource.id}>
                   <TableCell>
-                    <div className="flex items-center gap-3">
-                      <resource.icon className="h-5 w-5 text-muted-foreground" />
-                      <div className="font-medium">{resource.name}</div>
+                    <div 
+                      className={`flex items-center gap-3 ${resource.type === "PDF" ? "cursor-pointer hover:bg-muted/50 rounded p-1 -m-1 transition-colors" : ""}`}
+                      onClick={() => handleResourceClick(resource)}
+                    >
+                      <resource.icon className={`h-5 w-5 text-muted-foreground ${resource.type === "PDF" ? "text-primary" : ""}`} />
+                      <div className={`font-medium ${resource.type === "PDF" ? "text-primary underline decoration-dotted underline-offset-4" : ""}`}>
+                        {resource.name}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
