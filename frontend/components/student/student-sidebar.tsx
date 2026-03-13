@@ -17,10 +17,12 @@ import {
   TrendingUp,
   Settings,
   Award,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
+  BrainCircuit,
+  BookMarked,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { useState } from "react"
 
 export function StudentSidebar() {
   const pathname = usePathname();
@@ -57,11 +59,9 @@ export function StudentSidebar() {
       icon: BarChart3,
     },
     { name: "Progress", href: "/dashboard/student/progress", icon: TrendingUp },
-    {
-      name: "Resources",
-      href: "/dashboard/student/resources",
-      icon: FolderOpen,
-    },
+    { name: "Resources", href: "/dashboard/student/resources", icon: FolderOpen },
+    { name: "Quiz Practice", href: "/dashboard/student/quiz-practice", icon: BrainCircuit },
+    { name: "Flashcards", href: "/dashboard/student/flashcards", icon: BookMarked },
     { name: "Profile", href: "/dashboard/student/profile", icon: Settings },
   ];
 

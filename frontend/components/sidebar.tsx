@@ -16,10 +16,11 @@ import {
   BookMarked,
   PenToolIcon as Tool,
   Settings,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
+  BrainCircuit,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { useState } from "react"
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -27,54 +28,19 @@ export function Sidebar() {
   const [pinned, setPinned] = useState(false);
 
   const navigation = [
-    { name: "Dashboard", href: "/dashboard/teacher", icon: Home },
-    { name: "My Classes", href: "/dashboard/teacher/classes", icon: BookOpen },
-    {
-      name: "Lesson Plans",
-      href: "/dashboard/teacher/lesson-plans",
-      icon: BookMarked,
-    },
-    {
-      name: "Assignments",
-      href: "/dashboard/teacher/assignments",
-      icon: FileText,
-    },
-    {
-      name: "Student Progress",
-      href: "/dashboard/teacher/student-progress",
-      icon: BarChart,
-    },
-    {
-      name: "Attendance",
-      href: "/dashboard/teacher/attendance",
-      icon: Calendar,
-    },
-    {
-      name: "Messages",
-      href: "/dashboard/teacher/messages",
-      icon: MessageSquare,
-    },
-    {
-      name: "Announcements",
-      href: "/dashboard/teacher/announcements",
-      icon: Megaphone,
-    },
-    {
-      name: "Resources",
-      href: "/dashboard/teacher/resources",
-      icon: FolderOpen,
-    },
-    {
-      name: "Productivity Tools",
-      href: "/dashboard/teacher/productivity",
-      icon: Tool,
-    },
-    {
-      name: "Profile & Settings",
-      href: "/dashboard/teacher/profile",
-      icon: Settings,
-    },
-  ];
+    { name: "Dashboard", href: "/", icon: Home },
+    { name: "My Classes", href: "/classes", icon: BookOpen },
+    { name: "Lesson Plans", href: "/lesson-plans", icon: BookMarked },
+    { name: "Assignments", href: "/assignments", icon: FileText },
+    { name: "Quiz Practice", href: "/quiz-practice", icon: BrainCircuit },
+    { name: "Student Progress", href: "/student-progress", icon: BarChart },
+    { name: "Attendance", href: "/attendance", icon: Calendar },
+    { name: "Messages", href: "/messages", icon: MessageSquare },
+    { name: "Announcements", href: "/announcements", icon: Megaphone },
+    { name: "Resources", href: "/resources", icon: FolderOpen },
+    { name: "Productivity Tools", href: "/productivity", icon: Tool },
+    { name: "Profile & Settings", href: "/profile", icon: Settings },
+  ]
 
   const isActiveRoute = (href: string) => {
     if (href === "/") {
