@@ -36,19 +36,45 @@ services:
       mongo:
         condition: service_healthy
 
+  ai-service:
+    build: 
+      context: ./ai-service
+    ports:
+      - 8000:8000
+    volumes:
+      - ./ai-service:/app
+      - shared-media:/app/shared_data
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/senior_capstone
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_COLLECTION_NAME=course_materials
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    depends_on:
+      - qdrant
+      - mongo
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - 6333:6333
+      - 6334:6334
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    volumes:
+      - qdrant-data:/qdrant/storage
+
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: frontend
+      dockerfile: Dockerfile
     ports:
-      - 3000:3000                # Frontend port
+      - 3000:3000
+    working_dir: /frontend
     environment:
       - MONGODB_URI=mongodb://admin:admin@mongo:27017/senior_database?authSource=admin
       - NEXT_PUBLIC_API_URL=http://localhost:8080
-    working_dir: /frontend
-    volumes:                     # (Highly Recommended) Mounts your code for hot-reloading
-      - ./frontend:/frontend
-      - /frontend/node_modules   # Prevents local node_modules from overwriting container's
+    volumes:
+      - shared-media:/frontend/public
     command: npm start
     depends_on:
       backend:
@@ -60,8 +86,10 @@ services:
       dockerfile: .devcontainer/Dockerfile
       target: frontend
     volumes:
-      - .:/workspaces/senior-capstone-project # Matches your devcontainer.json
+      - .:/workspaces/senior-capstone-project
       - ./.devcontainer/frontend/.vscode:/workspaces/senior-capstone-project/.vscode
+      - ~/.ssh:/home/senior/.ssh:cached
+      - ~/.config:/home/senior/.config:cached
     ports:
       - 3001:3000
     command: sleep infinity
@@ -95,3 +123,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+
+volumes:
+  mongo-data:
+  qdrant-data:
+  shared-media:
