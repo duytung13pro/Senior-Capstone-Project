@@ -62,6 +62,7 @@ export function StudentSidebar() {
     { name: "Resources", href: "/dashboard/student/resources", icon: FolderOpen },
     { name: "Quiz Practice", href: "/dashboard/student/quiz-practice", icon: BrainCircuit },
     { name: "Flashcards", href: "/dashboard/student/flashcards", icon: BookMarked },
+    { name: "AI Chat", href: "/dashboard/student/ai-chat", icon: MessageSquare },
     { name: "Profile", href: "/dashboard/student/profile", icon: Settings },
   ];
 
