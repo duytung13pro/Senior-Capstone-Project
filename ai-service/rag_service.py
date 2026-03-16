@@ -57,7 +57,7 @@ class RAGService:
         if not self._setup_done:
             raise ValueError("RAG Service is not initialized. check API keys and Qdrant connection.")
 
-    async def ingest_document(self, file_path: str, course_id: str):
+    async def ingest_document(self, file_path: str, course_id: str, resource_id: str | None = None):
         """
         Reads a document, chunks it, and indexes it into Qdrant with course_id metadata.
         """
@@ -67,9 +67,19 @@ class RAGService:
             loader = SimpleDirectoryReader(input_files=[file_path])
             documents = loader.load_data()
 
+            # Validate extracted text
+            if not documents:
+                raise ValueError("Không trích xuất được nội dung văn bản từ tài liệu này. Vui lòng kiểm tra lại file PDF/DOC/PPT hợp lệ.")
+
+            total_text_length = sum(len((getattr(doc, "text", "") or "").strip()) for doc in documents)
+            if total_text_length == 0:
+                raise ValueError("Tài liệu không có nội dung văn bản (có thể là ảnh scan). Vui lòng tải lên file có text rõ ràng.")
+
             # Add metadata to each document chunk
             for doc in documents:
                 doc.metadata["course_id"] = course_id
+                if resource_id:
+                    doc.metadata["resource_id"] = resource_id
 
             # Create index from documents (this automatically chunks and upserts to Qdrant)
             # We don't need to persist the index to disk because Qdrant handles storage
@@ -225,6 +235,66 @@ class RAGService:
         
         response = await self.llm.acomplete(prompt)
         return response.text
+
+    async def chat_stream(self, messages: list[dict], course_id: str, resource_ids: list[str] | None = None):
+        """
+        Streams chat completion text using RAG context filtered by course and optionally by resource IDs.
+        messages: list of { role: "user" | "assistant" | "system", content: str }
+        """
+        self._check_setup()
+
+        from llama_index.core.vector_stores import MetadataFilters, ExactMatchFilter, MetadataCondition
+
+        # Build retrieval filters
+        filters: list[ExactMatchFilter] = [ExactMatchFilter(key="course_id", value=course_id)]
+        if resource_ids:
+            resource_filters = [ExactMatchFilter(key="resource_id", value=rid) for rid in resource_ids]
+            # Prefer resource-based retrieval; rely on ingestion tagging resources with course consistency
+            metadata_filters = MetadataFilters(filters=resource_filters, condition=MetadataCondition.OR)
+        else:
+            metadata_filters = MetadataFilters(filters=filters)
+
+        context_text = ""
+        try:
+            index = VectorStoreIndex.from_vector_store(
+                self.vector_store,
+                embed_model=self.embed_model
+            )
+            retriever = index.as_retriever(filters=metadata_filters, similarity_top_k=6)
+            # Use the latest user message as the query
+            last_user = next((m for m in reversed(messages) if m.get("role") == "user"), None)
+            query_text = last_user.get("content") if last_user else ""
+            nodes = retriever.retrieve(query_text)
+            context_text = "\n\n".join([n.get_content() for n in nodes])
+            logger.info(f"Retrieved {len(nodes)} context nodes for chat")
+        except Exception as e:
+            logger.warning(f"RAG retrieval failed for chat, falling back to LLM-only: {e}")
+            context_text = ""
+
+        # Build conversation text
+        conversation = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
+        prompt = f"""
+    You are an expert Chinese language tutor helping a student. Use provided context to answer.
+    If the context does not contain relevant information, clearly say you could not find it in the selected document.
+
+    Context:
+    {context_text if context_text else 'No course-specific context available.'}
+
+    Conversation so far:
+    {conversation}
+
+    Continue as the tutor. Keep responses concise and actionable for learners.
+    """
+
+        # Stream completion
+        stream_resp = await self.llm.astream_complete(prompt)
+        async for event in stream_resp:
+            chunk = getattr(event, "delta", None) or getattr(event, "text", None)
+            if chunk:
+                yield chunk
+
+        # Signal completion
+        yield ""
 
 # Singleton instance
 rag_service = RAGService()

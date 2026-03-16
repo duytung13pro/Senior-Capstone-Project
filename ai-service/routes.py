@@ -2,8 +2,17 @@ import shutil
 import uuid
 from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi.responses import StreamingResponse
 from config import logger, UPLOAD_DIR, MEDIA_DIR
-from schemas import TTSRequest, TranslateRequest, QuizRequest, FlashcardRequest, QuizResponse, FlashcardResponse
+from schemas import (
+    TTSRequest,
+    TranslateRequest,
+    QuizRequest,
+    FlashcardRequest,
+    QuizResponse,
+    FlashcardResponse,
+    ChatRequest,
+)
 from document_service import convert_to_pdf
 from tts_service import process_tts
 from rag_service import rag_service
@@ -17,7 +26,8 @@ def read_root():
 @router.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
-    courseId: str = Form(...)
+    courseId: str = Form(...),
+    resourceId: str | None = Form(None)
 ):
     """
     Uploads a document (PDF, DOCX, PPTX), converts to PDF if needed, 
@@ -26,6 +36,12 @@ async def upload_document(
     try:
         # 1. Save uploaded file
         file_ext = Path(file.filename).suffix
+        allowed_ext = {".pdf", ".docx", ".doc", ".pptx", ".ppt"}
+        if file_ext.lower() not in allowed_ext:
+            raise HTTPException(
+                status_code=400,
+                detail="Định dạng tệp không hỗ trợ. Vui lòng tải lên PDF, DOC, DOCX, PPT hoặc PPTX.",
+            )
         unique_filename = f"{uuid.uuid4()}{file_ext}"
         input_file_path = UPLOAD_DIR / unique_filename
         
@@ -51,8 +67,24 @@ async def upload_document(
 
         # 4. Ingest into Qdrant using RAG Service
         try:
-            await rag_service.ingest_document(str(final_pdf_path), courseId)
+            await rag_service.ingest_document(str(final_pdf_path), courseId, resourceId)
             logger.info(f"Ingested document into Qdrant for course {courseId}")
+        except ValueError as e:
+            logger.error(f"Document ingestion validation failed: {e}")
+            # Cleanup generated files to avoid dangling artifacts
+            try:
+                if final_pdf_path.exists():
+                    final_pdf_path.unlink()
+            except Exception:
+                pass
+
+            try:
+                if input_file_path.exists():
+                    input_file_path.unlink()
+            except Exception:
+                pass
+
+            raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
             logger.error(f"Failed to ingest document: {e}")
             # We don't fail the whole request if ingestion fails, just log it
@@ -120,4 +152,19 @@ async def generate_flashcards_endpoint(request: FlashcardRequest):
         return await rag_service.generate_flashcards(request.topic, request.courseId, request.num_cards)
     except Exception as e:
         logger.error(f"Flashcard generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/chat/stream")
+async def chat_stream_endpoint(request: ChatRequest):
+    """Streams chat responses using RAG with optional resource filters."""
+    try:
+        async def streamer():
+            async for chunk in rag_service.chat_stream(request.messages, request.courseId, request.resourceIds):
+                yield f"data: {chunk}\n\n"
+            yield "data: [DONE]\n\n"
+
+        return StreamingResponse(streamer(), media_type="text/event-stream")
+    except Exception as e:
+        logger.error(f"Chat stream failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

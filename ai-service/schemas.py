@@ -26,6 +26,19 @@ class Flashcard(BaseModel):
 class FlashcardResponse(BaseModel):
     flashcards: list[Flashcard]
 
+
+# --- Chat ---
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class ChatRequest(BaseModel):
+    courseId: str
+    messages: list[ChatMessage]
+    resourceIds: list[str] | None = None
+    sessionId: str | None = None
+
 class QuizOption(BaseModel):
     label: str          # e.g., "A", "B", "C", "D"
     text: str           # The answer text
