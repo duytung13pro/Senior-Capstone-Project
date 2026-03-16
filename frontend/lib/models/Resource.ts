@@ -3,7 +3,7 @@ import mongoose from "mongoose"
 export interface IResource extends mongoose.Document {
   title: string
   description?: string
-  type: "pdf" | "video" | "link" | "document" | "image" | "other"
+  type: "pdf" | "document"
   url: string
   fileSize?: number
   course: mongoose.Types.ObjectId
@@ -25,7 +25,7 @@ const resourceSchema = new mongoose.Schema<IResource>(
     description: String,
     type: {
       type: String,
-      enum: ["pdf", "video", "link", "document", "image", "other"],
+      enum: ["pdf", "document"],
       default: "document",
     },
     url: {

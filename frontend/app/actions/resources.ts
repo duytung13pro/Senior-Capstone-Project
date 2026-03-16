@@ -24,6 +24,7 @@ export async function getStudentResources(
   const query: Record<string, unknown> = {
     course: { $in: courseIds },
     isPublic: true,
+     type: { $in: ["pdf", "document"] },
   }
 
   if (filters?.courseId) {
@@ -73,6 +74,7 @@ export async function getResourcesByCourse(studentId: string) {
       const resources = await Resource.find({
         course: courseId,
         isPublic: true,
+         type: { $in: ["pdf", "document"] },
       })
         .populate("module", "title order")
         .sort({ createdAt: -1 })
@@ -135,6 +137,7 @@ export async function getResourceTags(studentId: string) {
   const resources = await Resource.find({
     course: { $in: courseIds },
     isPublic: true,
+    type: { $in: ["pdf", "document"] },
   })
     .select("tags")
     .lean()
@@ -151,7 +154,7 @@ export async function uploadResource(
   data: {
     title: string
     description?: string
-    type: "pdf" | "video" | "link" | "document" | "image" | "other"
+    type: "pdf" | "document"
     url: string
     fileSize?: number
     courseId: string
@@ -206,6 +209,7 @@ export async function getRecentlyViewedResources(studentId: string, limit = 5) {
   const resources = await Resource.find({
     course: { $in: courseIds },
     isPublic: true,
+    type: { $in: ["pdf", "document"] },
   })
     .populate("course", "title")
     .sort({ downloadCount: -1 })
