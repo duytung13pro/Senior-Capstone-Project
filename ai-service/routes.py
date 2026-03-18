@@ -87,8 +87,10 @@ async def upload_document(
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
             logger.error(f"Failed to ingest document: {e}")
-            # We don't fail the whole request if ingestion fails, just log it
-            # Or maybe we should add a warning to the response
+            raise HTTPException(
+                status_code=502,
+                detail=f"Document uploaded but indexing failed: {str(e)}",
+            )
 
         return {
             "status": "success",
@@ -97,9 +99,11 @@ async def upload_document(
             "message": "Document uploaded and processed successfully"
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Upload failed: {str(e)}")
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/tts")
 async def generate_tts(request: TTSRequest):

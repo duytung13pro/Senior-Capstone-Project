@@ -243,16 +243,19 @@ class RAGService:
         """
         self._check_setup()
 
-        from llama_index.core.vector_stores import MetadataFilters, ExactMatchFilter, MetadataCondition
+        from llama_index.core.vector_stores import MetadataFilters, ExactMatchFilter
 
-        # Build retrieval filters
-        filters: list[ExactMatchFilter] = [ExactMatchFilter(key="course_id", value=course_id)]
-        if resource_ids:
-            resource_filters = [ExactMatchFilter(key="resource_id", value=rid) for rid in resource_ids]
-            # Prefer resource-based retrieval; rely on ingestion tagging resources with course consistency
-            metadata_filters = MetadataFilters(filters=resource_filters, condition=MetadataCondition.OR)
-        else:
-            metadata_filters = MetadataFilters(filters=filters)
+        # Base retrieval filter by course
+        course_filters = MetadataFilters(
+            filters=[ExactMatchFilter(key="course_id", value=course_id)]
+        )
+        selected_resource_ids = set(resource_ids or [])
+
+        def _msg_role(msg):
+            return getattr(msg, "role", None) or (msg.get("role") if isinstance(msg, dict) else None)
+
+        def _msg_content(msg):
+            return getattr(msg, "content", None) or (msg.get("content") if isinstance(msg, dict) else "")
 
         context_text = ""
         try:
@@ -260,19 +263,53 @@ class RAGService:
                 self.vector_store,
                 embed_model=self.embed_model
             )
-            retriever = index.as_retriever(filters=metadata_filters, similarity_top_k=6)
             # Use the latest user message as the query
-            last_user = next((m for m in reversed(messages) if m.get("role") == "user"), None)
-            query_text = last_user.get("content") if last_user else ""
-            nodes = retriever.retrieve(query_text)
+            last_user = next((m for m in reversed(messages) if _msg_role(m) == "user"), None)
+            query_text = _msg_content(last_user) if last_user else ""
+
+            nodes = []
+            if selected_resource_ids:
+                # Retrieve directly per selected resource for higher precision
+                for rid in selected_resource_ids:
+                    rid_filters = MetadataFilters(
+                        filters=[
+                            ExactMatchFilter(key="course_id", value=course_id),
+                            ExactMatchFilter(key="resource_id", value=rid),
+                        ]
+                    )
+                    rid_nodes = index.as_retriever(filters=rid_filters, similarity_top_k=8).retrieve(query_text)
+                    nodes.extend(rid_nodes)
+
+                # If nothing found, fallback for legacy chunks that may not have resource_id metadata
+                if not nodes:
+                    logger.warning(
+                        "No nodes matched selected resource_ids=%s for course_id=%s. "
+                        "Trying course-level fallback (legacy metadata compatibility).",
+                        list(selected_resource_ids),
+                        course_id,
+                    )
+                    course_nodes = index.as_retriever(filters=course_filters, similarity_top_k=12).retrieve(query_text)
+                    filtered = [
+                        n for n in course_nodes
+                        if str(getattr(getattr(n, "node", None), "metadata", {}).get("resource_id", "")) in selected_resource_ids
+                    ]
+                    nodes = filtered if filtered else course_nodes
+            else:
+                nodes = index.as_retriever(filters=course_filters, similarity_top_k=6).retrieve(query_text)
+
             context_text = "\n\n".join([n.get_content() for n in nodes])
-            logger.info(f"Retrieved {len(nodes)} context nodes for chat")
+            logger.info(
+                "Retrieved %s context nodes for chat (course_id=%s, selected_resource_ids=%s)",
+                len(nodes),
+                course_id,
+                list(selected_resource_ids),
+            )
         except Exception as e:
             logger.warning(f"RAG retrieval failed for chat, falling back to LLM-only: {e}")
             context_text = ""
 
         # Build conversation text
-        conversation = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
+        conversation = "\n".join([f"{_msg_role(m)}: {_msg_content(m)}" for m in messages])
         prompt = f"""
     You are an expert Chinese language tutor helping a student. Use provided context to answer.
     If the context does not contain relevant information, clearly say you could not find it in the selected document.
