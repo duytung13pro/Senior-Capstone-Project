@@ -21,18 +21,21 @@ export async function getStudentResources(
   const enrollments = await Enrollment.find({ student: studentId }).lean()
   const courseIds = enrollments.map((e) => e.course)
 
-  const query: Record<string, unknown> = {
-    course: { $in: courseIds },
-    isPublic: true,
-     type: { $in: ["pdf", "document"] },
-  }
+    const query: Record<string, unknown> = {
+      isPublic: true,
+      type: { $in: ["pdf", "document"] },
+    }
+
+    if (courseIds.length > 0) {
+      query.course = { $in: courseIds }
+    }
 
   if (filters?.courseId) {
     query.course = filters.courseId
   }
 
   if (filters?.type) {
-    query.type = filters.type
+    query.type = { $regex: new RegExp(`^${filters.type}$`, "i") }
   }
 
   if (filters?.tags && filters.tags.length > 0) {
@@ -74,7 +77,7 @@ export async function getResourcesByCourse(studentId: string) {
       const resources = await Resource.find({
         course: courseId,
         isPublic: true,
-         type: { $in: ["pdf", "document"] },
+        type: { $in: ["pdf", "document", "PDF", "DOCUMENT"] },
       })
         .populate("module", "title order")
         .sort({ createdAt: -1 })
@@ -137,7 +140,7 @@ export async function getResourceTags(studentId: string) {
   const resources = await Resource.find({
     course: { $in: courseIds },
     isPublic: true,
-    type: { $in: ["pdf", "document"] },
+    type: { $in: ["pdf", "document", "PDF", "DOCUMENT"] },
   })
     .select("tags")
     .lean()
@@ -209,7 +212,7 @@ export async function getRecentlyViewedResources(studentId: string, limit = 5) {
   const resources = await Resource.find({
     course: { $in: courseIds },
     isPublic: true,
-    type: { $in: ["pdf", "document"] },
+    type: { $in: ["pdf", "document", "PDF", "DOCUMENT"] },
   })
     .populate("course", "title")
     .sort({ downloadCount: -1 })

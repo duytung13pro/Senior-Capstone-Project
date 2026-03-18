@@ -70,10 +70,10 @@ export async function getResourcesForStudent(studentId: string) {
   await dbConnect()
 
   // Limit to public resources from enrolled courses
+  // MVP: return public document resources (already pre-vetted by instructors)
   const resources = await Resource.find({
-    uploadedBy: { $exists: true },
     isPublic: true,
-    type: { $in: ["pdf", "document"] },
+    type: { $in: ["pdf", "document", "PDF", "DOCUMENT"] },
   })
     .select("title type course module tags")
     .sort({ createdAt: -1 })
