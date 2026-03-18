@@ -9,13 +9,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing messages or courseId" }, { status: 400 })
   }
 
-  const upstream = await fetch(`${AI_SERVICE_URL}/chat/stream`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
-    body: JSON.stringify({ messages, courseId, resourceIds, sessionId }),
-    // @ts-expect-error node18 fetch duplex hint
-    duplex: "half",
-  })
+  let upstream: Response
+  try {
+    upstream = await fetch(`${AI_SERVICE_URL}/chat/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      body: JSON.stringify({ messages, courseId, resourceIds, sessionId }),
+      // @ts-expect-error node18 fetch duplex hint
+      duplex: "half",
+    })
+  } catch (error) {
+    console.error("Failed to reach AI service", error)
+    return NextResponse.json({ error: "Failed to reach AI service" }, { status: 502 })
+  }
 
   if (!upstream.ok || !upstream.body) {
     return NextResponse.json({ error: "Failed to reach AI service" }, { status: 502 })

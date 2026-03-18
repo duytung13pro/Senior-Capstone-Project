@@ -175,6 +175,19 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         }),
       })
 
+      if (!response.ok) {
+        let errorMessage = "Không thể kết nối AI service."
+        try {
+          const errData = await response.json()
+          errorMessage = errData?.error || errData?.detail || errorMessage
+        } catch {
+          // no-op
+        }
+        setIsStreaming(false)
+        setStreamingError(errorMessage)
+        return
+      }
+
       if (!response.body) {
         setIsStreaming(false)
         setStreamingError("Không thể kết nối AI service.")

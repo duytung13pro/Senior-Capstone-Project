@@ -73,6 +73,7 @@ services:
     environment:
       - MONGODB_URI=mongodb://admin:admin@mongo:27017/senior_database?authSource=admin
       - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - AI_SERVICE_URL=http://ai-service:8000
     volumes:
       - shared-media:/frontend/public
     command: npm start
