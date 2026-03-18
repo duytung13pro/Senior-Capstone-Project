@@ -5,9 +5,9 @@ import { fileURLToPath } from "node:url"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const defaultUri = "mongodb://admin:admin@localhost:27018/senior_project?authSource=admin"
+const defaultUri = "mongodb://admin:admin@localhost:27017/senior_database?authSource=admin"
 const rawUri = process.env.MONGODB_URI || defaultUri
-const uri = rawUri.replace("mongo:27017", "localhost:27018")
+const uri = rawUri.replace("mongo:27017", "localhost:27017")
 
 const allowedExtensions = [".pdf", ".doc", ".docx", ".ppt", ".pptx"]
 
