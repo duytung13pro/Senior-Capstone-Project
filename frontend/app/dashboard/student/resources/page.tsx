@@ -4,144 +4,27 @@ export const dynamic = 'force-dynamic';
 
 import React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import dynamicImport from "next/dynamic"
-import { ArrowLeft, Loader2, X, Search, FileText, Video, Link2, ImageIcon, Download, ExternalLink, FolderOpen, BookOpen, BookMarked } from "lucide-react"
+import { ArrowLeft, Loader2, X, Search, FileText, Download, FolderOpen, BookOpen, BookMarked } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getStudentResources } from "@/app/actions/resources"
 
 const PdfViewer = dynamicImport(() => import("@/components/pdf-viewer"), { ssr: false })
 
-const resources = [
-  {
-    id: "1",
-    title: "Pinyin Chart PDF",
-    type: "pdf",
-    course: "Beginner Mandarin",
-    courseId: "1",
-    description: "Complete pinyin chart with all tones and pronunciation guide",
-    fileSize: "2.4 MB",
-    downloads: 156,
-    uploadedBy: "Teacher Wang",
-    uploadedAt: "2024-03-15",
-    url: "/media/pinyin-chart.pdf",
-    tags: ["pinyin", "pronunciation", "reference"],
-  },
-  {
-    id: "2",
-    title: "Character Stroke Order Videos",
-    type: "video",
-    course: "Beginner Mandarin",
-    courseId: "1",
-    description: "Video collection showing proper stroke order for 100 basic characters",
-    fileSize: "150 MB",
-    downloads: 89,
-    uploadedBy: "Teacher Wang",
-    uploadedAt: "2024-03-20",
-    tags: ["characters", "writing", "stroke-order"],
-  },
-  {
-    id: "3",
-    title: "HSK 4 Vocabulary List",
-    type: "pdf",
-    course: "HSK 4 Preparation",
-    courseId: "3",
-    description: "Complete vocabulary list for HSK Level 4 with pinyin and examples",
-    fileSize: "1.8 MB",
-    downloads: 234,
-    uploadedBy: "Teacher Zhang",
-    uploadedAt: "2024-04-01",
-    url: "/media/hsk4-vocabulary.pdf",
-    tags: ["vocabulary", "hsk4", "study-guide"],
-  },
-  {
-    id: "4",
-    title: "Conversation Practice Audio",
-    type: "video",
-    course: "Intermediate Conversation",
-    courseId: "2",
-    description: "Audio recordings of native speaker conversations at intermediate level",
-    fileSize: "85 MB",
-    downloads: 67,
-    uploadedBy: "Teacher Li",
-    uploadedAt: "2024-04-10",
-    tags: ["listening", "conversation", "audio"],
-  },
-  {
-    id: "5",
-    title: "Chinese Grammar Reference",
-    type: "link",
-    course: "Beginner Mandarin",
-    courseId: "1",
-    description: "External link to comprehensive Chinese grammar resource",
-    fileSize: null,
-    downloads: 112,
-    uploadedBy: "Teacher Wang",
-    uploadedAt: "2024-04-15",
-    tags: ["grammar", "reference", "external"],
-  },
-  {
-    id: "6",
-    title: "Calligraphy Brush Technique Guide",
-    type: "pdf",
-    course: "Chinese Calligraphy",
-    courseId: "4",
-    description: "Illustrated guide to brush holding and basic strokes",
-    fileSize: "5.2 MB",
-    downloads: 45,
-    uploadedBy: "Teacher Chen",
-    uploadedAt: "2024-04-20",
-    url: "/media/grammar-essentials.pdf",
-    tags: ["calligraphy", "technique", "guide"],
-  },
-  {
-    id: "7",
-    title: "Character Practice Sheets",
-    type: "pdf",
-    course: "Beginner Mandarin",
-    courseId: "1",
-    description: "Printable character practice sheets with grid lines",
-    fileSize: "3.1 MB",
-    downloads: 198,
-    uploadedBy: "Teacher Wang",
-    uploadedAt: "2024-05-01",
-    url: "/media/pinyin-chart.pdf",
-    tags: ["practice", "writing", "printable"],
-  },
-  {
-    id: "8",
-    title: "HSK 4 Mock Exam",
-    type: "pdf",
-    course: "HSK 4 Preparation",
-    courseId: "3",
-    description: "Full-length practice exam with answer key",
-    fileSize: "4.5 MB",
-    downloads: 156,
-    uploadedBy: "Teacher Zhang",
-    uploadedAt: "2024-05-10",
-    url: "/media/hsk4-vocabulary.pdf",
-    tags: ["exam", "practice", "hsk4"],
-  },
-]
-
 const typeIcons: Record<string, React.ElementType> = {
   pdf: FileText,
-  video: Video,
-  link: Link2,
-  image: ImageIcon,
   document: FileText,
 }
 
 const typeColors: Record<string, string> = {
   pdf: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-  video: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-  link: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  image: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
   document: "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
 }
 
@@ -149,11 +32,41 @@ export default function StudentResourcesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [courseFilter, setCourseFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
+  const [resourcesData, setResourcesData] = useState<any[]>([])
   const [selectedResource, setSelectedResource] = useState<any>(null)
   const [translationResult, setTranslationResult] = useState<{ text: string; explanation: string } | null>(null)
   const [isTranslating, setIsTranslating] = useState(false)
   const [savingFlashcard, setSavingFlashcard] = useState(false)
   const [flashcardSaved, setFlashcardSaved] = useState(false)
+
+  useEffect(() => {
+    const loadResources = async () => {
+      try {
+        const studentId = localStorage.getItem("userId") || ""
+        const resourcesFromDb = await getStudentResources(studentId)
+        const normalized = (resourcesFromDb || []).map((r: any) => ({
+          id: r._id?.toString?.() || r._id,
+          title: r.title,
+          type: String(r.type || "document").toLowerCase(),
+          course: r.course?.title || "General Course",
+          courseId: r.course?._id?.toString?.() || r.course?.toString?.() || "general",
+          description: r.description || "",
+          fileSize: r.fileSize ? `${(Number(r.fileSize) / 1024 / 1024).toFixed(1)} MB` : null,
+          downloads: Number(r.downloadCount || 0),
+          uploadedBy: r.uploadedBy?.name || "Teacher",
+          uploadedAt: r.createdAt || "",
+          url: r.url,
+          tags: r.tags || [],
+        }))
+
+        setResourcesData(normalized)
+      } catch (error) {
+        console.error("Failed to load resources", error)
+      }
+    }
+
+    void loadResources()
+  }, [])
 
   const handleSaveFlashcard = async () => {
     if (!translationResult || savingFlashcard) return
@@ -196,7 +109,7 @@ export default function StudentResourcesPage() {
     setIsTranslating(true)
     setTranslationResult(null)
     try {
-      const response = await fetch("http://localhost:8000/translate", {
+      const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -205,6 +118,11 @@ export default function StudentResourcesPage() {
           targetLanguage: "English",
         }),
       })
+
+      if (!response.ok) {
+        throw new Error(`Translate API error: ${response.status}`)
+      }
+
       const data = await response.json()
       if (data.explanation) {
         setTranslationResult({ text, explanation: data.explanation })
@@ -216,7 +134,7 @@ export default function StudentResourcesPage() {
     }
   }
 
-  const filteredResources = resources.filter((resource) => {
+  const filteredResources = resourcesData.filter((resource) => {
     const matchesSearch =
       resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -226,7 +144,7 @@ export default function StudentResourcesPage() {
     return matchesSearch && matchesCourse && matchesType
   })
 
-  const resourcesByCourse = resources.reduce(
+  const resourcesByCourse = resourcesData.reduce(
     (acc, resource) => {
       if (!acc[resource.course]) {
         acc[resource.course] = []
@@ -234,10 +152,13 @@ export default function StudentResourcesPage() {
       acc[resource.course].push(resource)
       return acc
     },
-    {} as Record<string, typeof resources>
+    {} as Record<string, typeof resourcesData>
   )
 
-  const allTags = [...new Set(resources.flatMap((r) => r.tags))].sort()
+  const allTags = [...new Set(resourcesData.flatMap((r) => r.tags))].sort()
+  const courseOptions = Array.from(
+    new Map(resourcesData.map((r) => [r.courseId, r.course])).entries()
+  )
 
   // PDF Viewer full-screen view
   if (selectedResource) {
@@ -342,10 +263,11 @@ export default function StudentResourcesPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Courses</SelectItem>
-            <SelectItem value="1">Beginner Mandarin</SelectItem>
-            <SelectItem value="2">Intermediate Conversation</SelectItem>
-            <SelectItem value="3">HSK 4 Preparation</SelectItem>
-            <SelectItem value="4">Chinese Calligraphy</SelectItem>
+            {courseOptions.map(([id, label]) => (
+              <SelectItem key={id} value={id}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -355,9 +277,7 @@ export default function StudentResourcesPage() {
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="pdf">PDF</SelectItem>
-            <SelectItem value="video">Video</SelectItem>
-            <SelectItem value="link">Link</SelectItem>
-            <SelectItem value="image">Image</SelectItem>
+            <SelectItem value="document">Document</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -437,18 +357,11 @@ export default function StudentResourcesPage() {
                               View
                             </Button>
                           )}
-                          <Button size="sm" variant={resource.type === "link" ? "outline" : "default"}>
-                            {resource.type === "link" ? (
-                              <>
-                                <ExternalLink className="h-4 w-4 mr-1" />
-                                Open
-                              </>
-                            ) : (
-                              <>
-                                <Download className="h-4 w-4 mr-1" />
-                                Download
-                              </>
-                            )}
+                          <Button size="sm" asChild>
+                            <a href={resource.url} target="_blank" rel="noreferrer">
+                              <Download className="h-4 w-4 mr-1" />
+                              Download
+                            </a>
                           </Button>
                         </div>
                       </div>
@@ -500,12 +413,10 @@ export default function StudentResourcesPage() {
                                 <FileText className="h-4 w-4" />
                               </Button>
                             )}
-                            <Button size="sm" variant="ghost">
-                              {resource.type === "link" ? (
-                                <ExternalLink className="h-4 w-4" />
-                              ) : (
+                            <Button size="sm" variant="ghost" asChild>
+                              <a href={resource.url} target="_blank" rel="noreferrer" title="Download resource">
                                 <Download className="h-4 w-4" />
-                              )}
+                              </a>
                             </Button>
                           </div>
                         </div>

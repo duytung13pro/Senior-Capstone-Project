@@ -7,8 +7,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 
-// Configure the PDF.js worker (Required for Next.js)
-// Note: react-pdf v9+ uses .mjs for the worker
+// Configure PDF.js worker via CDN for stable runtime loading in Next.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PdfViewerProps {
@@ -18,6 +17,7 @@ interface PdfViewerProps {
 
 export default function PdfViewer({ fileUrl, onTextSelect }: PdfViewerProps) {
   const [numPages, setNumPages] = useState<number>();
+  const resolvedFileUrl = fileUrl.startsWith("/media/") ? `/api/media/${fileUrl.replace(/^\/media\//, "")}` : fileUrl
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
@@ -40,8 +40,11 @@ export default function PdfViewer({ fileUrl, onTextSelect }: PdfViewerProps) {
       className="flex flex-col items-center bg-gray-100 p-4 overflow-auto max-h-screen"
     >
       <Document
-        file={fileUrl}
+        file={resolvedFileUrl}
         onLoadSuccess={onDocumentLoadSuccess}
+        onLoadError={(error) => {
+          console.error("Failed to load PDF:", resolvedFileUrl, error)
+        }}
         className="shadow-lg"
       >
         {Array.from(new Array(numPages), (el, index) => (
