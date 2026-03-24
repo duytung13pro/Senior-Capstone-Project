@@ -71,7 +71,6 @@ export function Header() {
       <div className="flex w-full max-w-7xl mx-auto items-center">
         <div className="ml-2 pl-16">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="text-xl text-primary">汉语学习</span>
             <span className="text-lg">Teacher Portal</span>
           </Link>
         </div>

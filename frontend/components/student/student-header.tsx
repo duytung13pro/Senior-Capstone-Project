@@ -1,8 +1,17 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Bell, ChevronDown, Globe, LogOut, Moon, Sun, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react";
+import {
+  Bell,
+  ChevronDown,
+  GraduationCap,
+  Globe,
+  LogOut,
+  Moon,
+  Sun,
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,26 +19,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { useTheme } from "next-themes"
-import Link from "next/link"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { useTheme } from "next-themes";
+import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
 
 const languages = [
   { code: "en", name: "English", flag: "🇺🇸" },
   { code: "zh", name: "中文", flag: "🇨🇳" },
   { code: "es", name: "Español", flag: "🇪🇸" },
   { code: "fr", name: "Français", flag: "🇫🇷" },
-]
+];
 
 interface Notification {
-  id: string
-  title: string
-  message: string
-  type: "assignment" | "grade" | "message" | "announcement"
-  read: boolean
-  time: string
+  id: string;
+  title: string;
+  message: string;
+  type: "assignment" | "grade" | "message" | "announcement";
+  read: boolean;
+  time: string;
 }
 
 const mockNotifications: Notification[] = [
@@ -57,25 +67,60 @@ const mockNotifications: Notification[] = [
     read: true,
     time: "2 hours ago",
   },
-]
+];
 
 export function StudentHeader() {
-  const { theme, setTheme } = useTheme()
-  const [notifications] = useState<Notification[]>(mockNotifications)
-  const [currentLang, setCurrentLang] = useState("en")
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
+  const [notifications] = useState<Notification[]>(mockNotifications);
+  const [currentLang, setCurrentLang] = useState("en");
+  const [localAvatar, setLocalAvatar] = useState("");
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleLogout = () => {
-    alert("Logging out...")
-    window.location.href = "/"
-  }
+  useEffect(() => {
+    const syncAvatar = () => {
+      setLocalAvatar(localStorage.getItem("userAvatar") || "");
+    };
+
+    syncAvatar();
+    window.addEventListener("profile-avatar-updated", syncAvatar);
+    window.addEventListener("storage", syncAvatar);
+
+    return () => {
+      window.removeEventListener("profile-avatar-updated", syncAvatar);
+      window.removeEventListener("storage", syncAvatar);
+    };
+  }, []);
+
+  const displayName = session?.user?.name?.trim() || "Student";
+  const displayEmail = session?.user?.email?.trim() || "";
+  const avatarSrc = localAvatar || session?.user?.image || undefined;
+  const initials =
+    displayName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || "")
+      .join("") || "S";
+
+  const handleLogout = async () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userAvatar");
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6">
       <div className="flex items-center gap-4 pl-16">
-        <Link href="/dashboard/student" className="flex items-center gap-2">
-          <span className="text-xl text-primary font-semibold">汉语学习</span>
-          <span className="text-muted-foreground hidden sm:inline">Student Portal</span>
+        <Link
+          href="/dashboard/student"
+          className="flex items-center gap-2 text-primary"
+        >
+          <span className="text-xl font-bold tracking-tight">
+            Student Portal
+          </span>
         </Link>
       </div>
 
@@ -95,8 +140,8 @@ export function StudentHeader() {
               <DropdownMenuItem
                 key={lang.code}
                 onClick={() => {
-                  setCurrentLang(lang.code)
-                  alert(`Language changed to ${lang.name}`)
+                  setCurrentLang(lang.code);
+                  alert(`Language changed to ${lang.name}`);
                 }}
                 className={currentLang === lang.code ? "bg-accent" : ""}
               >
@@ -108,7 +153,11 @@ export function StudentHeader() {
         </DropdownMenu>
 
         {/* Theme Toggle */}
-        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
@@ -131,29 +180,53 @@ export function StudentHeader() {
             <DropdownMenuLabel className="flex items-center justify-between">
               Notifications
               {unreadCount > 0 && (
-                <Button variant="ghost" size="sm" className="text-xs h-auto py-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-auto py-1"
+                >
                   Mark all read
                 </Button>
               )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {notifications.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">No notifications</div>
+              <div className="p-4 text-center text-muted-foreground">
+                No notifications
+              </div>
             ) : (
               notifications.map((notification) => (
-                <DropdownMenuItem key={notification.id} className="flex flex-col items-start gap-1 p-3 cursor-pointer">
+                <DropdownMenuItem
+                  key={notification.id}
+                  className="flex flex-col items-start gap-1 p-3 cursor-pointer"
+                >
                   <div className="flex items-center gap-2 w-full">
-                    <span className={cn("font-medium", !notification.read && "text-primary")}>{notification.title}</span>
-                    {!notification.read && <span className="h-2 w-2 rounded-full bg-primary ml-auto" />}
+                    <span
+                      className={cn(
+                        "font-medium",
+                        !notification.read && "text-primary",
+                      )}
+                    >
+                      {notification.title}
+                    </span>
+                    {!notification.read && (
+                      <span className="h-2 w-2 rounded-full bg-primary ml-auto" />
+                    )}
                   </div>
-                  <span className="text-sm text-muted-foreground line-clamp-1">{notification.message}</span>
-                  <span className="text-xs text-muted-foreground">{notification.time}</span>
+                  <span className="text-sm text-muted-foreground line-clamp-1">
+                    {notification.message}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {notification.time}
+                  </span>
                 </DropdownMenuItem>
               ))
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="justify-center">
-              <Link href="/dashboard/student/messages">View all notifications</Link>
+              <Link href="/dashboard/student/messages">
+                View all notifications
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -163,11 +236,16 @@ export function StudentHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary/10 text-primary">ST</AvatarFallback>
+                <AvatarImage src={avatarSrc} alt={displayName} />
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-medium">Student Name</span>
-                <span className="text-xs text-muted-foreground">student@example.com</span>
+                <span className="text-sm font-medium">{displayName}</span>
+                <span className="text-xs text-muted-foreground">
+                  {displayEmail}
+                </span>
               </div>
               <ChevronDown className="h-4 w-4 hidden md:block" />
             </Button>
@@ -182,7 +260,10 @@ export function StudentHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-destructive"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>
@@ -190,9 +271,9 @@ export function StudentHeader() {
         </DropdownMenu>
       </div>
     </header>
-  )
+  );
 }
 
 function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ")
+  return classes.filter(Boolean).join(" ");
 }

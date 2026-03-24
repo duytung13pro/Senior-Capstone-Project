@@ -10,4 +10,5 @@ public interface AssignmentSubmissionRepository extends MongoRepository<Assignme
     long countByAssignmentId(String assignmentId);
     List<AssignmentSubmission> findByAssignmentId(String assignmentId);
     AssignmentSubmission findTopByAssignmentIdAndStudentIdOrderBySubmittedAtDesc(String assignmentId, String studentId);
+    void deleteByAssignmentId(String assignmentId);
 }

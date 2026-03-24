@@ -24,6 +24,6 @@ WORKDIR /app
 # Maven builds the JAR in the 'target' folder relative to where the pom.xml is.
 COPY --from=build /app/backend/target/*.jar ./backend.jar
 
-EXPOSE 8080
+EXPOSE 8081
 
 CMD ["java", "-jar", "backend.jar"]

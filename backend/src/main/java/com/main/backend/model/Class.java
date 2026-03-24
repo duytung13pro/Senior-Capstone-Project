@@ -10,6 +10,159 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "classes")
 public class Class {
 
+    public static class AnnouncementEntry {
+        private String id;
+        private String title;
+        private String content;
+        private String status;
+        private String target;
+        private Boolean pinned = false;
+        private Instant createdAt = Instant.now();
+        private Instant updatedAt = Instant.now();
+
+        public AnnouncementEntry() {
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getTarget() {
+            return target;
+        }
+
+        public void setTarget(String target) {
+            this.target = target;
+        }
+
+        public Boolean getPinned() {
+            return pinned;
+        }
+
+        public void setPinned(Boolean pinned) {
+            this.pinned = pinned;
+        }
+
+        public Instant getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(Instant createdAt) {
+            this.createdAt = createdAt;
+        }
+
+        public Instant getUpdatedAt() {
+            return updatedAt;
+        }
+
+        public void setUpdatedAt(Instant updatedAt) {
+            this.updatedAt = updatedAt;
+        }
+    }
+
+    public static class ResourceLink {
+        private String id;
+        private String title;
+        private String url;
+        private Instant createdAt = Instant.now();
+
+        public ResourceLink() {
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public Instant getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(Instant createdAt) {
+            this.createdAt = createdAt;
+        }
+    }
+
+    public static class ModuleEntry {
+        private String id;
+        private String title;
+        private Integer order;
+
+        public ModuleEntry() {
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Integer getOrder() {
+            return order;
+        }
+
+        public void setOrder(Integer order) {
+            this.order = order;
+        }
+    }
+
     @Id
     private String id;
 
@@ -41,6 +194,12 @@ public class Class {
     // List of student user IDs enrolled in this class
 
     private List<String> studentIds = new ArrayList<>();
+
+    private List<ResourceLink> resources = new ArrayList<>();
+
+    private List<AnnouncementEntry> announcements = new ArrayList<>();
+
+    private List<ModuleEntry> modules = new ArrayList<>();
 
     public Class() {
     }
@@ -143,5 +302,29 @@ public class Class {
 
     public void setStudentIds(List<String> studentIds) {
         this.studentIds = studentIds;
+    }
+
+    public List<ResourceLink> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<ResourceLink> resources) {
+        this.resources = resources;
+    }
+
+    public List<AnnouncementEntry> getAnnouncements() {
+        return announcements;
+    }
+
+    public void setAnnouncements(List<AnnouncementEntry> announcements) {
+        this.announcements = announcements;
+    }
+
+    public List<ModuleEntry> getModules() {
+        return modules;
+    }
+
+    public void setModules(List<ModuleEntry> modules) {
+        this.modules = modules;
     }
 }

@@ -10,5 +10,6 @@ import com.main.backend.model.Assignment;
 public interface AssignmentRepository extends MongoRepository<Assignment, String> {
     List<Assignment> findByClassId(String classId);
     Optional<Assignment> findFirstByClassIdAndTitle(String classId, String title);
+    void deleteByClassId(String classId);
 
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -14,7 +15,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  GripVertical,
+  Link2,
+  Plus,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { AddStudentButton } from "@/components/add-student-button";
 import { RemoveStudentButton } from "@/components/remove-student-button";
@@ -39,6 +47,20 @@ interface ClassDetail {
   startDate?: string;
   endDate?: string;
   studentIds: string[];
+  resources?: ClassResource[];
+  modules?: ClassModule[];
+}
+
+interface ClassResource {
+  id: string;
+  title: string;
+  url: string;
+}
+
+interface ClassModule {
+  id: string;
+  title: string;
+  order?: number;
 }
 
 export function EachClass() {
@@ -54,8 +76,56 @@ export function EachClass() {
   const [studentLoading, setStudentLoading] = useState(true);
   const [studentError, setStudentError] = useState<string | null>(null);
   const [classError, setClassError] = useState<string | null>(null);
+  const [resourceTitle, setResourceTitle] = useState("");
+  const [resourceUrl, setResourceUrl] = useState("");
+  const [resourceError, setResourceError] = useState<string | null>(null);
+  const [resourceSaving, setResourceSaving] = useState(false);
+  const [resourceDeletingId, setResourceDeletingId] = useState<string | null>(
+    null,
+  );
+  const [moduleTitle, setModuleTitle] = useState("");
+  const [moduleError, setModuleError] = useState<string | null>(null);
+  const [moduleSaving, setModuleSaving] = useState(false);
+  const [moduleDeletingId, setModuleDeletingId] = useState<string | null>(null);
+  const [moduleLoading, setModuleLoading] = useState(false);
+  const [moduleLoadError, setModuleLoadError] = useState<string | null>(null);
+  const [modules, setModules] = useState<ClassModule[]>([]);
 
   const [students, setStudents] = useState<Student[]>([]);
+  const fetchModules = async (
+    showLoading = false,
+    sourceClassId: string = classId,
+  ) => {
+    if (!sourceClassId) {
+      setModules([]);
+      return;
+    }
+
+    if (showLoading) {
+      setModuleLoading(true);
+    }
+
+    try {
+      setModuleLoadError(null);
+      const res = await fetchApiFirstOk(`/api/classes/${sourceClassId}/modules`, {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      setModules(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setModules([]);
+      setModuleLoadError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load modules in this class.",
+      );
+    } finally {
+      if (showLoading) {
+        setModuleLoading(false);
+      }
+    }
+  };
+
   // Update class
   const fetchClass = async (showLoading = false) => {
     if (showLoading) {
@@ -121,6 +191,7 @@ export function EachClass() {
 
     fetchClass(true);
     fetchStudents(true);
+    fetchModules(true, classId);
   }, [classId]);
 
   if (loading) {
@@ -136,6 +207,143 @@ export function EachClass() {
   }
 
   const effectiveClassId = classData.id || classId;
+  const classResources = classData.resources || [];
+  const classModules = [...modules].sort(
+    (left, right) =>
+      (left.order ?? Number.MAX_SAFE_INTEGER) -
+      (right.order ?? Number.MAX_SAFE_INTEGER),
+  );
+
+  const handleAddResource = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const title = resourceTitle.trim();
+    const url = resourceUrl.trim();
+
+    if (!title || !url) {
+      setResourceError("Please provide both a title and a URL.");
+      return;
+    }
+
+    try {
+      setResourceSaving(true);
+      setResourceError(null);
+
+      const res = await fetchApiFirstOk(
+        `/api/classes/${effectiveClassId}/resources`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title, url }),
+        },
+      );
+
+      const updatedClass: ClassDetail = await res.json();
+      setClassData(updatedClass);
+      setResourceTitle("");
+      setResourceUrl("");
+    } catch (error) {
+      setResourceError(
+        error instanceof Error
+          ? error.message
+          : "Unable to add resource right now.",
+      );
+    } finally {
+      setResourceSaving(false);
+    }
+  };
+
+  const handleRemoveResource = async (resourceId: string) => {
+    try {
+      setResourceDeletingId(resourceId);
+      setResourceError(null);
+
+      const res = await fetchApiFirstOk(
+        `/api/classes/${effectiveClassId}/resources/${resourceId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const updatedClass: ClassDetail = await res.json();
+      setClassData(updatedClass);
+    } catch (error) {
+      setResourceError(
+        error instanceof Error
+          ? error.message
+          : "Unable to remove resource right now.",
+      );
+    } finally {
+      setResourceDeletingId(null);
+    }
+  };
+
+  const handleAddModule = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const title = moduleTitle.trim();
+    if (!title) {
+      setModuleError("Please provide a module name.");
+      return;
+    }
+
+    try {
+      setModuleSaving(true);
+      setModuleError(null);
+
+      const res = await fetchApiFirstOk(
+        `/api/classes/${effectiveClassId}/modules`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title }),
+        },
+      );
+
+      const updatedClass: ClassDetail = await res.json();
+      setClassData(updatedClass);
+      await fetchModules(false, updatedClass.id || effectiveClassId);
+      setModuleTitle("");
+    } catch (error) {
+      setModuleError(
+        error instanceof Error
+          ? error.message
+          : "Unable to add module right now.",
+      );
+    } finally {
+      setModuleSaving(false);
+    }
+  };
+
+  const handleRemoveModule = async (moduleId: string) => {
+    try {
+      setModuleDeletingId(moduleId);
+      setModuleError(null);
+
+      const res = await fetchApiFirstOk(
+        `/api/classes/${effectiveClassId}/modules/${moduleId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const updatedClass: ClassDetail = await res.json();
+      setClassData(updatedClass);
+      await fetchModules(false, updatedClass.id || effectiveClassId);
+    } catch (error) {
+      setModuleError(
+        error instanceof Error
+          ? error.message
+          : "Unable to remove module right now.",
+      );
+    } finally {
+      setModuleDeletingId(null);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -234,6 +442,170 @@ export function EachClass() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="rounded-xl border border-gray-100 bg-white shadow-sm">
+        <CardHeader>
+          <CardTitle>Class Resources</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form
+            onSubmit={handleAddResource}
+            className="flex flex-col gap-3 md:flex-row md:items-end"
+          >
+            <div className="w-full space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">
+                Resource Title
+              </label>
+              <Input
+                value={resourceTitle}
+                onChange={(event) => setResourceTitle(event.target.value)}
+                placeholder="Course Syllabus"
+                className="border-gray-200 focus-visible:ring-primary"
+              />
+            </div>
+
+            <div className="w-full space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">
+                Resource URL
+              </label>
+              <Input
+                value={resourceUrl}
+                onChange={(event) => setResourceUrl(event.target.value)}
+                placeholder="https://zoom.us/..."
+                className="border-gray-200 focus-visible:ring-primary"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={resourceSaving}
+              className="bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {resourceSaving ? "Adding..." : "Add Resource"}
+            </Button>
+          </form>
+
+          {resourceError ? (
+            <p className="text-sm text-destructive">{resourceError}</p>
+          ) : null}
+
+          <div className="space-y-2">
+            {classResources.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No resources added yet.
+              </p>
+            ) : (
+              classResources.map((resource) => (
+                <div
+                  key={resource.id}
+                  className="flex items-start justify-between gap-3 rounded-lg border border-gray-100 p-3"
+                >
+                  <div className="min-w-0 space-y-1">
+                    <p className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
+                      <Link2 className="h-4 w-4 text-muted-foreground" />
+                      <span>{resource.title}</span>
+                    </p>
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block max-w-[420px] truncate text-xs text-gray-500 hover:underline"
+                    >
+                      {resource.url}
+                    </a>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={resourceDeletingId === resource.id}
+                    onClick={() => handleRemoveResource(resource.id)}
+                    className="text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-xl border border-gray-100 bg-white shadow-sm">
+        <CardHeader>
+          <CardTitle>Manage Modules / Syllabus</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form
+            onSubmit={handleAddModule}
+            className="flex flex-col gap-3 md:flex-row md:items-end"
+          >
+            <div className="w-full space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">
+                Module Name
+              </label>
+              <Input
+                value={moduleTitle}
+                onChange={(event) => setModuleTitle(event.target.value)}
+                placeholder="Week 1: Basics"
+                className="border-gray-200 focus-visible:ring-primary"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={moduleSaving}
+              className="bg-emerald-600 text-white hover:bg-emerald-700"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              {moduleSaving ? "Adding..." : "Add Module"}
+            </Button>
+          </form>
+
+          {moduleError ? (
+            <p className="text-sm text-destructive">{moduleError}</p>
+          ) : null}
+
+          {moduleLoadError ? (
+            <p className="text-sm text-destructive">{moduleLoadError}</p>
+          ) : null}
+
+          <div className="space-y-2">
+            {moduleLoading ? (
+              <p className="text-sm text-muted-foreground">Loading modules...</p>
+            ) : classModules.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No modules added yet.
+              </p>
+            ) : (
+              classModules.map((moduleItem) => (
+                <div
+                  key={moduleItem.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-gray-100 p-3"
+                >
+                  <div className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    <span>{moduleItem.title}</span>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={moduleDeletingId === moduleItem.id}
+                    onClick={() => handleRemoveModule(moduleItem.id)}
+                    className="text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Tabs */}
       <Card>

@@ -55,6 +55,12 @@ type TeacherClass = {
   name: string;
 };
 
+type ClassModule = {
+  id: string;
+  title: string;
+  order?: number;
+};
+
 type LessonStatus =
   | "Draft"
   | "Ready / Scheduled"
@@ -83,6 +89,7 @@ type CreateLessonPlanForm = {
   title: string;
   topic: string;
   classId: string;
+  moduleId: string;
   date?: Date;
   difficulty: "1" | "2" | "3" | "4" | "5" | "";
   duration: string;
@@ -164,6 +171,7 @@ const defaultForm = (): CreateLessonPlanForm => ({
   title: "",
   topic: "",
   classId: "",
+  moduleId: "",
   date: new Date(),
   difficulty: "",
   duration: "45 mins",
@@ -225,9 +233,12 @@ export function LessonPlansPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [classes, setClasses] = useState<TeacherClass[]>([]);
+  const [classModules, setClassModules] = useState<ClassModule[]>([]);
   const [lessonPlans, setLessonPlans] = useState<LessonPlan[]>([]);
 
   const [loading, setLoading] = useState(true);
+  const [loadingModules, setLoadingModules] = useState(false);
+  const [moduleLoadError, setModuleLoadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -578,6 +589,99 @@ export function LessonPlansPage() {
     return () => clearTimeout(timeoutId);
   }, [dialogOpen, form, assetLibrary, arcMinutes, plannerTab]);
 
+  useEffect(() => {
+    if (!dialogOpen) {
+      return;
+    }
+
+    if (!form.classId || form.status === "Template") {
+      setClassModules([]);
+      setLoadingModules(false);
+      setModuleLoadError(null);
+      setForm((prev) => (prev.moduleId ? { ...prev, moduleId: "" } : prev));
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadModules = async () => {
+      try {
+        setLoadingModules(true);
+        setModuleLoadError(null);
+
+        const res = await fetchApiFirstOk(
+          `/api/classes/${form.classId}/modules`,
+          {
+            cache: "no-store",
+          },
+        );
+
+        const payload: Array<{
+          id?: string;
+          _id?: string;
+          moduleId?: string;
+          title?: string;
+          name?: string;
+          moduleName?: string;
+          order?: number;
+        }> = await res.json();
+
+        const mapped = (Array.isArray(payload) ? payload : [])
+          .map((item, index) => {
+            const resolvedTitle = String(
+              item.title || item.name || item.moduleName || "",
+            ).trim();
+            const resolvedId = String(
+              item.id || item.moduleId || item._id || resolvedTitle || `module-${index + 1}`,
+            ).trim();
+
+            return {
+              id: resolvedId,
+              title: resolvedTitle,
+              order: item.order,
+            };
+          })
+          .filter((item) => item.title.length > 0)
+          .sort(
+            (left, right) =>
+              (left.order ?? Number.MAX_SAFE_INTEGER) -
+              (right.order ?? Number.MAX_SAFE_INTEGER),
+          );
+
+        if (cancelled) {
+          return;
+        }
+
+        setClassModules(mapped);
+        setForm((prev) => ({
+          ...prev,
+          moduleId:
+            prev.moduleId && mapped.some((item) => item.id === prev.moduleId)
+              ? prev.moduleId
+              : mapped[0]?.id || "",
+        }));
+      } catch {
+        if (cancelled) {
+          return;
+        }
+
+        setClassModules([]);
+        setModuleLoadError("Unable to load modules for the selected class.");
+        setForm((prev) => (prev.moduleId ? { ...prev, moduleId: "" } : prev));
+      } finally {
+        if (!cancelled) {
+          setLoadingModules(false);
+        }
+      }
+    };
+
+    void loadModules();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dialogOpen, form.classId, form.status]);
+
   const createLessonPlan = async () => {
     const teacherId = localStorage.getItem("userId");
 
@@ -605,6 +709,7 @@ export function LessonPlansPage() {
           body: JSON.stringify({
             teacherId,
             classId: isTemplate ? "" : form.classId,
+            moduleId: isTemplate ? "" : form.moduleId,
             title: form.topic ? `${form.title} — ${form.topic}` : form.title,
             date: isTemplate
               ? new Date().toISOString()
@@ -937,13 +1042,17 @@ export function LessonPlansPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 md:grid-cols-3">
                   <div className="grid gap-2">
                     <Label htmlFor="class">Class</Label>
                     <Select
                       value={form.classId || undefined}
                       onValueChange={(value) =>
-                        setForm((prev) => ({ ...prev, classId: value }))
+                        setForm((prev) => ({
+                          ...prev,
+                          classId: value,
+                          moduleId: "",
+                        }))
                       }
                     >
                       <SelectTrigger id="class">
@@ -961,6 +1070,52 @@ export function LessonPlansPage() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="moduleId">Module / Unit</Label>
+                    <Select
+                      value={form.moduleId || undefined}
+                      onValueChange={(value) =>
+                        setForm((prev) => ({ ...prev, moduleId: value }))
+                      }
+                      disabled={
+                        !form.classId ||
+                        form.status === "Template" ||
+                        loadingModules ||
+                        classModules.length === 0
+                      }
+                    >
+                      <SelectTrigger id="moduleId">
+                        <SelectValue
+                          placeholder={
+                            !form.classId
+                              ? "Select class first"
+                              : form.status === "Template"
+                                ? "Not required for template"
+                                : loadingModules
+                                  ? "Loading modules..."
+                                  : "No modules available"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classModules.map((moduleItem) => (
+                          <SelectItem key={moduleItem.id} value={moduleItem.id}>
+                            {moduleItem.title}
+                          </SelectItem>
+                        ))}
+                        {!loadingModules && classModules.length === 0 ? (
+                          <SelectItem value="no-modules" disabled>
+                            No modules available
+                          </SelectItem>
+                        ) : null}
+                      </SelectContent>
+                    </Select>
+                    {moduleLoadError ? (
+                      <p className="text-xs text-destructive">{moduleLoadError}</p>
+                    ) : null}
+                  </div>
+
                   <div className="grid gap-2">
                     <Label htmlFor="date">Date</Label>
                     <Popover>
@@ -1038,6 +1193,8 @@ export function LessonPlansPage() {
                           status: nextStatus,
                           classId:
                             nextStatus === "Template" ? "" : prev.classId,
+                          moduleId:
+                            nextStatus === "Template" ? "" : prev.moduleId,
                           date:
                             nextStatus === "Template" ? undefined : prev.date,
                         }));
@@ -1753,16 +1910,6 @@ export function LessonPlansPage() {
                       onSelect={(value) => setFilterDate(value ?? null)}
                       initialFocus
                     />
-                    <div className="border-t p-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => setFilterDate(null)}
-                      >
-                        Clear date filter
-                      </Button>
-                    </div>
                   </PopoverContent>
                 </Popover>
               </div>

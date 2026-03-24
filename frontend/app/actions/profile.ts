@@ -53,12 +53,37 @@ export type CurrentProfileSettings = {
   preferences: PreferenceSettingsInput
 }
 
+function splitDisplayName(name: string) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+
+  if (parts.length === 0) {
+    return { firstName: "", lastName: "" }
+  }
+
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: "" }
+  }
+
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
+  }
+}
+
 function normalizeProfile(user: any): CurrentProfileSettings {
+  const firstName = String((user as any).firstName ?? "").trim()
+  const lastName = String((user as any).lastName ?? "").trim()
+  const combinedName = `${firstName} ${lastName}`.trim()
+  const fallbackName = String(user.name ?? "").trim()
+
   return {
     id: user._id.toString(),
     role: user.role ?? "",
     email: user.email ?? "",
-    name: user.name ?? "",
+    name: combinedName || fallbackName,
     avatar: user.avatar ?? "",
     phone: user.phone ?? "",
     location: user.location ?? "",
@@ -116,8 +141,12 @@ export async function updateCurrentUserProfile(data: ProfileInfoInput) {
   try {
     const parsed = profileInfoSchema.parse(data)
     const user = await getAuthedUserOrThrow(false)
+    const nextName = String(parsed.name || "").trim()
+    const { firstName, lastName } = splitDisplayName(nextName)
 
-    user.name = parsed.name
+    user.name = nextName
+    ;(user as any).firstName = firstName
+    ;(user as any).lastName = lastName
     user.phone = parsed.phone || ""
     user.location = parsed.location || ""
     user.bio = parsed.bio || ""

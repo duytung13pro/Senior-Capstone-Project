@@ -375,11 +375,18 @@ export function UpcomingAssignments({
             );
 
             return (
-              <button
+              <div
                 key={assignment.id}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => handleAssignmentClick(assignment)}
-                className={`flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-[#F9FAFB] ${
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleAssignmentClick(assignment);
+                  }
+                }}
+                className={`flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-[#F9FAFB] focus:outline-none focus:ring-2 focus:ring-primary/30 ${
                   index < visibleAssignments.length - 1
                     ? "border-b border-[#E5E7EB]"
                     : ""
@@ -442,7 +449,7 @@ export function UpcomingAssignments({
                     Review
                   </Button>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

@@ -13,6 +13,7 @@ public class LessonPlan {
 
     private String teacherId;
     private String classId;
+    private String moduleId;
     private String title;
     private Instant date;
     private String status;
@@ -47,6 +48,14 @@ public class LessonPlan {
 
     public void setClassId(String classId) {
         this.classId = classId;
+    }
+
+    public String getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(String moduleId) {
+        this.moduleId = moduleId;
     }
 
     public String getTitle() {

@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -26,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.main.backend.dto.CreateLessonPlanRequest;
-import com.main.backend.model.Assignment;
 import com.main.backend.model.LessonPlan;
-import com.main.backend.repository.AssignmentRepository;
-import com.main.backend.repository.ClassRepository;
 import com.main.backend.repository.LessonPlanRepository;
 
 @RestController
@@ -37,22 +34,59 @@ import com.main.backend.repository.LessonPlanRepository;
 @CrossOrigin(originPatterns = { "http://localhost:*", "http://127.0.0.1:*" })
 public class LessonPlanController {
 
+    private static final Set<String> STUDENT_VISIBLE_LESSON_STATUSES = Set.of(
+            "Published",
+            "Ready / Scheduled");
+
     private final LessonPlanRepository lessonPlanRepository;
-    private final AssignmentRepository assignmentRepository;
-    private final ClassRepository classRepository;
 
     public LessonPlanController(
-            LessonPlanRepository lessonPlanRepository,
-            AssignmentRepository assignmentRepository,
-            ClassRepository classRepository) {
+            LessonPlanRepository lessonPlanRepository) {
         this.lessonPlanRepository = lessonPlanRepository;
-        this.assignmentRepository = assignmentRepository;
-        this.classRepository = classRepository;
     }
 
     @GetMapping
     public List<LessonPlan> getLessonPlans(@RequestParam String teacherId) {
         return lessonPlanRepository.findByTeacherIdOrderByDateAsc(teacherId);
+    }
+
+    private boolean isStudentVisibleLesson(LessonPlan lessonPlan) {
+        return lessonPlan != null
+                && !lessonPlan.isTemplate()
+                && lessonPlan.getClassId() != null
+                && !lessonPlan.getClassId().isBlank()
+                && STUDENT_VISIBLE_LESSON_STATUSES.contains(lessonPlan.getStatus());
+    }
+
+    @GetMapping("/class/{classId}")
+    public List<LessonPlan> getClassLessons(@PathVariable String classId) {
+        return lessonPlanRepository
+                .findByClassIdAndTemplateFalseAndStatusInOrderByDateDesc(classId, STUDENT_VISIBLE_LESSON_STATUSES);
+    }
+
+    @GetMapping("/{lessonPlanId}")
+    public ResponseEntity<?> getLessonPlanById(@PathVariable String lessonPlanId) {
+        LessonPlan lessonPlan = lessonPlanRepository
+                .findById(lessonPlanId)
+                .orElse(null);
+
+        if (!isStudentVisibleLesson(lessonPlan)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(lessonPlan);
+    }
+
+    @GetMapping("/class/{classId}/latest")
+    public ResponseEntity<?> getLatestLessonForClass(@PathVariable String classId) {
+        List<LessonPlan> lessons = lessonPlanRepository
+                .findByClassIdAndTemplateFalseAndStatusInOrderByDateDesc(classId, STUDENT_VISIBLE_LESSON_STATUSES);
+
+        if (lessons.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(lessons.get(0));
     }
 
     @PostMapping
@@ -61,6 +95,7 @@ public class LessonPlanController {
 
         lessonPlan.setTeacherId(req.getTeacherId());
         lessonPlan.setClassId(req.getClassId());
+        lessonPlan.setModuleId(req.getModuleId());
         lessonPlan.setTitle(req.getTitle());
         lessonPlan.setDate(parseDate(req.getDate()));
         lessonPlan.setStatus(resolveStatus(req.getStatus(), req.isTemplate()));
@@ -142,6 +177,7 @@ public class LessonPlanController {
         LessonPlan copy = new LessonPlan();
         copy.setTeacherId(original.getTeacherId());
         copy.setClassId(original.getClassId());
+        copy.setModuleId(original.getModuleId());
         copy.setTitle(original.getTitle() + " (Copy)");
         copy.setDate(original.getDate());
         copy.setStatus(original.getStatus());
@@ -172,6 +208,9 @@ public class LessonPlanController {
         if (req.getClassId() != null) {
             lessonPlan.setClassId(req.getClassId());
         }
+        if (req.getModuleId() != null) {
+            lessonPlan.setModuleId(req.getModuleId());
+        }
         if (req.getTitle() != null) {
             lessonPlan.setTitle(req.getTitle());
         }
@@ -197,79 +236,8 @@ public class LessonPlanController {
         lessonPlan.setTemplate(req.isTemplate());
         lessonPlan.setUpdatedAt(Instant.now());
 
-        maybeCreatePublishedAssignment(lessonPlan);
-
         lessonPlanRepository.save(lessonPlan);
         return ResponseEntity.ok(lessonPlan);
-    }
-
-    private void maybeCreatePublishedAssignment(LessonPlan lessonPlan) {
-        boolean shouldPublishToAssignments = "Published".equals(lessonPlan.getStatus())
-                && !lessonPlan.isTemplate()
-                && lessonPlan.getClassId() != null
-                && !lessonPlan.getClassId().isBlank();
-
-        if (!shouldPublishToAssignments) {
-            return;
-        }
-
-        if (lessonPlan.getPublishedAssignmentId() != null && !lessonPlan.getPublishedAssignmentId().isBlank()) {
-            Optional<Assignment> existing = assignmentRepository.findById(lessonPlan.getPublishedAssignmentId());
-            if (existing.isPresent()) {
-                Assignment assignment = existing.get();
-                hydrateAssignmentFromLessonPlan(assignment, lessonPlan);
-                assignmentRepository.save(assignment);
-                return;
-            }
-        }
-
-        String lessonTitle = lessonPlan.getTitle() == null || lessonPlan.getTitle().isBlank()
-                ? "Published Lesson Plan"
-                : lessonPlan.getTitle();
-
-        Optional<Assignment> legacyAssignment = assignmentRepository
-                .findFirstByClassIdAndTitle(lessonPlan.getClassId(), lessonTitle);
-        if (legacyAssignment.isPresent()) {
-            Assignment assignment = legacyAssignment.get();
-            hydrateAssignmentFromLessonPlan(assignment, lessonPlan);
-            Assignment saved = assignmentRepository.save(assignment);
-            lessonPlan.setPublishedAssignmentId(saved.getId());
-            return;
-        }
-
-        classRepository.findById(lessonPlan.getClassId())
-                .orElseThrow(() -> new RuntimeException("Class not found for published lesson plan"));
-
-        Assignment assignment = new Assignment();
-        hydrateAssignmentFromLessonPlan(assignment, lessonPlan);
-        assignment.setCreatedAt(Instant.now());
-
-        Assignment saved = assignmentRepository.save(assignment);
-        lessonPlan.setPublishedAssignmentId(saved.getId());
-    }
-
-    private void hydrateAssignmentFromLessonPlan(Assignment assignment, LessonPlan lessonPlan) {
-        assignment.setClassId(lessonPlan.getClassId());
-        assignment.setTitle(lessonPlan.getTitle() == null || lessonPlan.getTitle().isBlank()
-                ? "Published Lesson Plan"
-                : lessonPlan.getTitle());
-        assignment.setDescription(buildAssignmentDescription(lessonPlan));
-        assignment.setDeadline(lessonPlan.getDate() != null ? lessonPlan.getDate() : Instant.now());
-        assignment.setMaxScore(100);
-    }
-
-    private String buildAssignmentDescription(LessonPlan lessonPlan) {
-        StringBuilder description = new StringBuilder("This assignment was published from a lesson plan.");
-
-        if (lessonPlan.getObjectives() != null && !lessonPlan.getObjectives().isBlank()) {
-            description.append("\n\nObjectives:\n").append(lessonPlan.getObjectives());
-        }
-
-        if (lessonPlan.getAssessment() != null && !lessonPlan.getAssessment().isBlank()) {
-            description.append("\n\nAssessment:\n").append(lessonPlan.getAssessment());
-        }
-
-        return description.toString();
     }
 
     private Instant parseDate(String rawDate) {

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import * as React from "react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { DayPicker } from "react-day-picker";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 function Calendar({
   className,
@@ -15,52 +15,114 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
-      classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-        ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
-        day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
-      }}
-      {...props}
-    />
-  )
-}
-Calendar.displayName = "Calendar"
+  const onSingleSelect =
+    props.mode === "single"
+      ? (props.onSelect as ((day: Date | undefined) => void) | undefined)
+      : undefined;
 
-export { Calendar }
+  const handleToday = () => {
+    onSingleSelect?.(new Date());
+  };
+
+  const handleClear = () => {
+    onSingleSelect?.(undefined);
+  };
+
+  return (
+    <div
+      className={cn(
+        "w-[320px] rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-md",
+        className,
+      )}
+    >
+      <DayPicker
+        showOutsideDays={showOutsideDays}
+        className="w-full"
+        formatters={{
+          formatWeekdayName: (date) =>
+            new Intl.DateTimeFormat("en-US", { weekday: "short" })
+              .format(date)
+              .slice(0, 2),
+        }}
+        classNames={{
+          months: "flex flex-col",
+          month: "w-full space-y-4",
+          month_caption: "relative mb-4 flex items-center justify-center",
+          caption: "relative mb-4 flex items-center justify-center",
+          caption_label: "text-base font-semibold text-gray-800",
+          nav: "pointer-events-none absolute left-0 right-0 top-0 flex h-8 items-center justify-between",
+          button_previous: cn(
+            buttonVariants({ variant: "ghost" }),
+            "pointer-events-auto h-8 w-8 bg-transparent p-0 text-gray-500 hover:bg-gray-100 hover:text-gray-900",
+          ),
+          button_next: cn(
+            buttonVariants({ variant: "ghost" }),
+            "pointer-events-auto h-8 w-8 bg-transparent p-0 text-gray-500 hover:bg-gray-100 hover:text-gray-900",
+          ),
+          month_grid: "w-full border-collapse",
+          weekdays: "grid grid-cols-7 gap-1 mb-2",
+          weekday:
+            "flex h-8 items-center justify-center text-center text-xs font-medium text-gray-500",
+          weeks: "space-y-1",
+          week: "grid grid-cols-7 gap-1",
+          day: "flex items-center justify-center",
+          day_button: cn(
+            buttonVariants({ variant: "ghost" }),
+            "h-8 w-8 p-0 font-normal rounded-md aria-selected:opacity-100 hover:bg-gray-100 text-gray-700",
+          ),
+          range_end: "day-range-end",
+          selected:
+            "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground font-semibold",
+          today: "border border-primary text-primary bg-transparent",
+          outside:
+            "day-outside text-gray-300 opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
+          disabled: "text-muted-foreground opacity-50",
+          range_middle:
+            "aria-selected:bg-accent aria-selected:text-accent-foreground",
+          hidden: "invisible",
+          ...classNames,
+        }}
+        components={{
+          Chevron: ({ orientation, className, ...iconProps }) => {
+            if (orientation === "left") {
+              return <ChevronLeft className={cn("h-4 w-4", className)} />;
+            }
+
+            if (orientation === "right" || orientation === "down") {
+              return <ChevronRight className={cn("h-4 w-4", className)} />;
+            }
+
+            return <ChevronLeft className={cn("h-4 w-4", className)} />;
+          },
+        }}
+        {...props}
+      />
+
+      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm">
+        <div className="flex items-center text-gray-600 cursor-pointer hover:text-gray-900">
+          <Clock className="w-4 h-4 mr-2" />
+          <span>12:00 AM</span>
+        </div>
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={handleToday}
+            className="text-primary hover:underline font-medium"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={handleClear}
+            className="text-gray-500 hover:text-gray-900 hover:underline"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+Calendar.displayName = "Calendar";
+
+export { Calendar };

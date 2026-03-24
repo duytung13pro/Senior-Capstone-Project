@@ -8,9 +8,7 @@ const backendCandidates = [
   configuredBase,
   "http://127.0.0.1:8081",
   "http://localhost:8081",
-  "http://127.0.0.1:8080",
-  "http://localhost:8080",
-  "http://backend:8080",
+  "http://backend:8081",
 ].filter((value): value is string => Boolean(value))
 
 function buildTargetUrl(base: string, pathSegments: string[], requestUrl: URL) {

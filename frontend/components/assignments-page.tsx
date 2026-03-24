@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import {
   Users,
   ArrowLeft,
   Pencil,
+  Plus,
   Circle,
 } from "lucide-react";
 import { fetchApiFirstOk } from "@/lib/api";
@@ -51,6 +53,36 @@ type LessonPlanRef = {
   title: string;
   publishedAssignmentId?: string;
 };
+
+const LEGACY_LESSON_PLAN_ASSIGNMENT_PREFIX =
+  "This assignment was published from a lesson plan.";
+
+const ASSIGNMENT_METADATA_LINE_PREFIXES = [
+  "Module / Unit:",
+  "Available From:",
+  "Due Date:",
+  "Lock Date (Until):",
+  "Submission Type:",
+  "Allowed File Extensions:",
+  "Teacher Attachments:",
+] as const;
+
+function getDisplayDescription(rawDescription: string): string {
+  const lines = rawDescription.split("\n").map((line) => line.trimEnd());
+
+  const cleanedLines = lines.filter((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return true;
+    }
+
+    return !ASSIGNMENT_METADATA_LINE_PREFIXES.some((prefix) =>
+      trimmed.startsWith(prefix),
+    );
+  });
+
+  return cleanedLines.join("\n").trim();
+}
 
 type AssignmentSubmissionStudent = {
   studentId: string;
@@ -82,6 +114,51 @@ let assignmentsBootstrapPromise: Promise<{
   assignments: Assignment[];
   lessonPlans: LessonPlanRef[];
 }> | null = null;
+
+const filterLessonDerivedAssignments = (
+  inputAssignments: Assignment[],
+  inputLessonPlans: LessonPlanRef[],
+) => {
+  const lessonAssignmentIds = new Set(
+    inputLessonPlans
+      .map((plan) => String(plan.publishedAssignmentId || "").trim())
+      .filter(Boolean),
+  );
+
+  const lessonTitleKeys = new Set(
+    inputLessonPlans
+      .map(
+        (plan) =>
+          `${String(plan.classId || "").trim()}::${String(plan.title || "")
+            .trim()
+            .toLowerCase()}`,
+      )
+      .filter((key) => key !== "::"),
+  );
+
+  return inputAssignments.filter((assignment) => {
+    const assignmentId = String(assignment.id || "").trim();
+    if (assignmentId && lessonAssignmentIds.has(assignmentId)) {
+      return false;
+    }
+
+    const titleKey = `${String(assignment.classId || "").trim()}::${String(
+      assignment.title || "",
+    )
+      .trim()
+      .toLowerCase()}`;
+    if (lessonTitleKeys.has(titleKey)) {
+      return false;
+    }
+
+    const description = String(assignment.description || "").trim();
+    if (description.startsWith(LEGACY_LESSON_PLAN_ASSIGNMENT_PREFIX)) {
+      return false;
+    }
+
+    return true;
+  });
+};
 
 function getStatus(deadlineIso: string): "Open" | "Due Soon" | "Past Due" {
   const deadline = new Date(deadlineIso);
@@ -222,20 +299,27 @@ export function AssignmentsPage() {
                 );
               });
 
+            const normalizedLessonPlans = Array.isArray(lessonPlansData)
+              ? lessonPlansData.map((plan: any) => ({
+                  id: String(plan.id ?? ""),
+                  classId: String(plan.classId ?? ""),
+                  title: String(plan.title ?? ""),
+                  publishedAssignmentId:
+                    typeof plan.publishedAssignmentId === "string"
+                      ? plan.publishedAssignmentId
+                      : undefined,
+                }))
+              : [];
+
+            const assignmentOnly = filterLessonDerivedAssignments(
+              mergedAssignments,
+              normalizedLessonPlans,
+            );
+
             return {
               classes: classData,
-              assignments: mergedAssignments,
-              lessonPlans: Array.isArray(lessonPlansData)
-                ? lessonPlansData.map((plan: any) => ({
-                    id: String(plan.id ?? ""),
-                    classId: String(plan.classId ?? ""),
-                    title: String(plan.title ?? ""),
-                    publishedAssignmentId:
-                      typeof plan.publishedAssignmentId === "string"
-                        ? plan.publishedAssignmentId
-                        : undefined,
-                  }))
-                : [],
+              assignments: assignmentOnly,
+              lessonPlans: normalizedLessonPlans,
             };
           })();
         }
@@ -428,6 +512,9 @@ export function AssignmentsPage() {
   const selectedAssignmentData = assignments.find(
     (assignment) => assignment.id === selectedAssignment,
   );
+  const selectedAssignmentDescription = selectedAssignmentData
+    ? getDisplayDescription(String(selectedAssignmentData.description || ""))
+    : "";
   const selectedClassName =
     classes.find((item) => item.id === selectedClassId)?.name ||
     "Unknown class";
@@ -586,14 +673,10 @@ export function AssignmentsPage() {
     });
   };
 
-  const handleEditLessonPlan = (assignment: Assignment) => {
-    const lessonPlanId = lessonPlanIdByAssignmentId.get(assignment.id);
-    if (lessonPlanId) {
-      router.push(`/dashboard/teacher/lesson-plans/${lessonPlanId}?mode=edit`);
-      return;
-    }
-
-    router.push(`/dashboard/teacher/lesson-plans?id=${assignment.classId}`);
+  const handleEditAssignment = (assignment: Assignment) => {
+    router.push(
+      `/dashboard/teacher/assignments/${encodeURIComponent(assignment.classId)}/edit/${encodeURIComponent(assignment.id)}`,
+    );
   };
 
   if (loading) {
@@ -701,7 +784,7 @@ export function AssignmentsPage() {
                   <TabsContent value="details" className="mt-4">
                     <h3 className="mb-2 text-lg font-medium">Description</h3>
                     <p className="whitespace-pre-line text-sm text-muted-foreground">
-                      {selectedAssignmentData?.description || "No description"}
+                      {selectedAssignmentDescription || "No description"}
                     </p>
                   </TabsContent>
 
@@ -898,26 +981,28 @@ export function AssignmentsPage() {
         <div className="space-y-4">
           <div className="rounded-md border border-border bg-card p-3 shadow-sm">
             <div className="space-y-3">
-              <div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-1 text-sm text-muted-foreground hover:text-foreground"
-                  onClick={() => {
-                    setSelectedClassId(null);
-                    setSearchQuery("");
-                    setAssignmentStatusFilter("all");
-                    router.push("/dashboard/teacher/assignments", {
-                      scroll: false,
-                    });
-                  }}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to All Classes
-                </Button>
-                <h2 className="text-2xl font-bold leading-tight text-foreground md:text-3xl">
-                  {selectedClassName}
-                </h2>
+              <div className="flex items-start gap-3">
+                <div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-1 text-sm text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      setSelectedClassId(null);
+                      setSearchQuery("");
+                      setAssignmentStatusFilter("all");
+                      router.push("/dashboard/teacher/assignments", {
+                        scroll: false,
+                      });
+                    }}
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to All Classes
+                  </Button>
+                  <h2 className="text-2xl font-bold leading-tight text-foreground md:text-3xl">
+                    {selectedClassName}
+                  </h2>
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -949,7 +1034,7 @@ export function AssignmentsPage() {
             }
             className="space-y-4"
           >
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="active">Active</TabsTrigger>
@@ -957,15 +1042,25 @@ export function AssignmentsPage() {
                 <TabsTrigger value="graded">Graded</TabsTrigger>
               </TabsList>
 
-              <div className="relative flex-1 md:max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search assignments..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+              <div className="flex items-center gap-3">
+                <div className="relative w-64 max-w-xs">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search assignments..."
+                    className="pl-8"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+
+                <Link
+                  href={`/dashboard/teacher/assignments/create?classId=${encodeURIComponent(selectedClassId)}`}
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 font-medium text-white hover:bg-primary/90"
+                >
+                  <Plus className="h-4 w-4" />
+                  New Assignment
+                </Link>
               </div>
             </div>
           </Tabs>
@@ -1067,11 +1162,11 @@ export function AssignmentsPage() {
                           variant="outline"
                           onClick={(event) => {
                             event.stopPropagation();
-                            handleEditLessonPlan(assignment);
+                            handleEditAssignment(assignment);
                           }}
                         >
                           <Pencil className="mr-2 h-4 w-4" />
-                          Edit Lesson Plan
+                          Edit Assignment
                         </Button>
                       </div>
                     </div>

@@ -1,6 +1,12 @@
 export type TeacherMessage = {
   id: string
   sender: string
+  senderEmail?: string
+  recipient?: string
+  recipientEmail?: string
+  direction?: "sent" | "received"
+  counterpartName?: string
+  counterpartEmail?: string
   subject: string
   class: string
   time: string
@@ -8,6 +14,7 @@ export type TeacherMessage = {
   starred: boolean
   avatar: string
   preview: string
+  body?: string
 }
 
 export const TEACHER_MESSAGES_STORAGE_KEY = "teacherMessages"

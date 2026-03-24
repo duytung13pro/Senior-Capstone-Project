@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const BASE_URL = (process.env.BASE_URL || "http://localhost:8080").replace(/\/$/, "")
+const BASE_URL = (process.env.BASE_URL || "http://localhost:8081").replace(/\/$/, "")
 const TEACHER_EMAIL = process.env.TEACHER_EMAIL || ""
 const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || ""
 

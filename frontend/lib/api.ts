@@ -1,4 +1,4 @@
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").trim()
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081").trim()
 
 export function apiUrl(path: string) {
   return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`
@@ -13,8 +13,6 @@ export function apiEndpointCandidates(path: string) {
       apiUrl(normalizedPath),
       `http://localhost:8081${normalizedPath}`,
       `http://127.0.0.1:8081${normalizedPath}`,
-      `http://localhost:8080${normalizedPath}`,
-      `http://127.0.0.1:8080${normalizedPath}`,
     ]),
   )
 }
@@ -25,13 +23,23 @@ export async function fetchWithTimeout(
   timeoutMs = 8000,
 ) {
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+  let timedOut = false
+  const timeoutId = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, timeoutMs)
 
   try {
     return await fetch(input, {
       ...init,
       signal: init?.signal ?? controller.signal,
     })
+  } catch (error) {
+    if (timedOut) {
+      throw new Error(`Request timed out after ${timeoutMs}ms: ${input}`)
+    }
+
+    throw error
   } finally {
     clearTimeout(timeoutId)
   }

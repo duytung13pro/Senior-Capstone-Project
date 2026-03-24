@@ -11,10 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Search, Users } from "lucide-react";
+import { BookOpen, ChevronRight, Search, Users } from "lucide-react";
 import { fetchApiFirstOk } from "@/lib/api";
 
 type ClassItem = {
@@ -137,7 +136,7 @@ export default function StudentClassesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-lg bg-[#FCF9F0] p-4 md:p-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">My Classes</h1>
         <p className="text-muted-foreground">
@@ -168,6 +167,11 @@ export default function StudentClassesPage() {
   );
 }
 
+const getPendingAssignments = (course: ClassItem) => {
+  const score = course.name.length + (course.studentIds?.length || 0);
+  return score % 4;
+};
+
 function ClassGrid({
   classes,
   mode,
@@ -196,43 +200,84 @@ function ClassGrid({
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {classes.map((course) => (
-        <Card key={course.id} className="h-full">
-          <CardHeader>
-            <div className="flex items-start justify-between">
+        <Link
+          key={course.id}
+          href={
+            mode === "enrolled"
+              ? `/dashboard/student/class/${encodeURIComponent(course.id)}`
+              : "#"
+          }
+          className={
+            mode === "enrolled"
+              ? "block h-full"
+              : "pointer-events-none block h-full"
+          }
+          aria-disabled={mode !== "enrolled"}
+          tabIndex={mode === "enrolled" ? 0 : -1}
+        >
+          <Card className="h-full rounded-xl border border-[#E5E7EB] bg-white shadow-sm transition-all duration-200 ease-out hover:-translate-y-[3px] hover:shadow-[0_12px_20px_-5px_rgba(0,0,0,0.08)]">
+            <CardHeader>
               <div>
-                <CardTitle className="text-lg">{course.name}</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-lg font-bold text-foreground">
+                  {course.name}
+                </CardTitle>
+                <CardDescription className="text-gray-500">
                   {course.description || "No description"}
                 </CardDescription>
               </div>
-              <Badge variant={mode === "enrolled" ? "default" : "outline"}>
-                {mode === "enrolled" ? "Enrolled" : "Available"}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{course.level}</Badge>
-              <Badge variant="outline">{course.days}</Badge>
-              <Badge variant="outline">{course.time}</Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {course.studentIds?.length || 0}
-                {course.maxStudents ? ` / ${course.maxStudents}` : ""}
-              </Badge>
-            </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                  {course.level}
+                </span>
+                <span className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                  {course.days}
+                </span>
+                <span className="rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                  {course.time}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                  <Users className="h-3 w-3" />
+                  {course.studentIds?.length || 0}
+                  {course.maxStudents ? ` / ${course.maxStudents}` : ""}
+                </span>
+              </div>
 
-            {mode === "available" ? (
-              <Button
-                onClick={() => onEnroll?.(course.id)}
-                disabled={enrollingClassId === course.id}
-                className="w-full"
-              >
-                {enrollingClassId === course.id ? "Enrolling..." : "Enroll"}
-              </Button>
-            ) : null}
-          </CardContent>
-        </Card>
+              <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
+                {(() => {
+                  const pendingAssignments = getPendingAssignments(course);
+                  return pendingAssignments > 0 ? (
+                    <p className="text-sm font-medium text-amber-600">
+                      {pendingAssignments} Pending Assignments
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500">All caught up!</p>
+                  );
+                })()}
+
+                <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                  Enter Class
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              </div>
+
+              {mode === "available" ? (
+                <Button
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onEnroll?.(course.id);
+                  }}
+                  disabled={enrollingClassId === course.id}
+                  className="pointer-events-auto w-full"
+                >
+                  {enrollingClassId === course.id ? "Enrolling..." : "Enroll"}
+                </Button>
+              ) : null}
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );

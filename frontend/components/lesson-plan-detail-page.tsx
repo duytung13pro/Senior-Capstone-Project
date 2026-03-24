@@ -67,6 +67,7 @@ type LessonPlan = {
   id: string;
   title: string;
   classId: string;
+  moduleId?: string;
   date: string;
   status: RawLessonStatus;
   objectives?: string;
@@ -80,6 +81,12 @@ type LessonPlan = {
 type TeacherClass = {
   id: string;
   name: string;
+};
+
+type ClassModule = {
+  id: string;
+  title: string;
+  order?: number;
 };
 
 type LessonPlanDetailPageProps = {
@@ -418,7 +425,10 @@ export function LessonPlanDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [lessonPlan, setLessonPlan] = useState<LessonPlan | null>(null);
   const [classes, setClasses] = useState<TeacherClass[]>([]);
+  const [classModules, setClassModules] = useState<ClassModule[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [loadingModules, setLoadingModules] = useState(false);
+  const [moduleLoadError, setModuleLoadError] = useState<string | null>(null);
 
   const [checklistState, setChecklistState] = useState<Record<string, boolean>>(
     {},
@@ -426,6 +436,7 @@ export function LessonPlanDetailPage({
 
   const [titleInput, setTitleInput] = useState("");
   const [classIdInput, setClassIdInput] = useState("");
+  const [moduleIdInput, setModuleIdInput] = useState("");
   const [dateInput, setDateInput] = useState("");
   const [statusInput, setStatusInput] = useState<LessonStatus>("Draft");
   const [durationMinutes, setDurationMinutes] = useState(45);
@@ -488,6 +499,7 @@ export function LessonPlanDetailPage({
 
     setTitleInput(plan.title || "");
     setClassIdInput(plan.classId || "");
+    setModuleIdInput(plan.moduleId || "");
     setDateInput(
       plan.date ? format(new Date(plan.date), "yyyy-MM-dd'T'HH:mm") : "",
     );
@@ -525,6 +537,7 @@ export function LessonPlanDetailPage({
     const snapshot = JSON.stringify({
       title: plan.title || "",
       classId: plan.classId || "",
+      moduleId: plan.moduleId || "",
       date: plan.date ? format(new Date(plan.date), "yyyy-MM-dd'T'HH:mm") : "",
       status: normalized,
       durationMinutes: parseDuration(plan.materials),
@@ -551,6 +564,7 @@ export function LessonPlanDetailPage({
       JSON.stringify({
         title: titleInput,
         classId: classIdInput,
+        moduleId: moduleIdInput,
         date: dateInput,
         status: statusInput,
         durationMinutes,
@@ -566,6 +580,7 @@ export function LessonPlanDetailPage({
     [
       titleInput,
       classIdInput,
+      moduleIdInput,
       dateInput,
       statusInput,
       durationMinutes,
@@ -661,6 +676,94 @@ export function LessonPlanDetailPage({
     load();
   }, [lessonPlanId, searchParams]);
 
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    if (!classIdInput || statusInput === "Template") {
+      setClassModules([]);
+      setLoadingModules(false);
+      setModuleLoadError(null);
+      setModuleIdInput("");
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadModules = async () => {
+      try {
+        setLoadingModules(true);
+        setModuleLoadError(null);
+
+        const res = await fetchApiFirstOk(`/api/classes/${classIdInput}/modules`, {
+          cache: "no-store",
+        });
+
+        const payload: Array<{
+          id?: string;
+          _id?: string;
+          moduleId?: string;
+          title?: string;
+          name?: string;
+          moduleName?: string;
+          order?: number;
+        }> = await res.json();
+
+        const mapped = (Array.isArray(payload) ? payload : [])
+          .map((item, index) => {
+            const resolvedTitle = String(
+              item.title || item.name || item.moduleName || "",
+            ).trim();
+            const resolvedId = String(
+              item.id || item.moduleId || item._id || resolvedTitle || `module-${index + 1}`,
+            ).trim();
+
+            return {
+              id: resolvedId,
+              title: resolvedTitle,
+              order: item.order,
+            };
+          })
+          .filter((item) => item.title.length > 0)
+          .sort(
+            (left, right) =>
+              (left.order ?? Number.MAX_SAFE_INTEGER) -
+              (right.order ?? Number.MAX_SAFE_INTEGER),
+          );
+
+        if (cancelled) {
+          return;
+        }
+
+        setClassModules(mapped);
+        setModuleIdInput((previous) =>
+          previous && mapped.some((moduleItem) => moduleItem.id === previous)
+            ? previous
+            : "",
+        );
+      } catch {
+        if (cancelled) {
+          return;
+        }
+
+        setClassModules([]);
+        setModuleIdInput("");
+        setModuleLoadError("Unable to load modules for the selected class.");
+      } finally {
+        if (!cancelled) {
+          setLoadingModules(false);
+        }
+      }
+    };
+
+    void loadModules();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isEditing, classIdInput, statusInput]);
+
   const handleSave = async () => {
     if (!lessonPlan) {
       return;
@@ -724,6 +827,7 @@ export function LessonPlanDetailPage({
 
         return {
           classId: isTemplate ? "" : classIdInput,
+          moduleId: isTemplate ? "" : moduleIdInput,
           title: titleInput.trim() || lessonPlan.title,
           date: dateInput ? new Date(dateInput).toISOString() : lessonPlan.date,
           status: effectiveStatus,
@@ -823,6 +927,7 @@ export function LessonPlanDetailPage({
           body: JSON.stringify({
             teacherId,
             classId: classIdInput || lessonPlan.classId,
+            moduleId: moduleIdInput || "",
             title: titleInput.trim() || lessonPlan.title,
             date: dateInput
               ? new Date(dateInput).toISOString()
@@ -1266,37 +1371,83 @@ export function LessonPlanDetailPage({
                 <CardTitle className="text-base">Lesson Logistics</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="space-y-1.5">
-                  <p className="text-sm font-medium">Class</p>
-                  <Select
-                    value={classIdInput || undefined}
-                    onValueChange={setClassIdInput}
-                    disabled={statusInput === "Template"}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select class" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {classes.map((teacherClass) => (
-                        <SelectItem
-                          key={teacherClass.id}
-                          value={teacherClass.id}
-                        >
-                          {teacherClass.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-medium">Class</p>
+                    <Select
+                      value={classIdInput || undefined}
+                      onValueChange={(value) => {
+                        setClassIdInput(value);
+                        setModuleIdInput("");
+                      }}
+                      disabled={statusInput === "Template"}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select class" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classes.map((teacherClass) => (
+                          <SelectItem
+                            key={teacherClass.id}
+                            value={teacherClass.id}
+                          >
+                            {teacherClass.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="space-y-1.5">
-                  <p className="text-sm font-medium">Date</p>
-                  <Input
-                    type="datetime-local"
-                    value={dateInput}
-                    onChange={(event) => setDateInput(event.target.value)}
-                    disabled={statusInput === "Template"}
-                  />
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-medium">Module / Unit</p>
+                    <Select
+                      value={moduleIdInput || undefined}
+                      onValueChange={setModuleIdInput}
+                      disabled={
+                        statusInput === "Template" ||
+                        !classIdInput ||
+                        loadingModules ||
+                        classModules.length === 0
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            !classIdInput
+                              ? "Select class first"
+                              : loadingModules
+                                ? "Loading modules..."
+                                : "Select a Module"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {classModules.map((moduleItem) => (
+                          <SelectItem key={moduleItem.id} value={moduleItem.id}>
+                            {moduleItem.title}
+                          </SelectItem>
+                        ))}
+                        {!loadingModules && classModules.length === 0 ? (
+                          <SelectItem value="no-modules" disabled>
+                            No modules available
+                          </SelectItem>
+                        ) : null}
+                      </SelectContent>
+                    </Select>
+                    {moduleLoadError ? (
+                      <p className="text-xs text-destructive">{moduleLoadError}</p>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-medium">Date</p>
+                    <Input
+                      type="datetime-local"
+                      value={dateInput}
+                      onChange={(event) => setDateInput(event.target.value)}
+                      disabled={statusInput === "Template"}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-1.5">
@@ -1308,6 +1459,7 @@ export function LessonPlanDetailPage({
                       setStatusInput(next);
                       if (next === "Template") {
                         setClassIdInput("");
+                        setModuleIdInput("");
                       }
                     }}
                   >

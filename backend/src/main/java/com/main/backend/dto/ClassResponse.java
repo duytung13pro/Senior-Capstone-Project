@@ -23,6 +23,9 @@ public class ClassResponse {
     private String teacherId;
     private Instant createdAt;
     private List<String> studentIds;
+    private List<Class.ResourceLink> resources;
+    private List<Class.AnnouncementEntry> announcements;
+    private List<Class.ModuleEntry> modules;
 
     public ClassResponse(Class c) {
         this.id = c.getId();
@@ -38,6 +41,9 @@ public class ClassResponse {
         this.teacherId = c.getTeacherId();
         this.createdAt = c.getCreatedAt();
         this.studentIds = c.getStudentIds();
+        this.resources = c.getResources();
+        this.announcements = c.getAnnouncements();
+        this.modules = c.getModules();
     }
 
     public List<String> getStudentIds() {
@@ -90,5 +96,17 @@ public class ClassResponse {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public List<Class.ResourceLink> getResources() {
+        return resources;
+    }
+
+    public List<Class.AnnouncementEntry> getAnnouncements() {
+        return announcements;
+    }
+
+    public List<Class.ModuleEntry> getModules() {
+        return modules;
     }
 }

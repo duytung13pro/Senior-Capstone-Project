@@ -5,9 +5,26 @@ import dbConnect from "@/lib/mongodb"
 import Enrollment from "@/lib/models/Enrollment"
 import Message from "@/lib/models/Message"
 import StudyAnalytics from "@/lib/models/StudyAnalytics"
+import StudentWeeklyStudy from "@/lib/models/StudentWeeklyStudy"
 import { auth } from "@/auth"
 
 export const dynamic = "force-dynamic"
+
+const getWeekStartUtc = (date: Date) => {
+  const copy = new Date(date)
+  const day = copy.getUTCDay()
+  const diffToMonday = day === 0 ? -6 : 1 - day
+  copy.setUTCDate(copy.getUTCDate() + diffToMonday)
+  copy.setUTCHours(0, 0, 0, 0)
+  return copy
+}
+
+const toUtcDayKey = (date: Date) => {
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0")
+  const day = String(date.getUTCDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,13 +64,16 @@ export async function GET(request: NextRequest) {
             .collection("assignments")
             .find({ course: { $in: courseIds }, dueDate: { $exists: true } })
             .sort({ dueDate: 1 })
-            .limit(3)
             .project({ title: 1, dueDate: 1, totalPoints: 1 })
             .toArray()
         : []
 
     const now = Date.now()
-    const assignmentPreview = assignmentDocs.map((assignment) => {
+    const currentDate = new Date()
+    const weekStartUtc = getWeekStartUtc(currentDate)
+    const weekEndUtc = new Date(weekStartUtc)
+    weekEndUtc.setUTCDate(weekEndUtc.getUTCDate() + 7)
+    const assignmentPreview = assignmentDocs.slice(0, 3).map((assignment) => {
       const dueDate = assignment.dueDate ? new Date(assignment.dueDate) : null
       const dueLabel = dueDate
         ? dueDate.getTime() < now
@@ -69,11 +89,102 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    const pendingAssignmentsCount = assignmentDocs.filter((assignment) => {
+      if (!assignment.dueDate) {
+        return false
+      }
+
+      const dueDate = new Date(assignment.dueDate)
+      if (Number.isNaN(dueDate.getTime())) {
+        return false
+      }
+
+      return dueDate.getTime() >= now && dueDate < weekEndUtc
+    }).length
+
+    const weeklyTaskAssignments = assignmentDocs.filter((assignment) => {
+      if (!assignment.dueDate) {
+        return false
+      }
+
+      const dueDate = new Date(assignment.dueDate)
+      if (Number.isNaN(dueDate.getTime())) {
+        return false
+      }
+
+      return dueDate >= weekStartUtc && dueDate < weekEndUtc
+    })
+
+    const weeklyTasksTotal = weeklyTaskAssignments.length
+    const weeklyTaskAssignmentIds = weeklyTaskAssignments.map((assignment) => assignment._id)
+
+    const studentIdentityFilters: Record<string, unknown>[] = [
+      { student: studentId },
+      { studentId },
+    ]
+
+    if (mongoose.Types.ObjectId.isValid(studentId)) {
+      const studentObjectId = new mongoose.Types.ObjectId(studentId)
+      studentIdentityFilters.push({ student: studentObjectId })
+      studentIdentityFilters.push({ studentId: studentObjectId })
+    }
+
+    const assignmentIdentityFilters: Record<string, unknown>[] = [
+      { assignment: { $in: weeklyTaskAssignmentIds } },
+      { assignmentId: { $in: weeklyTaskAssignmentIds } },
+      {
+        assignment: {
+          $in: weeklyTaskAssignmentIds.map((id) => id.toString()),
+        },
+      },
+      {
+        assignmentId: {
+          $in: weeklyTaskAssignmentIds.map((id) => id.toString()),
+        },
+      },
+    ]
+
+    let weeklyTasksCompleted = 0
+    if (weeklyTaskAssignmentIds.length > 0) {
+      try {
+        const completedSubmissions = await mongoose.connection
+          .collection("submissions")
+          .countDocuments({
+            $and: [
+              { $or: studentIdentityFilters },
+              { $or: assignmentIdentityFilters },
+              {
+                $or: [
+                  { submittedAt: { $exists: true, $ne: null } },
+                  { submitted: true },
+                  { isSubmitted: true },
+                  {
+                    status: {
+                      $in: ["submitted", "SUBMITTED", "graded", "GRADED"],
+                    },
+                  },
+                ],
+              },
+            ],
+          })
+
+        weeklyTasksCompleted = Math.min(weeklyTasksTotal, Number(completedSubmissions || 0))
+      } catch {
+        weeklyTasksCompleted = Math.max(0, weeklyTasksTotal - pendingAssignmentsCount)
+      }
+    }
+
     const messages = await Message.find({ recipient: studentId, archived: { $ne: true } })
       .populate("sender", "name")
       .sort({ createdAt: -1 })
       .limit(3)
       .lean()
+
+    const unreadMessagesCount = await Message.countDocuments({
+      recipient: studentId,
+      archived: { $ne: true },
+      read: false,
+    })
 
     const messagePreview = messages.map((message) => ({
       id: message._id.toString(),
@@ -82,15 +193,11 @@ export async function GET(request: NextRequest) {
       time: new Date(message.createdAt).toLocaleString(),
     }))
 
-    const weekStart = new Date()
-    weekStart.setDate(weekStart.getDate() - 7)
-    weekStart.setHours(0, 0, 0, 0)
-
     const analytics = await StudyAnalytics.aggregate([
       {
         $match: {
           student: new mongoose.Types.ObjectId(studentId),
-          date: { $gte: weekStart },
+          date: { $gte: weekStartUtc, $lt: weekEndUtc },
         },
       },
       {
@@ -107,15 +214,95 @@ export async function GET(request: NextRequest) {
         ? Math.round(enrollments.reduce((sum, enrollment) => sum + (enrollment.progress || 0), 0) / enrollments.length)
         : 0
 
+    const trackedWeekDoc = await StudentWeeklyStudy.findOne({
+      student: new mongoose.Types.ObjectId(studentId),
+      weekStart: weekStartUtc,
+    })
+      .select("trackedMinutes lastHeartbeatAt")
+      .lean()
+
+    const trackedHeartbeatMinutes = Number(trackedWeekDoc?.trackedMinutes || 0)
+    const analyticsStudyMinutes = Number(analytics[0]?.totalStudyMinutes || 0)
+    const combinedStudyMinutes = analyticsStudyMinutes + trackedHeartbeatMinutes
+
+    const studyHoursThisWeek = `${Math.round((combinedStudyMinutes / 60) * 10) / 10}h`
+    const averageQuizScore = `${Math.round(analytics[0]?.averageQuizScore || 0)}%`
+    const courseCompletion = `${avgProgress}%`
+
+    const streakDays = await StudyAnalytics.aggregate([
+      {
+        $match: {
+          student: new mongoose.Types.ObjectId(studentId),
+          date: { $gte: weekStartUtc, $lt: weekEndUtc },
+          studyMinutes: { $gt: 0 },
+        },
+      },
+      {
+        $project: {
+          dayKey: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$date",
+              timezone: "UTC",
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$dayKey",
+        },
+      },
+      {
+        $sort: {
+          _id: -1,
+        },
+      },
+    ])
+
+    const activeDayKeys = new Set<string>(
+      streakDays.map((entry) => String(entry?._id || "")).filter(Boolean),
+    )
+
+    if (trackedHeartbeatMinutes > 0) {
+      activeDayKeys.add(toUtcDayKey(currentDate))
+    }
+
+    let currentStudyStreakDays = 0
+    const streakCursor = new Date(currentDate)
+    streakCursor.setUTCHours(0, 0, 0, 0)
+
+    while (
+      streakCursor >= weekStartUtc &&
+      activeDayKeys.has(toUtcDayKey(streakCursor))
+    ) {
+      currentStudyStreakDays += 1
+      streakCursor.setUTCDate(streakCursor.getUTCDate() - 1)
+    }
+
     const analyticsPreview = [
-      { label: "Study Hours This Week", value: `${Math.round(((analytics[0]?.totalStudyMinutes || 0) / 60) * 10) / 10}h` },
-      { label: "Average Quiz Score", value: `${Math.round(analytics[0]?.averageQuizScore || 0)}%` },
-      { label: "Course Completion", value: `${avgProgress}%` },
+      { label: "Study Hours This Week", value: studyHoursThisWeek },
+      { label: "Average Quiz Score", value: averageQuizScore },
+      { label: "Course Completion", value: courseCompletion },
     ]
 
     return NextResponse.json({
       success: true,
       data: {
+        enrolledClasses: classPreview.map((classItem) => ({
+          id: classItem.id,
+          name: classItem.name,
+        })),
+        pendingAssignmentsCount,
+        unreadMessagesCount,
+        analyticsSummary: {
+          studyHoursThisWeek,
+          averageQuizScore,
+          courseCompletion,
+          currentStudyStreakDays,
+          weeklyTasksCompleted,
+          weeklyTasksTotal,
+        },
         classes: classPreview,
         assignments: assignmentPreview,
         messages: messagePreview,

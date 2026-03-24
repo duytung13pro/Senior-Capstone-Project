@@ -3,6 +3,8 @@ import mongoose from "mongoose"
 export interface IUser extends mongoose.Document {
   email: string
   name: string
+  firstName?: string
+  lastName?: string
   password: string
   role: "Student" | "Instructor" | "Teacher" | "Admin" | "Center"
   avatar?: string
@@ -48,6 +50,8 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: [true, "Please provide a name"],
     },
+    firstName: String,
+    lastName: String,
     password: {
       type: String,
       required: [true, "Please provide a password"],

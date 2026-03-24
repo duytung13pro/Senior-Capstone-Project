@@ -13,7 +13,7 @@ export const authOptions: NextAuthOptions = {
     Credentials({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email or Phone", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -22,25 +22,37 @@ export const authOptions: NextAuthOptions = {
         }
 
         await dbConnect()
-        const user = await User.findOne({ email: credentials.email }).select("+password")
+        const identifier = String(credentials.email).trim()
+        const normalizedEmail = identifier.toLowerCase()
+
+        const user = await User.findOne({
+          $or: [
+            { email: normalizedEmail },
+            { phone: identifier },
+          ],
+        }).select("+password")
 
         if (!user) {
           return null
         }
 
-        const isValidPassword = await bcrypt.compare(
-          credentials.password as string,
-          user.password,
-        )
+        const storedPassword = String(user.password || "")
+        const looksHashed = /^\$2[aby]\$\d{2}\$/.test(storedPassword)
+
+        const isValidPassword = looksHashed
+          ? await bcrypt.compare(credentials.password as string, storedPassword)
+          : (credentials.password as string) === storedPassword
 
         if (!isValidPassword) {
           return null
         }
 
+        const fallbackName = `${String((user as any).firstName || "").trim()} ${String((user as any).lastName || "").trim()}`.trim()
+
         return {
           id: user._id.toString(),
           email: user.email,
-          name: user.name,
+          name: user.name || fallbackName || user.email,
           role: user.role,
         }
       },

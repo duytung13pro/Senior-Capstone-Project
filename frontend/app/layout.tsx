@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthSessionProvider } from "@/components/auth-session-provider";
+import { FloatingChatWidget } from "@/components/floating-chat-widget";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function RootLayout({
         <AuthSessionProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
             {children}
+            <FloatingChatWidget />
             <Toaster />
           </ThemeProvider>
         </AuthSessionProvider>

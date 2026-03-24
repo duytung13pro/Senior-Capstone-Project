@@ -77,8 +77,17 @@ export function Sidebar() {
   ];
 
   const isActiveRoute = (href: string) => {
-    if (href === "/") {
-      return pathname === href;
+    if (href === "/dashboard/teacher") {
+      return pathname === "/dashboard/teacher";
+    }
+
+    if (href === "/dashboard/teacher/student-progress") {
+      return (
+        pathname === href ||
+        pathname.startsWith(`${href}/`) ||
+        pathname === "/dashboard/teacher/progress" ||
+        pathname.startsWith("/dashboard/teacher/progress/")
+      );
     }
 
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -101,7 +110,7 @@ export function Sidebar() {
             !expanded && !pinned && "hidden",
           )}
         >
-          <span className="text-xl text-primary">汉语学习</span>
+          <span className="text-xl text-primary">Teacher Portal</span>
         </div>
         <Button
           variant="ghost"

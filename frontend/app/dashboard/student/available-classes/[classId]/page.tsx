@@ -36,6 +36,7 @@ export default function StudentClassDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [enrolling, setEnrolling] = useState(false);
+  const [studentId, setStudentId] = useState("");
 
   const resolveStudentId = async () => {
     const stored = localStorage.getItem("userId") || "";
@@ -86,6 +87,23 @@ export default function StudentClassDetailsPage() {
     }
     void loadClass();
   }, [classId]);
+
+  useEffect(() => {
+    const checkEnrollmentAndRedirect = async () => {
+      const currentStudentId = await resolveStudentId();
+      if (!currentStudentId) {
+        return;
+      }
+
+      setStudentId(currentStudentId);
+
+      if (classData && (classData.studentIds || []).includes(currentStudentId)) {
+        router.replace(`/dashboard/student/class/${classId}`);
+      }
+    };
+
+    void checkEnrollmentAndRedirect();
+  }, [classData, classId, router]);
 
   const handleEnroll = async () => {
     const studentId = await resolveStudentId();
@@ -144,6 +162,11 @@ export default function StudentClassDetailsPage() {
 
   const seatsUsed = classData.studentIds?.length || 0;
   const isFull = classData.maxStudents != null && seatsUsed >= classData.maxStudents;
+  const isAlreadyEnrolled = Boolean(studentId) && (classData.studentIds || []).includes(studentId);
+
+  if (isAlreadyEnrolled) {
+    return <div className="p-6">Opening your class dashboard...</div>;
+  }
 
   return (
     <div className="space-y-6 p-6">
