@@ -92,3 +92,10 @@ Note: The VS Code `Run Backend` task is configured to run on port `8081` to avoi
 - [Feature Bundle Release Notes (2026-03-08)](./Instruction/RELEASE_NOTES_2026-03-08.md)
 - [Class Student Management Fix Notes](./Instruction/CLASS_STUDENT_MANAGEMENT_FIX.md)
 - [MongoDB Connectivity Guide](./Instruction/ConnectToMongoDB.md)
+
+## User Documentation
+
+- [Documentation Hub](./userguide/README.md)
+- [User Guide](./userguide/user-guide.md)
+- [User Manual](./userguide/user-manual.md)
+- [FAQ](./userguide/faq.md)
