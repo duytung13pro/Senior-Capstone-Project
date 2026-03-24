@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Senior Capstone Project Poster</title>
+    <style>
+      :root {
+        --paper: #f7f1e4;
+        --panel: #fffdf8;
+        --ink: #17202a;
+        --muted: #5a6470;
+        --forest: #1f5b3a;
+        --moss: #3e7c57;
+        --amber: #d9901a;
+        --sand: #ead8b1;
+        --line: #ddcfb3;
+        --sky: #d9ebf7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(217, 235, 247, 0.75), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(234, 216, 177, 0.75), transparent 24%),
+          var(--paper);
+      }
+
+      .poster {
+        width: min(1400px, 100%);
+        margin: 0 auto;
+        padding: 28px;
+      }
+
+      .header {
+        background: linear-gradient(135deg, var(--forest), #123a25);
+        color: white;
+        border-radius: 28px;
+        padding: 34px 36px 30px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header::after {
+        content: "";
+        position: absolute;
+        right: -70px;
+        top: -70px;
+        width: 260px;
+        height: 260px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+      }
+
+      .eyebrow {
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #e6f4e7;
+        margin: 0 0 10px;
+      }
+
+      h1 {
+        font-size: clamp(2.3rem, 4vw, 4.2rem);
+        line-height: 1.02;
+        margin: 0 0 12px;
+        max-width: 900px;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        line-height: 1.45;
+        max-width: 900px;
+        color: #edf6ee;
+        margin: 0;
+      }
+
+      .header-grid {
+        display: grid;
+        grid-template-columns: 2.3fr 1fr;
+        gap: 20px;
+        align-items: end;
+      }
+
+      .meta {
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 18px;
+      }
+
+      .meta h2 {
+        margin: 0 0 10px;
+        font-size: 1.1rem;
+      }
+
+      .meta p {
+        margin: 0 0 8px;
+        line-height: 1.4;
+      }
+
+      .content {
+        display: grid;
+        grid-template-columns: 1.1fr 1.1fr 0.9fr;
+        gap: 22px;
+        margin-top: 24px;
+      }
+
+      .column {
+        display: grid;
+        gap: 22px;
+        align-content: start;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: 0 10px 28px rgba(31, 38, 46, 0.06);
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 1.5rem;
+        color: var(--forest);
+      }
+
+      .panel h3 {
+        margin: 18px 0 8px;
+        font-size: 1.05rem;
+        color: var(--forest);
+      }
+
+      .panel p {
+        margin: 0;
+        line-height: 1.52;
+      }
+
+      .panel ul {
+        margin: 12px 0 0;
+        padding-left: 22px;
+        line-height: 1.55;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .stat {
+        background: linear-gradient(180deg, #fff7e5, #fff1cc);
+        border: 1px solid #f0d899;
+        border-radius: 20px;
+        padding: 16px 14px;
+        text-align: center;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 2rem;
+        color: var(--amber);
+        margin-bottom: 6px;
+      }
+
+      .workflow {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .step {
+        background: #f4fbf6;
+        border-left: 6px solid var(--moss);
+        border-radius: 16px;
+        padding: 14px 14px 14px 16px;
+      }
+
+      .step strong {
+        color: var(--forest);
+      }
+
+      .tech {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .chip {
+        background: var(--sky);
+        color: #14334a;
+        border: 1px solid #b7d4e8;
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 0.95rem;
+      }
+
+      .image-card {
+        background: #f8fafb;
+        border: 1px solid #dbe3e9;
+        border-radius: 18px;
+        padding: 12px;
+      }
+
+      .image-card img {
+        display: block;
+        width: 100%;
+        border-radius: 12px;
+      }
+
+      .caption {
+        margin-top: 10px;
+        font-size: 0.94rem;
+        color: var(--muted);
+      }
+
+      .footer {
+        margin-top: 24px;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 22px;
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 18px;
+      }
+
+      .qr-box {
+        border: 2px dashed #c8b58f;
+        border-radius: 18px;
+        padding: 18px;
+        background: #fff9ee;
+        min-height: 170px;
+      }
+
+      .small {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .team-showcase {
+        display: grid;
+        gap: 16px;
+        margin-top: 6px;
+      }
+
+      .team-member {
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        gap: 14px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid #e3d6bd;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #fffdf8, #f9f2e5);
+      }
+
+      .avatar {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        display: block;
+        object-fit: cover;
+        object-position: center;
+        border: 4px solid white;
+        box-shadow: 0 8px 20px rgba(31, 38, 46, 0.08);
+      }
+
+      .member-name {
+        margin: 0 0 4px;
+        font-size: 1.08rem;
+        color: var(--forest);
+      }
+
+      .member-role {
+        margin: 0 0 4px;
+        color: var(--ink);
+        font-size: 0.96rem;
+      }
+
+      .member-copy {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.45;
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+
+        .poster {
+          width: 100%;
+          padding: 10mm;
+        }
+
+        .panel,
+        .header,
+        .footer,
+        .stat,
+        .step,
+        .image-card,
+        .meta {
+          box-shadow: none;
+        }
+      }
+
+      @media (max-width: 1100px) {
+        .header-grid,
+        .content,
+        .footer {
+          grid-template-columns: 1fr;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="poster">
+      <section class="header">
+        <div class="header-grid">
+          <div>
+            <p class="eyebrow">University of Cincinnati | CEAS | Senior Capstone</p>
+            <h1>Rewood: An AI-Assisted Learning Management System for Teachers and Students</h1>
+            <p class="subtitle">
+              A classroom platform designed to reduce administrative overhead for educators while giving
+              students a clear, role-based place to access assignments, lessons, resources, messages, and progress.
+            </p>
+          </div>
+          <aside class="meta">
+            <h2>Advisor</h2>
+            <p>Lee Seokki</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="content">
+        <div class="column">
+          <article class="panel">
+            <h2>Problem</h2>
+            <p>
+              Teachers often manage classes, lessons, attendance, announcements, and student communication across
+              disconnected tools. Students then face a fragmented experience when they need to find materials, due dates,
+              and messages quickly.
+            </p>
+            <h3>Our Goal</h3>
+            <p>
+              Build one platform that keeps classroom organization simple, role-aware, and easy to navigate for everyday use.
+            </p>
+          </article>
+
+          <article class="panel">
+            <h2>Solution</h2>
+            <div class="workflow">
+              <div class="step"><strong>1. Sign in by role.</strong> Teachers, students, and admins are routed to the right dashboard.</div>
+              <div class="step"><strong>2. Organize teaching.</strong> Teachers manage classes, lesson plans, assignments, attendance, and announcements.</div>
+              <div class="step"><strong>3. Support learning.</strong> Students view class content, track grades, monitor progress, and access shared resources.</div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Key Features</h2>
+            <ul>
+              <li>Role-based authentication and dashboard routing</li>
+              <li>Teacher portal for classes, lesson plans, assignments, messages, and attendance</li>
+              <li>Student portal for enrolled classes, grades, schedule, analytics, and resources</li>
+              <li>Centralized communication through announcements and messages</li>
+              <li>Profile and settings management for both major user roles</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="column">
+          <article class="panel">
+            <h2>Why It Matters</h2>
+            <div class="stats">
+              <div class="stat">
+                <strong>3</strong>
+                user roles
+              </div>
+              <div class="stat">
+                <strong>10+</strong>
+                teacher tools
+              </div>
+              <div class="stat">
+                <strong>9+</strong>
+                student views
+              </div>
+            </div>
+            <h3>Value for Teachers</h3>
+            <p>Less time switching between tools and more time focused on instruction.</p>
+            <h3>Value for Students</h3>
+            <p>A single place to check coursework, deadlines, learning materials, and progress.</p>
+          </article>
+
+          <article class="panel">
+            <h2>System Architecture</h2>
+            <p>
+              The project combines a modern web frontend with a backend API and a MongoDB data layer to support
+              authentication, classroom data, assignments, and role-specific workflows.
+            </p>
+            <div class="tech">
+              <span class="chip">Next.js</span>
+              <span class="chip">React</span>
+              <span class="chip">TypeScript</span>
+              <span class="chip">Spring Boot</span>
+              <span class="chip">MongoDB</span>
+              <span class="chip">Docker</span>
+              <span class="chip">NextAuth</span>
+            </div>
+          </article>
+
+          <article class="panel">
+            <h2>Implementation Highlights</h2>
+            <ul>
+              <li>Teacher sidebar includes classes, lesson plans, assignments, attendance, resources, messages, and announcements</li>
+              <li>Student sidebar includes classes, assignments, grades, schedule, analytics, progress, and resources</li>
+              <li>Containerized local setup supports frontend, backend, and database services</li>
+              <li>Documentation now includes a user guide, user manual, and FAQ for onboarding</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="column">
+          <article class="panel">
+            <h2>Meet The Team</h2>
+            <div class="team-showcase">
+              <div class="team-member">
+                <img class="avatar" src="./quoc.jpeg" alt="Portrait of Quoc Huynh" />
+                <div>
+                  <p class="member-name">Quoc Huynh</p>
+                  <p class="member-role">Backend and API Development</p>
+                  <p class="member-copy">
+                    Focused on AI-logic.
+                  </p>
+                </div>
+              </div>
+
+              <div class="team-member">
+                <img class="avatar" src="./jay.jpg" alt="Portrait of Jay Dao" />
+                <div>
+                  <p class="member-name">Jay (Tung) Dao</p>
+                  <p class="member-role">Frontend and UX Development</p>
+                  <p class="member-copy">
+                    Focused on user experience, interface design, and responsive application workflows.
+                  </p>
+                </div>
+              </div>
+
+              <div class="team-member">
+                <img class="avatar" src="./khai.jpeg" alt="Portrait of Khai Nguyen" />
+                <div>
+                  <p class="member-name">Khai Nguyen</p>
+                  <p class="member-role">Backend and API Development</p>
+                  <p class="member-copy">
+                    Focused on deployment, integration, and keeping the full stack working together smoothly.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="panel">
+            <h2>Next Steps</h2>
+            <ul>
+              <li>Capture real production screenshots for the poster and website</li>
+              <li>Expand admin and center management features</li>
+              <li>Strengthen analytics and reporting for teacher insight</li>
+              <li>Continue polishing multilingual and accessibility support</li>
+            </ul>
+          </article>
+
+          
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
