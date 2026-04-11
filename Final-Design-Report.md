@@ -379,16 +379,14 @@ All external services operate within free or academic tiers. No paid cloud compu
 
 ### References and Citations
 
-1. Next.js 15 Documentation — [Placeholder]()
-2. Spring Boot 3.4 Reference Documentation — [Placeholder]()
-3. FastAPI Documentation — [Placeholder]()
-4. LlamaIndex Documentation — [Placeholder]()
-5. Qdrant Documentation — [Placeholder]()
-6. Google Gemini API Documentation — [Placeholder]()
-7. NextAuth.js v4 Documentation — [Placeholder]()
-8. Wozniak, P. (1990). *Optimization of Learning* (SM-2 Algorithm) — [Placeholder]()
-9. FERPA — Family Educational Rights and Privacy Act, 20 U.S.C. § 1232g
-10. WCAG 2.1 Accessibility Guidelines — W3C, 2018 — [Placeholder]()
+1. Next.js Documentation — [https://nextjs.org/docs](https://nextjs.org/docs)
+2. Spring Boot Reference Documentation — [https://docs.spring.io/spring-boot/documentation.html](https://docs.spring.io/spring-boot/documentation.html)
+3. FastAPI Documentation — [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
+4. LlamaIndex Documentation — [https://docs.llamaindex.ai/](https://docs.llamaindex.ai/)
+5. Qdrant Documentation — [https://qdrant.tech/documentation/](https://qdrant.tech/documentation/)
+6. Gemini API Documentation — [https://ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs)
+7. NextAuth.js v4 Documentation — [https://next-auth.js.org/](https://next-auth.js.org/)
+8. SM-2 Spaced Repetition Background (SuperMemo) — [https://www.supermemo.com/en/archives1990-2015/english/ol/sm2](https://www.supermemo.com/en/archives1990-2015/english/ol/sm2)
 
 ### Code Repository
 
