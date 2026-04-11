@@ -179,7 +179,7 @@ The comprehensive test plan covers four levels: unit tests for service-layer log
 
 ## 4. User Manual
 
-> [Full Online User Manual — Placeholder]()
+[Full Online User Manual](userguide/user-manual.md)
 
 ### 4.1 Installation
 
@@ -390,7 +390,7 @@ All external services operate within free or academic tiers. No paid cloud compu
 
 ### Code Repository
 
-> [GitHub Repository — Placeholder]()
+[GitHub Repository](https://github.com/duytung13pro/Senior-Capstone-Project/tree/main)
 
 ```
 Senior-Capstone-Project/
