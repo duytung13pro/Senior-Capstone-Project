@@ -42,7 +42,7 @@ The project addresses these gaps across four primary areas:
 
 **Role-Based Authentication & Access Control:** The platform enforces strict role separation (Student, Teacher, Center Admin, Admin) at both the middleware and API layer, with NextAuth session management and a Spring Boot OAuth2-backed Java backend.
 
-**AI-Powered Learning Tools:** Students interact with a streaming AI chat assistant constrained to their selected course materials (via RAG and Context Engineering), generate multiple-choice quizzes, translating new vocabulary on built-in document viewer with smart context awareness, and frictionless 1-click flashcards builder on any topic covered in the course, .
+**AI-Powered Learning Tools:** Students interact with a streaming AI chat assistant constrained to their selected course materials (via RAG and Context Engineering), generate multiple-choice quizzes, translating new vocabulary on built-in document viewer with smart context awareness, and frictionless 1-click flashcards builder on any topic covered in the course.
 
 **Teacher Productivity & Monitoring:** Teachers gain a student-progress dashboard aggregating enrollment, grades, assignment submission status, and study analytics. An on-demand AI summary feature produces a professional performance narrative for any individual student.
 
@@ -315,8 +315,8 @@ debugging, testing, and refinement to ultimately achieve a seamless user experie
 |---|---|
 | Quoc Huynh | 45 |
 | Jay (Tung) Dao | 45 |
-| Khai Nguyen | 45 |
-| **Fall Total** |
+| Khai Nguyen | ? |
+| **Fall Total** | **?** |
 
 ### Spring Semester
 
@@ -324,8 +324,8 @@ debugging, testing, and refinement to ultimately achieve a seamless user experie
 |---|---|
 | Quoc Huynh | 45 |
 | Jay (Tung) Dao | 45 |
-| Khai Nguyen | 45 |
-| **Spring Total** | **135** |
+| Khai Nguyen | ? |
+| **Spring Total** | **?** |
 
 ### Full-Year Total
 
@@ -333,17 +333,21 @@ debugging, testing, and refinement to ultimately achieve a seamless user experie
 |---|---|
 | Quoc Huynh | 90 |
 | Jay (Tung) Dao | 90 |
-| Khai Nguyen | 90 |
-| **Project Total** | **270** |
+| Khai Nguyen | ? |
+| **Project Total** | **?** |
 
 ### Justification
 
-**Quoc Huynh - AI Service**  
-Quoc's 90 hours were invested in 
+**Quoc Huynh — AI Service & Cross-Service Integration**  
+Quoc's 90 hours were invested across research, AI-service development, and full-stack integration. In the research phase, he evaluated RAG architectures, compared vector database options (Qdrant vs. Chroma), and studied LlamaIndex and Google Gemini APIs to determine the most suitable stack for a document-grounded tutoring system. The majority of his hours went into designing and implementing the FastAPI AI microservice: building the document ingestion pipeline (PDF parsing, chunking, metadata tagging, embedding generation), the Qdrant vector store wrapper, and the RAG-powered endpoints for chat streaming, translation, quiz generation, and flashcard creation. He also authored the prompt-engineering logic that constrains model responses to selected course documents and added citation trails to each answer. Beyond the AI service itself, Quoc carried out the integration work that connected it to the Next.js frontend (proxy routes, SSE streaming relay, session persistence) and the Spring Boot backend (secure token propagation, assignment data fetching, CORS configuration). He also owned the project documentation deliverables—technical reports, architecture notes, and required submissions—throughout both semesters.
 
+**Jay (Tung) Dao - Full-Stack Development**  
+Jay's 90 hours were focused on implementing the majority of the platform's frontend and backend features. On the frontend, he built the React/Next.js student and teacher portals, the responsive layout and navigation, the AI chat interface (session management, document scoping, streaming token rendering), quiz practice page, flashcard system with SM-2 scheduling, interactive PDF viewer, and the student progress dashboard. On the backend side, he contributed to API route development, data model wiring, and system-wide integration/testing support to ensure that the frontend, backend, and AI service worked together end-to-end. Jay also contributed to project documentation.
 
+**Khai Nguyen - Poster Design & Support**  
+Khai's hours were spent on the final expo poster layout and visual assets, plus supporting contributions to early project planning, team coordination, and documentation reviews across both semesters.
 
-> [Project Notebooks and Meeting Notes — Placeholder]()
+![Meeting Tracking Evidence](meeting-track.png)
 
 ---
 
@@ -399,12 +403,6 @@ Senior-Capstone-Project/
 ├── docker-compose.yml  # Full 7-service orchestration
 └── ops.sh              # One-command maintenance tooling
 ```
-
-### Meeting Notes
-
-> [Meeting Notes Folder — Placeholder]()
-
-Notes maintained throughout both semesters cover: weekly team standups, architecture decisions (Qdrant over Chroma, proxy route strategy, shared volume design), sprint planning and retrospectives, integration debugging sessions, and code review outcomes.
 
 ### Commit History Milestones
 
