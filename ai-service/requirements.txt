@@ -1,0 +1,53 @@
+# FastAPI & Server
+fastapi==0.135.1         # Latest stable as of March 2026
+uvicorn==0.41.0          # Standard ASGI server
+python-multipart==0.0.22 # Recent maintained release
+
+# LlamaIndex RAG Stack
+llama-index==0.14.15     # Current stable as of Feb 2026
+# Plugins - Unpinned to allow resolution of compatible versions with core 0.14.x
+llama-index-vector-stores-qdrant
+llama-index-embeddings-google-genai
+llama-index-llms-google-genai
+
+# Vector DB
+qdrant-client==1.17.0
+
+# Document Processing
+pydantic==2.12.5
+pymongo==4.16.0
+python-dotenv==1.0.1
+pypdf==6.7.5             # Latest pypdf
+python-docx==1.2.0
+python-pptx==1.0.2
+
+# Chinese Language Support
+jieba==0.42.1
+opencc==1.1.9
+
+# Vietnamese Language Support
+underthesea==9.2.11      # Latest stable 9.x series as of Feb 2026
+
+# English Language Support
+nltk==3.9.1
+spacy==3.8.3
+# Direct URL for spaCy 3.8.x compatible model
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+
+# Embeddings & ML
+sentence-transformers==5.2.3
+transformers==5.2.0
+torch==2.10.0            # Stable version released Jan 2026
+
+# OCR (for scanned documents)
+pytesseract==0.3.13
+Pillow==11.1.0
+
+# Language Detection
+langdetect==1.0.9 
+
+# TTS
+edge-tts==7.2.7
+
+# Utility
+aiofiles==24.1.0

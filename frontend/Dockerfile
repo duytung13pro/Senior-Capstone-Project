@@ -2,8 +2,8 @@
 FROM node:22.14.0-alpine AS deps
 WORKDIR /frontend
 
-# We are building from the ROOT context, so we point to the frontend subfolder
-COPY frontend/package*.json ./
+# Build context is /frontend, so copy directly
+COPY package*.json ./
 # Give the 'node' user ownership of the directory so it can write to it
 RUN chown -R node:node /frontend
 USER node
@@ -14,8 +14,8 @@ RUN npm ci --legacy-peer-deps
 FROM node:22.14.0-alpine AS builder
 WORKDIR /frontend
 COPY --from=deps --chown=node:node /frontend/node_modules ./node_modules
-# Copy all frontend source code from the subfolder
-COPY --chown=node:node frontend/ .
+# Copy all frontend source code
+COPY --chown=node:node . .
 
 # #Provide variables for build process
 # Sets MongoDB connection string for build-time usage.
@@ -26,6 +26,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
 # Builds the Next.js app
+RUN chown -R node:node /frontend
 USER node
 RUN npm run build
 
@@ -45,6 +46,8 @@ COPY --from=builder --chown=node:node /frontend/.next ./.next
 COPY --from=builder --chown=node:node /frontend/node_modules ./node_modules
 # Copies package.json for npm start
 COPY --from=builder --chown=node:node /frontend/package.json ./package.json
+# Copies static public assets (PDFs, images, etc.)
+COPY --from=builder --chown=node:node /frontend/public ./public
 
 # Install bash
 RUN apk add --no-cache bash

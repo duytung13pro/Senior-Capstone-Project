@@ -24,3 +24,10 @@ application-local.yml
 .db-mongodb/
 
 .zsh_history
+
+# Python / Node.js
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+ai-service/.venv/
